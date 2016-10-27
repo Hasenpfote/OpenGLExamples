@@ -1,0 +1,38 @@
+*.suo
+*.db
+BillboardBeam/builds/windows/vc2015/BillboardBeam/BillboardBeam/Debug/
+BillboardBeam/builds/windows/vc2015/BillboardBeam/BillboardBeam/Release/
+BillboardBeam/builds/windows/vc2015/BillboardBeam/Debug/
+BillboardBeam/builds/windows/vc2015/BillboardBeam/Release/
+FBXLoader/builds/windows/vc2015/FBXLoader/Debug/
+FBXLoader/builds/windows/vc2015/FBXLoader/FBXLoader/Debug/arcball.obj
+FBXLoader/builds/windows/vc2015/FBXLoader/FBXLoader/Debug/
+FBXLoader/builds/windows/vc2015/FBXLoader/FBXLoader/Release/
+FBXLoader/builds/windows/vc2015/FBXLoader/Release/
+Quad/builds/windows/vc2015/Quad/Debug/
+Quad/builds/windows/vc2015/Quad/Quad/Debug/
+Quad/builds/windows/vc2015/Quad/Quad/Release/
+Quad/builds/windows/vc2015/Quad/Release/
+Texture2DArray/builds/windows/vc2015/Texture2DArray/Debug/
+Texture2DArray/builds/windows/vc2015/Texture2DArray/Release/
+Texture2DArray/builds/windows/vc2015/Texture2DArray/Texture2DArray/Debug/
+Texture2DArray/builds/windows/vc2015/Texture2DArray/Texture2DArray/Release/
+*.opendb
+AdaptiveTerrainTessellation/builds/windows/vc2015/AdaptiveTerrainTessellation/AdaptiveTerrainTessellation/Release/
+AdaptiveTerrainTessellation/builds/windows/vc2015/AdaptiveTerrainTessellation/Release/
+externals/libpng/lpng1622/pnglibconf.h
+externals/libpng/lpng1622/projects/vstudio/Debug Library/
+externals/libpng/lpng1622/projects/vstudio/libpng/Debug Library/
+externals/libpng/lpng1622/projects/vstudio/libpng/Release Library/
+externals/libpng/lpng1622/projects/vstudio/pnglibconf/Release/
+externals/libpng/lpng1622/projects/vstudio/pngstest/Debug Library/
+externals/libpng/lpng1622/projects/vstudio/pngstest/Release Library/
+externals/libpng/lpng1622/projects/vstudio/pngtest/Debug Library/
+externals/libpng/lpng1622/projects/vstudio/pngtest/Release Library/
+externals/libpng/lpng1622/projects/vstudio/pngunknown/Debug Library/
+externals/libpng/lpng1622/projects/vstudio/pngunknown/Release Library/
+externals/libpng/lpng1622/projects/vstudio/pngvalid/Debug Library/
+externals/libpng/lpng1622/projects/vstudio/pngvalid/Release Library/
+externals/libpng/lpng1622/projects/vstudio/Release Library/
+externals/libpng/lpng1622/projects/vstudio/zlib/Debug Library/
+externals/libpng/lpng1622/projects/vstudio/zlib/Release Library/

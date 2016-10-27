@@ -2,7 +2,7 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros">
-    <LIBPNG_DIR>..\..\..\..\..\..\externals\libpng\lpng1622</LIBPNG_DIR>
+    <LIBPNG_DIR>..\..\..\..\..\..\external\libpng\lpng1622</LIBPNG_DIR>
   </PropertyGroup>
   <ItemGroup>
     <BuildMacro Include="LIBPNG_DIR">

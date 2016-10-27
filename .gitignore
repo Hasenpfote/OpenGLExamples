@@ -20,21 +20,21 @@ Texture2DArray/builds/windows/vc2015/Texture2DArray/Texture2DArray/Release/
 *.opendb
 AdaptiveTerrainTessellation/builds/windows/vc2015/AdaptiveTerrainTessellation/AdaptiveTerrainTessellation/Release/
 AdaptiveTerrainTessellation/builds/windows/vc2015/AdaptiveTerrainTessellation/Release/
-externals/libpng/lpng1622/pnglibconf.h
-externals/libpng/lpng1622/projects/vstudio/Debug Library/
-externals/libpng/lpng1622/projects/vstudio/libpng/Debug Library/
-externals/libpng/lpng1622/projects/vstudio/libpng/Release Library/
-externals/libpng/lpng1622/projects/vstudio/pnglibconf/Release/
-externals/libpng/lpng1622/projects/vstudio/pngstest/Debug Library/
-externals/libpng/lpng1622/projects/vstudio/pngstest/Release Library/
-externals/libpng/lpng1622/projects/vstudio/pngtest/Debug Library/
-externals/libpng/lpng1622/projects/vstudio/pngtest/Release Library/
-externals/libpng/lpng1622/projects/vstudio/pngunknown/Debug Library/
-externals/libpng/lpng1622/projects/vstudio/pngunknown/Release Library/
-externals/libpng/lpng1622/projects/vstudio/pngvalid/Debug Library/
-externals/libpng/lpng1622/projects/vstudio/pngvalid/Release Library/
-externals/libpng/lpng1622/projects/vstudio/Release Library/
-externals/libpng/lpng1622/projects/vstudio/zlib/Debug Library/
-externals/libpng/lpng1622/projects/vstudio/zlib/Release Library/
+external/libpng/lpng1622/pnglibconf.h
+external/libpng/lpng1622/projects/vstudio/Debug Library/
+external/libpng/lpng1622/projects/vstudio/libpng/Debug Library/
+external/libpng/lpng1622/projects/vstudio/libpng/Release Library/
+external/libpng/lpng1622/projects/vstudio/pnglibconf/Release/
+external/libpng/lpng1622/projects/vstudio/pngstest/Debug Library/
+external/libpng/lpng1622/projects/vstudio/pngstest/Release Library/
+external/libpng/lpng1622/projects/vstudio/pngtest/Debug Library/
+external/libpng/lpng1622/projects/vstudio/pngtest/Release Library/
+external/libpng/lpng1622/projects/vstudio/pngunknown/Debug Library/
+external/libpng/lpng1622/projects/vstudio/pngunknown/Release Library/
+external/libpng/lpng1622/projects/vstudio/pngvalid/Debug Library/
+external/libpng/lpng1622/projects/vstudio/pngvalid/Release Library/
+external/libpng/lpng1622/projects/vstudio/Release Library/
+external/libpng/lpng1622/projects/vstudio/zlib/Debug Library/
+external/libpng/lpng1622/projects/vstudio/zlib/Release Library/
 AdaptiveTerrainTessellation/builds/windows/vc2015/AdaptiveTerrainTessellation/AdaptiveTerrainTessellation/Debug/
 AdaptiveTerrainTessellation/builds/windows/vc2015/AdaptiveTerrainTessellation/Debug/

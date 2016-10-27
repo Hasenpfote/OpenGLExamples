@@ -2,7 +2,7 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros">
-    <ICU4C_DIR>..\..\..\..\..\..\externals\icu4c\icu4c-57_1-src\icu</ICU4C_DIR>
+    <ICU4C_DIR>..\..\..\..\..\..\external\icu4c\icu4c-57_1-src\icu</ICU4C_DIR>
   </PropertyGroup>
   <ItemGroup>
     <BuildMacro Include="ICU4C_DIR">

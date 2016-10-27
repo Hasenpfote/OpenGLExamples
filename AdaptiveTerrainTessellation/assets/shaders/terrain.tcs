@@ -1,0 +1,127 @@
+﻿#version 430
+
+layout(vertices = 4) out;
+
+in gl_PerVertex
+{
+  vec4 gl_Position;
+  float gl_PointSize;
+  float gl_ClipDistance[];
+} gl_in[gl_MaxPatchVertices];
+
+out gl_PerVertex
+{
+  vec4 gl_Position;
+  float gl_PointSize;
+  float gl_ClipDistance[];
+} gl_out[];
+
+in vec2 tcsTCoord[];
+out vec2 tesTCoord[];
+
+uniform mat4 mvp;
+uniform vec2 vp_size;
+uniform float lod_factor;	// スクリーン空間上でのピクセル単位の1辺の長さ
+uniform float vertical_scale;
+
+vec4 local_to_nd(const in vec4 v)
+{
+	vec4 result = mvp * v;
+	result /= result.w;
+	return result;
+}
+
+vec2 nd_to_screen(const in vec4 v)
+{
+	vec2 result = (clamp(v.xy, -1.0, 1.0) + 1.0) * (vp_size * 0.5);
+	result.y = vp_size.y - result.y;
+	return result;
+}
+
+bool offscreen(const in vec4 v0, const in vec4 v1, const in vec4 v2, const in vec4 v3)
+{
+	vec4 minimum = min(v0, v1);
+	minimum = min(minimum, v2);
+	minimum = min(minimum, v3);
+
+	vec4 maximum = max(v0, v1);
+	maximum = max(maximum, v2);
+	maximum = max(maximum, v3);
+
+	return any(greaterThan(minimum.xyz, vec3(1.0)) || lessThan(maximum.xyz, vec3(-1.0)));
+}
+
+float tess_level(const in vec2 v0, const in vec2 v1)
+{
+	return clamp(round(distance(v0, v1) / lod_factor), 1.0, 64.0);	// / 除算は lod factor で単位分割数をピクセル数で指定
+}
+
+void minmax(const in vec4 v[8], out vec4 minimum, out vec4 maximum)
+{
+	minimum = min(v[0], v[1]);
+	maximum = max(v[0], v[1]);
+	for(int i = 2; i < v.length(); i++){
+		minimum = min(minimum, v[i]);
+		maximum = max(maximum, v[i]);
+	}
+}
+
+void main(void)
+{
+	if(gl_InvocationID == 0){
+#if 1
+		// カリング
+		// パッチの制御点(4頂点)では不足のため、高さを加えた8頂点で行う
+		// パッチ内の分割点も高さが変動するため、雑になるが 0 - vertical_scale 間で判断する
+		vec4 v[8];
+		v[0] = local_to_nd(vec4(gl_in[0].gl_Position.x, 0.0, gl_in[0].gl_Position.z, 1.0));
+		v[1] = local_to_nd(vec4(gl_in[1].gl_Position.x, 0.0, gl_in[1].gl_Position.z, 1.0));
+		v[2] = local_to_nd(vec4(gl_in[2].gl_Position.x, 0.0, gl_in[2].gl_Position.z, 1.0));
+		v[3] = local_to_nd(vec4(gl_in[3].gl_Position.x, 0.0, gl_in[3].gl_Position.z, 1.0));
+		v[4] = local_to_nd(vec4(gl_in[0].gl_Position.x, vertical_scale, gl_in[0].gl_Position.z, 1.0));
+		v[5] = local_to_nd(vec4(gl_in[1].gl_Position.x, vertical_scale, gl_in[1].gl_Position.z, 1.0));
+		v[6] = local_to_nd(vec4(gl_in[2].gl_Position.x, vertical_scale, gl_in[2].gl_Position.z, 1.0));
+		v[7] = local_to_nd(vec4(gl_in[3].gl_Position.x, vertical_scale, gl_in[3].gl_Position.z, 1.0));
+
+		vec4 minimum;
+		vec4 maximum;
+		minmax(v, minimum, maximum);
+
+		if(any(greaterThan(minimum.xyz, vec3(1.0)) || lessThan(maximum.xyz, vec3(-1.0)))){
+			gl_TessLevelOuter[0] = 0.0;
+			gl_TessLevelOuter[1] = 0.0;
+			gl_TessLevelOuter[2] = 0.0;
+			gl_TessLevelOuter[3] = 0.0;
+			gl_TessLevelInner[0] = 0.0;
+			gl_TessLevelInner[1] = 0.0;
+		}
+		else
+#endif
+		{
+			vec4 v0 = local_to_nd(gl_in[0].gl_Position);
+			vec4 v1 = local_to_nd(gl_in[1].gl_Position);
+			vec4 v2 = local_to_nd(gl_in[2].gl_Position);
+			vec4 v3 = local_to_nd(gl_in[3].gl_Position);
+
+			vec2 s0 = nd_to_screen(v0);
+			vec2 s1 = nd_to_screen(v1);
+			vec2 s2 = nd_to_screen(v2);
+			vec2 s3 = nd_to_screen(v3);
+
+			float e0 = tess_level(s3, s0);
+			float e1 = tess_level(s0, s1);
+			float e2 = tess_level(s1, s2);
+			float e3 = tess_level(s2, s3);
+		
+			gl_TessLevelOuter[0] = e0;
+			gl_TessLevelOuter[1] = e1;
+			gl_TessLevelOuter[2] = e2;
+			gl_TessLevelOuter[3] = e3;
+
+			gl_TessLevelInner[0] = min(mix(e1, e3, 0.5), 64.0);
+			gl_TessLevelInner[1] = min(mix(e0, e2, 0.5), 64.0);
+		}
+	}
+	gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
+	tesTCoord[gl_InvocationID] = tcsTCoord[gl_InvocationID];
+}

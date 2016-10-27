@@ -1,0 +1,28 @@
+#version 430
+
+layout(vertices = 3) out;
+
+in gl_PerVertex
+{
+  vec4 gl_Position;
+  float gl_PointSize;
+  float gl_ClipDistance[];
+} gl_in[gl_MaxPatchVertices];
+
+out gl_PerVertex
+{
+  vec4 gl_Position;
+  float gl_PointSize;
+  float gl_ClipDistance[];
+} gl_out[];
+
+void main(void)
+{
+	gl_TessLevelOuter[0] = 64.0;	// ï”ÇÃï™äÑêî
+	gl_TessLevelOuter[1] = 64.0;
+	gl_TessLevelOuter[2] = 64.0;
+
+	gl_TessLevelInner[0] = 32.0;
+
+	gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
+}

@@ -2,11 +2,34 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros">
-    <ICU4C_DIR>..\..\..\..\..\..\external\icu4c\icu4c-57_1-src\icu</ICU4C_DIR>
+    <ICU4C_ROOT_DIR>..\..\..\..\..\..\external\icu4c\icu4c-57_1-src\icu</ICU4C_ROOT_DIR>
+    <ICU4C_INCLUDE_DIR>$(ICU4C_ROOT_DIR)\include</ICU4C_INCLUDE_DIR>
+    <ICU4C_LIB_DIR>$(ICU4C_ROOT_DIR)\lib</ICU4C_LIB_DIR>
+    <ICU4C_BIN_DIR>$(ICU4C_ROOT_DIR)\bin</ICU4C_BIN_DIR>
+    <ICU4C_LIB64_DIR>$(ICU4C_ROOT_DIR)\lib64</ICU4C_LIB64_DIR>
+    <ICU4C_BIN64_DIR>$(ICU4C_ROOT_DIR)\bin64</ICU4C_BIN64_DIR>
   </PropertyGroup>
   <ItemGroup>
     <BuildMacro Include="ICU4C_DIR">
       <Value>$(ICU4C_DIR)</Value>
+    </BuildMacro>
+    <BuildMacro Include="ICU4C_ROOT_DIR">
+      <Value>$(ICU4C_ROOT_DIR)</Value>
+    </BuildMacro>
+    <BuildMacro Include="ICU4C_INCLUDE_DIR">
+      <Value>$(ICU4C_INCLUDE_DIR)</Value>
+    </BuildMacro>
+    <BuildMacro Include="ICU4C_LIB_DIR">
+      <Value>$(ICU4C_LIB_DIR)</Value>
+    </BuildMacro>
+    <BuildMacro Include="ICU4C_BIN_DIR">
+      <Value>$(ICU4C_BIN_DIR)</Value>
+    </BuildMacro>
+    <BuildMacro Include="ICU4C_LIB64_DIR">
+      <Value>$(ICU4C_LIB64_DIR)</Value>
+    </BuildMacro>
+    <BuildMacro Include="ICU4C_BIN64_DIR">
+      <Value>$(ICU4C_BIN64_DIR)</Value>
     </BuildMacro>
   </ItemGroup>
   <!-- Debug|Win32 -->
@@ -14,15 +37,15 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(ICU4C_DIR)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ICU4C_INCLUDE_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(ICU4C_DIR)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ICU4C_LIB_DIR);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>icuucd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /y /r "$(ICU4C_DIR)\bin\icudt57.dll" "$(TargetDir)"
-xcopy /y /r "$(ICU4C_DIR)\bin\icuuc57d.dll" "$(TargetDir)"</Command>
+      <Command>xcopy /y /r "$(ICU4C_BIN_DIR)\icudt57.dll" "$(TargetDir)"
+xcopy /y /r "$(ICU4C_BIN_DIR)\icuuc57d.dll" "$(TargetDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <!-- Release|Win32 -->
@@ -30,15 +53,15 @@ xcopy /y /r "$(ICU4C_DIR)\bin\icuuc57d.dll" "$(TargetDir)"</Command>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(ICU4C_DIR)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ICU4C_INCLUDE_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(ICU4C_DIR)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ICU4C_LIB_DIR);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>icuuc.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /y /r "$(ICU4C_DIR)\bin\icudt57.dll" "$(TargetDir)"
-xcopy /y /r "$(ICU4C_DIR)\bin\icuuc57.dll" "$(TargetDir)"</Command>
+      <Command>xcopy /y /r "$(ICU4C_BIN_DIR)\icudt57.dll" "$(TargetDir)"
+xcopy /y /r "$(ICU4C_BIN_DIR)\icuuc57.dll" "$(TargetDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <!-- Debug|x64 -->
@@ -46,15 +69,15 @@ xcopy /y /r "$(ICU4C_DIR)\bin\icuuc57.dll" "$(TargetDir)"</Command>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(ICU4C_DIR)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ICU4C_INCLUDE_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(ICU4C_DIR)\lib64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ICU4C_LIB64_DIR);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>icuucd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /y /r "$(ICU4C_DIR)\bin64\icudt57.dll" "$(TargetDir)"
-xcopy /y /r "$(ICU4C_DIR)\bin64\icuuc57d.dll" "$(TargetDir)"</Command>
+      <Command>xcopy /y /r "$(ICU4C_BIN64_DIR)\icudt57.dll" "$(TargetDir)"
+xcopy /y /r "$(ICU4C_BIN64_DIR)\icuuc57d.dll" "$(TargetDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <!-- Release|x64 -->
@@ -62,15 +85,15 @@ xcopy /y /r "$(ICU4C_DIR)\bin64\icuuc57d.dll" "$(TargetDir)"</Command>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(ICU4C_DIR)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ICU4C_INCLUDE_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(ICU4C_DIR)\lib64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ICU4C_LIB64_DIR);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>icuuc.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /y /r "$(ICU4C_DIR)\bin64\icudt57.dll" "$(TargetDir)"
-xcopy /y /r "$(ICU4C_DIR)\bin64\icuuc57.dll" "$(TargetDir)"</Command>
+      <Command>xcopy /y /r "$(ICU4C_BIN64_DIR)\icudt57.dll" "$(TargetDir)"
+xcopy /y /r "$(ICU4C_BIN64_DIR)\icuuc57.dll" "$(TargetDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
 </Project>

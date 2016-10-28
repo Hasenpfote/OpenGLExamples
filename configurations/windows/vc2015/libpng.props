@@ -2,11 +2,26 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros">
-    <LIBPNG_DIR>..\..\..\..\..\..\external\libpng\lpng1622</LIBPNG_DIR>
+    <LIBPNG_ROOT_DIR>..\..\..\..\..\..\external\libpng\lpng1622</LIBPNG_ROOT_DIR>
+    <LIBPNG_INCLUDE_DIR>$(LIBPNG_ROOT_DIR)</LIBPNG_INCLUDE_DIR>
+    <LIBPNG_LIB_DIR>$(LIBPNG_ROOT_DIR)\projects\vstudio</LIBPNG_LIB_DIR>
+    <LIBPNG_BIN_DIR></LIBPNG_BIN_DIR>
   </PropertyGroup>
   <ItemGroup>
     <BuildMacro Include="LIBPNG_DIR">
       <Value>$(LIBPNG_DIR)</Value>
+    </BuildMacro>
+    <BuildMacro Include="LIBPNG_ROOT_DIR">
+      <Value>$(LIBPNG_ROOT_DIR)</Value>
+    </BuildMacro>
+    <BuildMacro Include="LIBPNG_INCLUDE_DIR">
+      <Value>$(LIBPNG_INCLUDE_DIR)</Value>
+    </BuildMacro>
+    <BuildMacro Include="LIBPNG_LIB_DIR">
+      <Value>$(LIBPNG_LIB_DIR)</Value>
+    </BuildMacro>
+    <BuildMacro Include="LIBPNG_BIN_DIR">
+      <Value>$(LIBPNG_BIN_DIR)</Value>
     </BuildMacro>
   </ItemGroup>
   <!-- Debug|Win32 -->
@@ -14,10 +29,10 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(LIBPNG_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(LIBPNG_INCLUDE_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(LIBPNG_DIR)\projects\vstudio\$(Configuration) Library;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(LIBPNG_LIB_DIR)\$(Configuration) Library;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>zlib.lib;libpng16.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -26,10 +41,10 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(LIBPNG_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(LIBPNG_INCLUDE_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(LIBPNG_DIR)\projects\vstudio\$(Configuration) Library;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(LIBPNG_LIB_DIR)\$(Configuration) Library;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>zlib.lib;libpng16.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>

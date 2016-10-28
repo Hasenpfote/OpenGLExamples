@@ -2,12 +2,24 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros">
-    <FBX_SDK_DIR>D:\Autodesk\FBX\FBX SDK\2017.0.1</FBX_SDK_DIR>
+    <FBX_SDK_ROOT_DIR>D:\Autodesk\FBX\FBX SDK\2017.0.1</FBX_SDK_ROOT_DIR>
+    <FBX_SDK_INCLUDE_DIR>$(FBX_SDK_ROOT_DIR)\include</FBX_SDK_INCLUDE_DIR>
+    <FBX_SDK_LIB_DIR>$(FBX_SDK_ROOT_DIR)\lib\vs2015</FBX_SDK_LIB_DIR>
+    <FBX_SDK_BIN_DIR></FBX_SDK_BIN_DIR>
   </PropertyGroup>
   <PropertyGroup />
   <ItemGroup>
-    <BuildMacro Include="FBX_SDK_DIR">
-      <Value>$(FBX_SDK_DIR)</Value>
+    <BuildMacro Include="FBX_SDK_ROOT_DIR">
+      <Value>$(FBX_SDK_ROOT_DIR)</Value>
+    </BuildMacro>
+    <BuildMacro Include="FBX_SDK_INCLUDE_DIR">
+      <Value>$(FBX_SDK_INCLUDE_DIR)</Value>
+    </BuildMacro>
+    <BuildMacro Include="FBX_SDK_LIB_DIR">
+      <Value>$(FBX_SDK_LIB_DIR)</Value>
+    </BuildMacro>
+    <BuildMacro Include="FBX_SDK_BIN_DIR">
+      <Value>$(FBX_SDK_BIN_DIR)</Value>
     </BuildMacro>
   </ItemGroup>
   <!-- Debug|Win32 -->
@@ -15,10 +27,10 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(FBX_SDK_DIR)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(FBX_SDK_INCLUDE_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(FBX_SDK_DIR)\lib\vs2015\x86\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(FBX_SDK_LIB_DIR)\x86\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>libfbxsdk-md.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -27,10 +39,10 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(FBX_SDK_DIR)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(FBX_SDK_INCLUDE_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(FBX_SDK_DIR)\lib\vs2015\x86\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(FBX_SDK_LIB_DIR)\x86\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>libfbxsdk-md.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -39,10 +51,10 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(FBX_SDK_DIR)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(FBX_SDK_INCLUDE_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(FBX_SDK_DIR)\lib\vs2015\x64\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(FBX_SDK_LIB_DIR)\x64\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>libfbxsdk-md.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -51,10 +63,10 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(FBX_SDK_DIR)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(FBX_SDK_INCLUDE_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(FBX_SDK_DIR)\lib\vs2015\x64\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(FBX_SDK_LIB_DIR)\x64\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>libfbxsdk-md.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>

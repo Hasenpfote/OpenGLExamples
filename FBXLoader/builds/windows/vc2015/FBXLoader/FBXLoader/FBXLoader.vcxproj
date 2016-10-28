@@ -58,6 +58,7 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\..\..\..\configurations\windows\vc2015\glew.props" />
     <Import Project="..\..\..\..\..\..\configurations\windows\vc2015\glfw.props" />
     <Import Project="..\..\..\..\..\..\configurations\windows\vc2015\libpng.props" />
     <Import Project="..\..\..\..\..\..\configurations\windows\vc2015\hasenpfote.props" />
@@ -65,6 +66,7 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\..\..\..\configurations\windows\vc2015\glew.props" />
     <Import Project="..\..\..\..\..\..\configurations\windows\vc2015\glfw.props" />
     <Import Project="..\..\..\..\..\..\configurations\windows\vc2015\libpng.props" />
     <Import Project="..\..\..\..\..\..\configurations\windows\vc2015\hasenpfote.props" />
@@ -72,6 +74,7 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\..\..\..\configurations\windows\vc2015\glew.props" />
     <Import Project="..\..\..\..\..\..\configurations\windows\vc2015\glfw.props" />
     <Import Project="..\..\..\..\..\..\configurations\windows\vc2015\libpng.props" />
     <Import Project="..\..\..\..\..\..\configurations\windows\vc2015\hasenpfote.props" />
@@ -79,6 +82,7 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\..\..\..\configurations\windows\vc2015\glew.props" />
     <Import Project="..\..\..\..\..\..\configurations\windows\vc2015\glfw.props" />
     <Import Project="..\..\..\..\..\..\configurations\windows\vc2015\libpng.props" />
     <Import Project="..\..\..\..\..\..\configurations\windows\vc2015\hasenpfote.props" />

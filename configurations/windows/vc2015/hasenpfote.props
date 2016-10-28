@@ -2,12 +2,24 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros">
-    <HASENPFOTE_DIR>..\..\..\..\..\..\external\hasenpfote</HASENPFOTE_DIR>
+    <HASENPFOTE_ROOT_DIR>..\..\..\..\..\..\external\hasenpfote</HASENPFOTE_ROOT_DIR>
+    <HASENPFOTE_INCLUDE_DIR>$(HASENPFOTE_ROOT_DIR)\include</HASENPFOTE_INCLUDE_DIR>
+    <HASENPFOTE_LIB_DIR>$(HASENPFOTE_ROOT_DIR)\lib\vc2015</HASENPFOTE_LIB_DIR>
+    <HASENPFOTE_BIN_DIR></HASENPFOTE_BIN_DIR>
   </PropertyGroup>
   <PropertyGroup />
   <ItemGroup>
-    <BuildMacro Include="HASENPFOTE_DIR">
-      <Value>$(HASENPFOTE_DIR)</Value>
+    <BuildMacro Include="HASENPFOTE_ROOT_DIR">
+      <Value>$(HASENPFOTE_ROOT_DIR)</Value>
+    </BuildMacro>
+    <BuildMacro Include="HASENPFOTE_INCLUDE_DIR">
+      <Value>$(HASENPFOTE_INCLUDE_DIR)</Value>
+    </BuildMacro>
+    <BuildMacro Include="HASENPFOTE_LIB_DIR">
+      <Value>$(HASENPFOTE_LIB_DIR)</Value>
+    </BuildMacro>
+    <BuildMacro Include="HASENPFOTE_BIN_DIR">
+      <Value>$(HASENPFOTE_BIN_DIR)</Value>
     </BuildMacro>
   </ItemGroup>
   <!-- Debug|Win32 -->
@@ -15,10 +27,10 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(HASENPFOTE_DIR)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(HASENPFOTE_INCLUDE_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(HASENPFOTE_DIR)\lib\vc2015\$(Configuration)\$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(HASENPFOTE_LIB_DIR)\$(Configuration)\$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>hasenpfoted.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -27,10 +39,10 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(HASENPFOTE_DIR)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(HASENPFOTE_INCLUDE_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(HASENPFOTE_DIR)\lib\vc2015\$(Configuration)\$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(HASENPFOTE_LIB_DIR)\$(Configuration)\$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>hasenpfote.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>

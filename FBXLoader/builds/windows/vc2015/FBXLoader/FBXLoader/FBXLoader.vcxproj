@@ -115,12 +115,15 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PreBuildEvent>
-      <Command>del /Q "$(SolutionDir)..\..\..\..\*.*"</Command>
-      <Message>不要なファイルをすべて削除.</Message>
+      <Command>del /Q "$(LocalDebuggerWorkingDirectory)$(TargetName)$(TargetExt)"
+del /Q "$(LocalDebuggerWorkingDirectory)*.dll"
+%(Command)</Command>
+      <Message>作業ディレクトリから実行ファイルおよびDLLを削除.</Message>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>xcopy /y /r "$(TargetPath)" "$(SolutionDir)..\..\..\..\"</Command>
-      <Message>実行ファイルを所定の位置へコピー.</Message>
+      <Command>xcopy /y /r "$(TargetPath)" "$(LocalDebuggerWorkingDirectory)"
+%(Command)</Command>
+      <Message>実行ファイルを作業ディレクトリへコピー.</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -137,12 +140,15 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PreBuildEvent>
-      <Command>del /Q "$(SolutionDir)..\..\..\..\*.*"</Command>
-      <Message>不要なファイルをすべて削除.</Message>
+      <Command>del /Q "$(LocalDebuggerWorkingDirectory)$(TargetName)$(TargetExt)"
+del /Q "$(LocalDebuggerWorkingDirectory)*.dll"
+%(Command)</Command>
+      <Message>作業ディレクトリから実行ファイルおよびDLLを削除.</Message>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>xcopy /y /r "$(TargetPath)" "$(SolutionDir)..\..\..\..\"</Command>
-      <Message>実行ファイルを所定の位置へコピー.</Message>
+      <Command>xcopy /y /r "$(TargetPath)" "$(LocalDebuggerWorkingDirectory)"
+%(Command)</Command>
+      <Message>実行ファイルを作業ディレクトリへコピー.</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -163,12 +169,15 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PreBuildEvent>
-      <Command>del /Q "$(SolutionDir)..\..\..\..\*.*"</Command>
-      <Message>不要なファイルをすべて削除.</Message>
+      <Command>del /Q "$(LocalDebuggerWorkingDirectory)$(TargetName)$(TargetExt)"
+del /Q "$(LocalDebuggerWorkingDirectory)*.dll"
+%(Command)</Command>
+      <Message>作業ディレクトリから実行ファイルおよびDLLを削除.</Message>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>xcopy /y /r "$(TargetPath)" "$(SolutionDir)..\..\..\..\"</Command>
-      <Message>実行ファイルを所定の位置へコピー.</Message>
+      <Command>xcopy /y /r "$(TargetPath)" "$(LocalDebuggerWorkingDirectory)"
+%(Command)</Command>
+      <Message>実行ファイルを作業ディレクトリへコピー.</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -189,12 +198,15 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PreBuildEvent>
-      <Command>del /Q "$(SolutionDir)..\..\..\..\*.*"</Command>
-      <Message>不要なファイルをすべて削除.</Message>
+      <Command>del /Q "$(LocalDebuggerWorkingDirectory)$(TargetName)$(TargetExt)"
+del /Q "$(LocalDebuggerWorkingDirectory)*.dll"
+%(Command)</Command>
+      <Message>作業ディレクトリから実行ファイルおよびDLLを削除.</Message>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>xcopy /y /r "$(TargetPath)" "$(SolutionDir)..\..\..\..\"</Command>
-      <Message>実行ファイルを所定の位置へコピー.</Message>
+      <Command>xcopy /y /r "$(TargetPath)" "$(LocalDebuggerWorkingDirectory)"
+%(Command)</Command>
+      <Message>実行ファイルを作業ディレクトリへコピー.</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

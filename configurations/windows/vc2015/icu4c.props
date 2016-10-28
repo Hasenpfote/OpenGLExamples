@@ -44,8 +44,9 @@
       <AdditionalDependencies>icuucd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /y /r "$(ICU4C_BIN_DIR)\icudt57.dll" "$(TargetDir)"
-xcopy /y /r "$(ICU4C_BIN_DIR)\icuuc57d.dll" "$(TargetDir)"</Command>
+      <Command>xcopy /y /r "$(ICU4C_BIN_DIR)\icudt57.dll" "$(LocalDebuggerWorkingDirectory)"
+xcopy /y /r "$(ICU4C_BIN_DIR)\icuuc57d.dll" "$(LocalDebuggerWorkingDirectory)"
+%(Command)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <!-- Release|Win32 -->
@@ -60,8 +61,9 @@ xcopy /y /r "$(ICU4C_BIN_DIR)\icuuc57d.dll" "$(TargetDir)"</Command>
       <AdditionalDependencies>icuuc.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /y /r "$(ICU4C_BIN_DIR)\icudt57.dll" "$(TargetDir)"
-xcopy /y /r "$(ICU4C_BIN_DIR)\icuuc57.dll" "$(TargetDir)"</Command>
+      <Command>xcopy /y /r "$(ICU4C_BIN_DIR)\icudt57.dll" "$(LocalDebuggerWorkingDirectory)"
+xcopy /y /r "$(ICU4C_BIN_DIR)\icuuc57.dll" "$(LocalDebuggerWorkingDirectory)"
+%(Command)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <!-- Debug|x64 -->
@@ -76,8 +78,9 @@ xcopy /y /r "$(ICU4C_BIN_DIR)\icuuc57.dll" "$(TargetDir)"</Command>
       <AdditionalDependencies>icuucd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /y /r "$(ICU4C_BIN64_DIR)\icudt57.dll" "$(TargetDir)"
-xcopy /y /r "$(ICU4C_BIN64_DIR)\icuuc57d.dll" "$(TargetDir)"</Command>
+      <Command>xcopy /y /r "$(ICU4C_BIN64_DIR)\icudt57.dll" "$(LocalDebuggerWorkingDirectory)"
+xcopy /y /r "$(ICU4C_BIN64_DIR)\icuuc57d.dll" "$(LocalDebuggerWorkingDirectory)"
+%(Command)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <!-- Release|x64 -->
@@ -92,8 +95,9 @@ xcopy /y /r "$(ICU4C_BIN64_DIR)\icuuc57d.dll" "$(TargetDir)"</Command>
       <AdditionalDependencies>icuuc.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /y /r "$(ICU4C_BIN64_DIR)\icudt57.dll" "$(TargetDir)"
-xcopy /y /r "$(ICU4C_BIN64_DIR)\icuuc57.dll" "$(TargetDir)"</Command>
+      <Command>xcopy /y /r "$(ICU4C_BIN64_DIR)\icudt57.dll" "$(LocalDebuggerWorkingDirectory)"
+xcopy /y /r "$(ICU4C_BIN64_DIR)\icuuc57.dll" "$(LocalDebuggerWorkingDirectory)"
+%(Command)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
 </Project>

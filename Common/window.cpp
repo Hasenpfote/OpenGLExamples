@@ -6,8 +6,8 @@
 #include "logger.h"
 #include "window.h"
 
-#define PREPRO_TO_STR(value) PREPRO_STR(value)
-#define PREPRO_STR(value)    #value
+#define STRINGIFY(value) #value
+#define TOKEN_TO_STRING(value) STRINGIFY(value)
 
 Window::Window()
 {
@@ -46,7 +46,7 @@ bool Window::Initialize(int width, int height)
     //glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
     glfwWindowHint(GLFW_SAMPLES, 4);
-    window = glfwCreateWindow(width, height, PREPRO_TO_STR(PRODUCT_NAME), nullptr, nullptr);
+    window = glfwCreateWindow(width, height, TOKEN_TO_STRING(PRODUCT_NAME), nullptr, nullptr);
     if(!window){
         LOG_E("Could not open GLFW window.");
         return false;

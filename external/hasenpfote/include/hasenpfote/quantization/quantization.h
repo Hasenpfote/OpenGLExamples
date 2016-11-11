@@ -6,6 +6,7 @@
 */
 #pragma once
 #include <cstdint>
+#include <cmath>
 
 namespace hasenpfote{ namespace math{
 class Quaternion;
@@ -32,14 +33,14 @@ template <unsigned N> float decode_unorm(std::uint16_t x)
 template <unsigned N> std::uint16_t encode_snorm(float x)
 {
     static_assert(((N) > 1) && ((N) <= 16), "Out of range.");
-    return static_cast<std::uint16_t>((x < 0) | (encode_unorm<(N) - 1>(std::fabsf(x)) << 1));
+    return static_cast<std::uint16_t>((x < 0) | (encode_unorm<(N) - 1>(std::abs(x)) << 1));
 }
 
 // N-bit signed normalized value([-1,+1]) decoder.
 template <unsigned N> float decode_snorm(std::uint16_t x)
 {
     static_assert(((N) > 1) && ((N) <= 16), "Out of range.");
-    return decode_unorm<(N)- 1>(x >> 1) * ((x & 0x1) ? -1.0f : 1.0f);
+    return decode_unorm<(N)- 1>(static_cast<std::uint16_t>(x >> 1)) * ((x & 0x1) ? -1.0f : 1.0f);
 }
 
 /*!

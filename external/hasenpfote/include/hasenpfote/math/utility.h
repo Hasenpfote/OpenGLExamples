@@ -77,7 +77,7 @@ T clamp(T x, T min, T max)
     if(x > max)
         return max;
     return x;
-};
+}
 
 /*!
  * [min1, max1] の範囲内にある x を [min2, max2] に写像する.
@@ -108,7 +108,7 @@ bool contains_closed(T x, T lower, T upper)
     if(x < lower || x > upper)
         return false;
     return true;
-};
+}
 
 /*!
 * 値 x が 開区間 (lower, upper) に含まれるか.
@@ -124,6 +124,6 @@ bool contains_open(T x, T lower, T upper)
     if(x <= lower || x >= upper)
         return false;
     return true;
-};
+}
 
 }}

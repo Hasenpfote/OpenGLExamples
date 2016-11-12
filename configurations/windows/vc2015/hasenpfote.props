@@ -4,7 +4,7 @@
   <PropertyGroup Label="UserMacros">
     <HASENPFOTE_ROOT_DIR>..\..\..\..\..\..\external\hasenpfote</HASENPFOTE_ROOT_DIR>
     <HASENPFOTE_INCLUDE_DIR>$(HASENPFOTE_ROOT_DIR)\include</HASENPFOTE_INCLUDE_DIR>
-    <HASENPFOTE_LIB_DIR>$(HASENPFOTE_ROOT_DIR)\lib\vc2015</HASENPFOTE_LIB_DIR>
+    <HASENPFOTE_LIB_DIR>$(HASENPFOTE_ROOT_DIR)\lib\vc14</HASENPFOTE_LIB_DIR>
     <HASENPFOTE_BIN_DIR></HASENPFOTE_BIN_DIR>
   </PropertyGroup>
   <PropertyGroup />
@@ -30,7 +30,7 @@
       <AdditionalIncludeDirectories>$(HASENPFOTE_INCLUDE_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(HASENPFOTE_LIB_DIR)\$(Configuration)\$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(HASENPFOTE_LIB_DIR)\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>hasenpfoted.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -42,7 +42,7 @@
       <AdditionalIncludeDirectories>$(HASENPFOTE_INCLUDE_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(HASENPFOTE_LIB_DIR)\$(Configuration)\$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(HASENPFOTE_LIB_DIR)\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>hasenpfote.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>

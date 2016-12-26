@@ -1,7 +1,7 @@
 ﻿#include <cassert>
 #include <iostream>
 #include <regex>
-#include <hasenpfote/math/utility.h>
+#include <hasenpfote/math/utils.h>
 #include <hasenpfote/math/cmatrix4.h>
 #include "../../Common/system.h"
 #include "model.h"
@@ -408,10 +408,10 @@ void Model::Update(double dt)
 {
     skeleton->BuildByInvBindPose();
 
-    constexpr auto max_limit = to_radians(45.0f);
-    constexpr auto min_limit = to_radians(-45.0f);
+    constexpr auto max_limit = ConvertDegreesToRadians(45.0f);
+    constexpr auto min_limit = ConvertDegreesToRadians(-45.0f);
 
-    static float s = to_radians(10.0f);
+    static float s = ConvertDegreesToRadians(10.0f);
     static float t = 0.0f;
     if((t > max_limit) || (t < min_limit)){
         s = -s;

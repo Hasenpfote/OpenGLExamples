@@ -1,5 +1,5 @@
 ﻿#include <GLFW/glfw3.h>
-#include <hasenpfote/math/utility.h>
+#include <hasenpfote/math/utils.h>
 #include <hasenpfote/math/vector4.h>
 #include "controllable_camera.h"
 
@@ -18,7 +18,7 @@ ControllableCamera::ControllableCamera()
 
     near = 1.0f;
     far = 100.0f;
-    fovy = to_radians(45.0f);
+    fovy = ConvertDegreesToRadians(45.0f);
     zoom = far;
     mode = ProjectionMode::Perspective;
 
@@ -183,12 +183,12 @@ void ControllableCamera::OnMouseButton(int button, int action, int mods)
 void ControllableCamera::OnMouseWheel(double xoffset, double yoffset)
 {
     if(mode == ProjectionMode::Perspective){
-        fovy += to_radians(static_cast<float>(yoffset));
-        fovy = clamp(fovy, to_radians(1.0f), to_radians(90.0f));
+        fovy += ConvertDegreesToRadians(static_cast<float>(yoffset));
+        fovy = Clamp(fovy, ConvertDegreesToRadians(1.0f), ConvertDegreesToRadians(90.0f));
     }
     else{
         zoom += static_cast<float>(yoffset);
-        zoom = clamp(zoom, near, far);
+        zoom = Clamp(zoom, near, far);
     }
 }
 
@@ -198,8 +198,8 @@ Vector3 ControllableCamera::ToSemiSphere(float x, float y)
     const float aspect = vp.GetAspectRatio();
 
     Vector3 result;
-    result.SetX(remap(x, static_cast<float>(vp.GetPositionX()), static_cast<float>(vp.GetWidth()), -aspect, aspect));
-    result.SetY(remap(y, static_cast<float>(vp.GetPositionY()), static_cast<float>(vp.GetHeight()), 1.0f, -1.0f));
+    result.SetX(Remap(x, static_cast<float>(vp.GetPositionX()), static_cast<float>(vp.GetWidth()), -aspect, aspect));
+    result.SetY(Remap(y, static_cast<float>(vp.GetPositionY()), static_cast<float>(vp.GetHeight()), 1.0f, -1.0f));
 
     const float d = result.GetX() * result.GetX() + result.GetY() * result.GetY();
     if(d <= 1.0f){

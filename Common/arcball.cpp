@@ -1,4 +1,4 @@
-﻿#include <hasenpfote/math/utility.h>
+﻿#include <hasenpfote/math/utils.h>
 #include "arcball.h"
 
 using namespace hasenpfote::math;
@@ -49,8 +49,8 @@ void ArcBall::Update(float x, float y)
 Vector3 ArcBall::ToScreenCoord(float x, float y)
 {
     Vector3 result;
-    result.SetX(remap(x, 0.0f, static_cast<float>(width), -1.0f, 1.0f));
-    result.SetY(remap(y, 0.0f, static_cast<float>(height), 1.0f, -1.0f));
+    result.SetX(Remap(x, 0.0f, static_cast<float>(width), -1.0f, 1.0f));
+    result.SetY(Remap(y, 0.0f, static_cast<float>(height), 1.0f, -1.0f));
 
     // needs clip
 

@@ -1,4 +1,4 @@
-#include <hasenpfote/math/utility.h>
+#include <hasenpfote/math/utils.h>
 #include <hasenpfote/math/vector4.h>
 #include "camera.h"
 
@@ -42,8 +42,8 @@ Vector3 Camera::ToScreenCoord(const Vector3& pos) const
     const CMatrix4 mvp = proj * view;
     const Vector4 clip = mvp * Vector4(pos, 1.0f);
     return Vector3(
-        remap(clip.GetX() / clip.GetW(), -1.0f, 1.0f, static_cast<float>(vp.GetPositionX()), static_cast<float>(vp.GetWidth())),
-        remap(clip.GetY() / clip.GetW(), -1.0f, 1.0f, static_cast<float>(vp.GetHeight()), static_cast<float>(vp.GetPositionY())),
+        Remap(clip.GetX() / clip.GetW(), -1.0f, 1.0f, static_cast<float>(vp.GetPositionX()), static_cast<float>(vp.GetWidth())),
+        Remap(clip.GetY() / clip.GetW(), -1.0f, 1.0f, static_cast<float>(vp.GetHeight()), static_cast<float>(vp.GetPositionY())),
         clip.GetZ() / clip.GetW());
 #endif
 }
@@ -62,8 +62,8 @@ Vector3 Camera::ToWorldCoord(const Vector3& pos) const
 #else
     const CMatrix4 inv = CMatrix4::Inverse(proj * view);
     const Vector4 h = inv * Vector4(
-        remap(pos.GetX(), static_cast<float>(vp.GetPositionX()), static_cast<float>(vp.GetWidth()), -1.0f, 1.0f),
-        remap(pos.GetY(), static_cast<float>(vp.GetPositionY()), static_cast<float>(vp.GetHeight()), 1.0f, -1.0f),
+        Remap(pos.GetX(), static_cast<float>(vp.GetPositionX()), static_cast<float>(vp.GetWidth()), -1.0f, 1.0f),
+        Remap(pos.GetY(), static_cast<float>(vp.GetPositionY()), static_cast<float>(vp.GetHeight()), 1.0f, -1.0f),
         pos.GetZ(),
         1.0f);
     return Vector3(
@@ -93,8 +93,8 @@ Vector3 Camera::GetRay(const Vector3& pos) const
 
     return ray;
 #else
-    const float x = remap(pos.GetX(), static_cast<float>(vp.GetPositionX()), static_cast<float>(vp.GetWidth()), -1.0f, 1.0f);
-    const float y = remap(pos.GetY(), static_cast<float>(vp.GetPositionY()), static_cast<float>(vp.GetHeight()), 1.0f, -1.0f);
+    const float x = Remap(pos.GetX(), static_cast<float>(vp.GetPositionX()), static_cast<float>(vp.GetWidth()), -1.0f, 1.0f);
+    const float y = Remap(pos.GetY(), static_cast<float>(vp.GetPositionY()), static_cast<float>(vp.GetHeight()), 1.0f, -1.0f);
 
     const CMatrix4 inv = CMatrix4::Inverse(proj * view);
 

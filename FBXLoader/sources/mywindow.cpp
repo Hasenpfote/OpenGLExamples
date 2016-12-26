@@ -2,7 +2,7 @@
 #include <sstream>
 #include <GL/glew.h>
 #include <hasenpfote/assert.h>
-#include <hasenpfote//math/utility.h>
+#include <hasenpfote//math/utils.h>
 #include <hasenpfote/math/vector3.h>
 #include <hasenpfote/math/vector4.h>
 #include <hasenpfote/math/cmatrix4.h>
@@ -265,9 +265,9 @@ void MyWindow::OnRender()
     oss.str("");
     oss.clear(std::stringstream::goodbit);
 
-    oss << "Aov D=" << to_degrees(camera.GetAngleOfView(CustomCamera::AngleOfView::Diagonal));
-    oss << " H=" << to_degrees(camera.GetAngleOfView(CustomCamera::AngleOfView::Horizontal));
-    oss << " V=" << to_degrees(camera.GetAngleOfView(CustomCamera::AngleOfView::Vertical));
+    oss << "Aov D=" << ConvertRadiansToDegrees(camera.GetAngleOfView(CustomCamera::AngleOfView::Diagonal));
+    oss << " H=" << ConvertRadiansToDegrees(camera.GetAngleOfView(CustomCamera::AngleOfView::Horizontal));
+    oss << " V=" << ConvertRadiansToDegrees(camera.GetAngleOfView(CustomCamera::AngleOfView::Vertical));
     text->DrawString(oss.str(), 0.0f, fh * 3.0f, scale);
     oss.str("");
     oss.clear(std::stringstream::goodbit);

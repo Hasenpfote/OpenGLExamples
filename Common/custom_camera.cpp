@@ -1,5 +1,5 @@
 ﻿#include <GLFW/glfw3.h>
-#include <hasenpfote/math/utility.h>
+#include <hasenpfote/math/utils.h>
 #include <hasenpfote/math/vector4.h>
 #include "custom_camera.h"
 
@@ -74,7 +74,7 @@ void CustomCamera::SetFocalLength(float focal_length)
 {
     this->focal_length = focal_length;
     zoom_magnification = 1.0f; // reset
-    const float tele_end = ComputeFocalLength(effective_sensor_diagonal, to_radians(1.0f));
+    const float tele_end = ComputeFocalLength(effective_sensor_diagonal, ConvertDegreesToRadians(1.0f));
     max_zoom_magnification = ComputeMaxZoomMagnification(tele_end, focal_length);
     is_dirty_proj = true;
 }
@@ -323,8 +323,8 @@ Vector3 CustomCamera::ToSemiSphere(float x, float y)
     const float aspect = vp.GetAspectRatio();
 
     Vector3 result;
-    result.SetX(remap(x, static_cast<float>(vp.GetPositionX()), static_cast<float>(vp.GetWidth()), -aspect, aspect));
-    result.SetY(remap(y, static_cast<float>(vp.GetPositionY()), static_cast<float>(vp.GetHeight()), 1.0f, -1.0f));
+    result.SetX(Remap(x, static_cast<float>(vp.GetPositionX()), static_cast<float>(vp.GetWidth()), -aspect, aspect));
+    result.SetY(Remap(y, static_cast<float>(vp.GetPositionY()), static_cast<float>(vp.GetHeight()), 1.0f, -1.0f));
 
     const float d = result.GetX() * result.GetX() + result.GetY() * result.GetY();
     if(d <= 1.0f){

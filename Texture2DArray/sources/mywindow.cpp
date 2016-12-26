@@ -2,7 +2,7 @@
 #include <sstream>
 #include <GL/glew.h>
 #include <hasenpfote/assert.h>
-#include <hasenpfote/math/utility.h>
+#include <hasenpfote/math/utils.h>
 #include <hasenpfote/math/vector3.h>
 #include <hasenpfote/math/vector4.h>
 #include <hasenpfote/math/cmatrix4.h>
@@ -121,7 +121,7 @@ void MyWindow::OnMouseWheel(GLFWwindow* window, double xoffset, double yoffset)
 #if 0
     System::GetMutableInstance().GetCamera().OnMouseWheel(xoffset, yoffset);
 #else
-    smoothness = hasenpfote::math::clamp(smoothness + static_cast<float>(yoffset) * 0.01f, 0.0f, 1.0f);
+    smoothness = hasenpfote::math::Clamp(smoothness + static_cast<float>(yoffset) * 0.01f, 0.0f, 1.0f);
     text->SetSmoothness(smoothness);
 #endif
 }

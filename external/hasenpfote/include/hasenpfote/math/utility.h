@@ -6,7 +6,7 @@
 */
 #pragma once
 #include <cstdint>
-#include "constants.h"
+#include "constants/constants.h"
 
 namespace hasenpfote{ namespace math{
 
@@ -20,28 +20,7 @@ namespace hasenpfote{ namespace math{
 bool almost_equals(float a, float b, std::uint32_t max_ulps);
 bool almost_equals(double a, double b, std::uint64_t max_ulps);
 
-/*!
- * sinc 関数のテイラー級数による近似.
- * <p>
- * sinc(x)<br>
- * \f$\frac{\sin{x}}{x} = 1 - \frac{1}{6}x^{2} + \frac{1}{120}x^{4} - \frac{1}{5040}x^{6}\f$
- * </p>
- * @param[in] x
- * @return
- */
-float sinc(float x);
-
-/*!
- * sinc 関数の逆数のテイラー級数による近似.
- * <p>
- * reciprocal of sinc(x)<br>
- * \f$\frac{x}{\sin{x}} = 1 + \frac{1}{6}x^{2} + \frac{7}{360}x^{4} + \frac{31}{15120}x^{6} + ･･･ \f$
- * </p>
- * @param x
- * @return
- */
-float rcp_sinc(float x);
-
+#if 0
 /*!
  * degrees to radians.
  * @param[in] angle an angle in degrees.
@@ -49,7 +28,7 @@ float rcp_sinc(float x);
  */
 constexpr float to_radians(float angle)
 {
-    return angle * pi<float>() / 180.0f;
+    return angle * constants::pi<float>() / 180.0f;
 }
 
 /*!
@@ -59,7 +38,7 @@ constexpr float to_radians(float angle)
  */
 constexpr float to_degrees(float angle)
 {
-    return angle * 180.0f / pi<float>();
+    return angle * 180.0f / constants::pi<float>();
 }
 
 /*!
@@ -125,5 +104,6 @@ bool contains_open(T x, T lower, T upper)
         return false;
     return true;
 }
+#endif
 
 }}

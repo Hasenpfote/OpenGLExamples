@@ -28,9 +28,34 @@ void Text::EndRendering()
     renderer->EndRendering();
 }
 
+#ifdef _WIN32
+#include <windows.h>
+
+//
+//  Convert an UTF8 string to a wide Unicode String
+//  https://stackoverflow.com/questions/215963/how-do-you-properly-use-widechartomultibyte/3999597#3999597
+//
+std::wstring utf8_decode(const std::string& str)
+{
+    if(str.empty())
+        return std::wstring();
+    int size_needed = MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), NULL, 0);
+    std::wstring wstrTo(size_needed, 0);
+    MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), &wstrTo[0], size_needed);
+    return wstrTo;
+}
+#endif
+
 void Text::DrawString(const std::string& string, float x, float y, float scale)
 {
-    //DrawString(utf8_to_utf16(string), x, y, scale);
+#ifdef _WIN32
+    // https://stackoverflow.com/a/42734882
+    auto wstr = utf8_decode(string);
+    std::u16string u16str(wstr.begin(), wstr.end());
+    DrawString(u16str, x, y, scale);
+#else
+#error Function not implemented.
+#endif
 }
 
 static std::tuple<float, float, float, float>

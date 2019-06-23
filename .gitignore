@@ -1,30 +1,40 @@
 *.suo
 *.db
 
+BillboardBeam/*.exe
+BillboardBeam/*.dll
 BillboardBeam/builds/windows/vc2019/BillboardBeam/.vs
 BillboardBeam/builds/windows/vc2019/BillboardBeam/Debug/
 BillboardBeam/builds/windows/vc2019/BillboardBeam/Release/
 BillboardBeam/builds/windows/vc2019/BillboardBeam/BillboardBeam/Debug/
 BillboardBeam/builds/windows/vc2019/BillboardBeam/BillboardBeam/Release/
 
+FBXLoader/*.exe
+FBXLoader/*.dll
 FBXLoader/builds/windows/vc2019/FBXLoader/.vs
 FBXLoader/builds/windows/vc2019/FBXLoader/Debug/
 FBXLoader/builds/windows/vc2019/FBXLoader/Release/
 FBXLoader/builds/windows/vc2019/FBXLoader/FBXLoader/Debug/
 FBXLoader/builds/windows/vc2019/FBXLoader/FBXLoader/Release/
 
+Quad/*.exe
+Quad/*.dll
 Quad/builds/windows/vc2019/Quad/.vs
 Quad/builds/windows/vc2019/Quad/Debug/
 Quad/builds/windows/vc2019/Quad/Release/
 Quad/builds/windows/vc2019/Quad/Quad/Debug/
 Quad/builds/windows/vc2019/Quad/Quad/Release/
 
+Texture2DArray/*.exe
+Texture2DArray/*.dll
 Texture2DArray/builds/windows/vc2019/Texture2DArray/.vs
 Texture2DArray/builds/windows/vc2019/Texture2DArray/Debug/
 Texture2DArray/builds/windows/vc2019/Texture2DArray/Release/
 Texture2DArray/builds/windows/vc2019/Texture2DArray/Texture2DArray/Debug/
 Texture2DArray/builds/windows/vc2019/Texture2DArray/Texture2DArray/Release/
 
+AdaptiveTerrainTessellation/*.exe
+AdaptiveTerrainTessellation/*.dll
 AdaptiveTerrainTessellation/builds/windows/vc2019/AdaptiveTerrainTessellation/.vs
 AdaptiveTerrainTessellation/builds/windows/vc2019/AdaptiveTerrainTessellation/Debug/
 AdaptiveTerrainTessellation/builds/windows/vc2019/AdaptiveTerrainTessellation/Release/

@@ -8,7 +8,7 @@
 
 namespace text{
 
-static GLuint Create2DArrayTexture(GLsizei width, GLsizei height, const std::vector<std::tr2::sys::path>& filepaths)
+static GLuint Create2DArrayTexture(GLsizei width, GLsizei height, const std::vector<std::filesystem::path>& filepaths)
 {
     GLuint texture = 0;
     glGenTextures(1, &texture);
@@ -98,7 +98,7 @@ public:
 
 public:
     Impl() = delete;
-    explicit Impl(const std::tr2::sys::path& filepath);
+    explicit Impl(const std::filesystem::path& filepath);
     ~Impl();
 
     GLuint GetTexture() const { return texture; }
@@ -110,7 +110,7 @@ public:
     std::int16_t GetKerningAmount(std::uint32_t first, std::uint32_t second) const;
 
 private:
-    void Create(const std::tr2::sys::path& filepath);
+    void Create(const std::filesystem::path& filepath);
     static bool Compare(const KerningAmount& lhs, const KerningAmount& rhs);
 
 private:
@@ -123,7 +123,7 @@ private:
     KerningPairMap kerning_pair;
 };
 
-Font::Impl::Impl(const std::tr2::sys::path& filepath)
+Font::Impl::Impl(const std::filesystem::path& filepath)
     : texture(0)
 {
     Create(filepath);
@@ -159,7 +159,7 @@ std::int16_t Font::Impl::GetKerningAmount(std::uint32_t first, std::uint32_t sec
     return 0;
 }
 
-void Font::Impl::Create(const std::tr2::sys::path& filepath)
+void Font::Impl::Create(const std::filesystem::path& filepath)
 {
     std::ifstream ifs(filepath.string(), std::ios::in | std::ios::binary);
     if(ifs.fail()){
@@ -179,7 +179,7 @@ void Font::Impl::Create(const std::tr2::sys::path& filepath)
     // <page>
     const auto parent_path = filepath.parent_path();
     const auto num_pages = static_cast<int>(std::get<FntParser::as_integer(FntParser::CommonElement::Pages)>(common));
-    std::vector<std::tr2::sys::path> filepaths;
+    std::vector<std::filesystem::path> filepaths;
     for(auto i = 0; i < num_pages; i++){
         field = FntParser::ReadLine(ifs, FntParser::PAGE_TAG);
         const auto page = FntParser::ParsePage(field);
@@ -279,7 +279,7 @@ bool Font::Impl::Compare(const KerningAmount& lhs, const KerningAmount& rhs)
 
 // Font
 
-Font::Font(const std::tr2::sys::path& filepath)
+Font::Font(const std::filesystem::path& filepath)
     : pimpl(std::make_shared<Impl>(filepath)), metrics(std::make_unique<FontMetrics>(*this))
 {
 }

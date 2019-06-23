@@ -1,5 +1,4 @@
-﻿#include <hasenpfote/unicode.h>
-#include <hasenpfote/math/cmatrix4.h>
+﻿#include <hasenpfote/math/cmatrix4.h>
 #include "text.h"
 
 namespace text{
@@ -31,7 +30,7 @@ void Text::EndRendering()
 
 void Text::DrawString(const std::string& string, float x, float y, float scale)
 {
-    DrawString(hasenpfote::utf8_to_utf16(string), x, y, scale);
+    //DrawString(utf8_to_utf16(string), x, y, scale);
 }
 
 static std::tuple<float, float, float, float>

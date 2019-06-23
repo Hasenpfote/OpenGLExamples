@@ -1,25 +1,38 @@
 *.suo
 *.db
-BillboardBeam/builds/windows/vc2015/BillboardBeam/BillboardBeam/Debug/
-BillboardBeam/builds/windows/vc2015/BillboardBeam/BillboardBeam/Release/
-BillboardBeam/builds/windows/vc2015/BillboardBeam/Debug/
-BillboardBeam/builds/windows/vc2015/BillboardBeam/Release/
-FBXLoader/builds/windows/vc2015/FBXLoader/Debug/
-FBXLoader/builds/windows/vc2015/FBXLoader/FBXLoader/Debug/arcball.obj
-FBXLoader/builds/windows/vc2015/FBXLoader/FBXLoader/Debug/
-FBXLoader/builds/windows/vc2015/FBXLoader/FBXLoader/Release/
-FBXLoader/builds/windows/vc2015/FBXLoader/Release/
-Quad/builds/windows/vc2015/Quad/Debug/
-Quad/builds/windows/vc2015/Quad/Quad/Debug/
-Quad/builds/windows/vc2015/Quad/Quad/Release/
-Quad/builds/windows/vc2015/Quad/Release/
-Texture2DArray/builds/windows/vc2015/Texture2DArray/Debug/
-Texture2DArray/builds/windows/vc2015/Texture2DArray/Release/
-Texture2DArray/builds/windows/vc2015/Texture2DArray/Texture2DArray/Debug/
-Texture2DArray/builds/windows/vc2015/Texture2DArray/Texture2DArray/Release/
+
+BillboardBeam/builds/windows/vc2019/BillboardBeam/.vs
+BillboardBeam/builds/windows/vc2019/BillboardBeam/Debug/
+BillboardBeam/builds/windows/vc2019/BillboardBeam/Release/
+BillboardBeam/builds/windows/vc2019/BillboardBeam/BillboardBeam/Debug/
+BillboardBeam/builds/windows/vc2019/BillboardBeam/BillboardBeam/Release/
+
+FBXLoader/builds/windows/vc2019/FBXLoader/.vs
+FBXLoader/builds/windows/vc2019/FBXLoader/Debug/
+FBXLoader/builds/windows/vc2019/FBXLoader/Release/
+FBXLoader/builds/windows/vc2019/FBXLoader/FBXLoader/Debug/
+FBXLoader/builds/windows/vc2019/FBXLoader/FBXLoader/Release/
+
+Quad/builds/windows/vc2019/Quad/.vs
+Quad/builds/windows/vc2019/Quad/Debug/
+Quad/builds/windows/vc2019/Quad/Release/
+Quad/builds/windows/vc2019/Quad/Quad/Debug/
+Quad/builds/windows/vc2019/Quad/Quad/Release/
+
+Texture2DArray/builds/windows/vc2019/Texture2DArray/.vs
+Texture2DArray/builds/windows/vc2019/Texture2DArray/Debug/
+Texture2DArray/builds/windows/vc2019/Texture2DArray/Release/
+Texture2DArray/builds/windows/vc2019/Texture2DArray/Texture2DArray/Debug/
+Texture2DArray/builds/windows/vc2019/Texture2DArray/Texture2DArray/Release/
+
+AdaptiveTerrainTessellation/builds/windows/vc2019/AdaptiveTerrainTessellation/.vs
+AdaptiveTerrainTessellation/builds/windows/vc2019/AdaptiveTerrainTessellation/Debug/
+AdaptiveTerrainTessellation/builds/windows/vc2019/AdaptiveTerrainTessellation/Release/
+AdaptiveTerrainTessellation/builds/windows/vc2019/AdaptiveTerrainTessellation/AdaptiveTerrainTessellation/Debug/
+AdaptiveTerrainTessellation/builds/windows/vc2019/AdaptiveTerrainTessellation/AdaptiveTerrainTessellation/Release/
+
 *.opendb
-AdaptiveTerrainTessellation/builds/windows/vc2015/AdaptiveTerrainTessellation/AdaptiveTerrainTessellation/Release/
-AdaptiveTerrainTessellation/builds/windows/vc2015/AdaptiveTerrainTessellation/Release/
+
 external/libpng/lpng1622/pnglibconf.h
 external/libpng/lpng1622/projects/vstudio/Debug Library/
 external/libpng/lpng1622/projects/vstudio/libpng/Debug Library/
@@ -36,5 +49,3 @@ external/libpng/lpng1622/projects/vstudio/pngvalid/Release Library/
 external/libpng/lpng1622/projects/vstudio/Release Library/
 external/libpng/lpng1622/projects/vstudio/zlib/Debug Library/
 external/libpng/lpng1622/projects/vstudio/zlib/Release Library/
-AdaptiveTerrainTessellation/builds/windows/vc2015/AdaptiveTerrainTessellation/AdaptiveTerrainTessellation/Debug/
-AdaptiveTerrainTessellation/builds/windows/vc2015/AdaptiveTerrainTessellation/Debug/

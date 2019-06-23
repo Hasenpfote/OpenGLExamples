@@ -3,14 +3,12 @@
 #include "png_loader.h"
 #include "texture.h"
 
-namespace sys = std::tr2::sys;
-
 TextureManager::~TextureManager()
 {
     DeleteTextures();
 }
 
-GLuint TextureManager::LoadTexture(const sys::path& filepath, bool generates_mipmap)
+GLuint TextureManager::LoadTexture(const std::filesystem::path& filepath, bool generates_mipmap)
 {
     LOG_I("Loading texture file: " << filepath.string());
     auto texture = GetTexture(filepath.string());
@@ -47,24 +45,24 @@ GLuint TextureManager::LoadTexture(const sys::path& filepath, bool generates_mip
     return texture;
 }
 
-void TextureManager::LoadTextures(const sys::path& directory, const sys::path& extension, bool generates_mipmap)
+void TextureManager::LoadTextures(const std::filesystem::path& directory, const std::filesystem::path& extension, bool generates_mipmap)
 {
-    std::vector<sys::path> filepaths;
-    auto func = [&filepaths, &extension](const sys::path& filepath){
-        if(sys::is_regular_file(filepath)){
+    std::vector<std::filesystem::path> filepaths;
+    auto func = [&filepaths, &extension](const std::filesystem::path& filepath){
+        if(std::filesystem::is_regular_file(filepath)){
             if(filepath.extension() == extension){
-                filepaths.push_back(filepath);
+                filepaths.push_back(filepath.generic_string());
             }
         }
     };
 
-    std::for_each(sys::directory_iterator(directory), sys::directory_iterator(), func);
+    std::for_each(std::filesystem::directory_iterator(directory), std::filesystem::directory_iterator(), func);
     for(const auto& filepath : filepaths){
         LoadTexture(filepath, generates_mipmap);
     }
 }
 
-void TextureManager::DeleteTexture(const std::tr2::sys::path& filepath)
+void TextureManager::DeleteTexture(const std::filesystem::path& filepath)
 {
     const auto hash = std::hash<std::string>()(filepath.string());
     DeleteTexture(hash);
@@ -89,7 +87,7 @@ void TextureManager::DeleteTextures()
     texture.clear();
 }
 
-GLuint TextureManager::GetTexture(const std::tr2::sys::path& filepath) const
+GLuint TextureManager::GetTexture(const std::filesystem::path& filepath) const
 {
     const auto hash = std::hash<std::string>()(filepath.string());
     return GetTexture(hash);

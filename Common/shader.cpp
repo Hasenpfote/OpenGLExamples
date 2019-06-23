@@ -4,8 +4,6 @@
 #include "logger.h"
 #include "shader.h"
 
-namespace sys = std::tr2::sys;
-
 static std::unordered_map<std::string, GLenum> make_extension_map();
 
 const std::unordered_map<std::string, GLenum> ShaderManager::ext_type = make_extension_map();
@@ -82,7 +80,7 @@ bool ShaderProgram::Create(GLenum type, const std::string& source)
     return true;
 }
 
-bool ShaderProgram::Create(GLenum type, const sys::path& filepath)
+bool ShaderProgram::Create(GLenum type, const std::filesystem::path& filepath)
 {
     Release();
 
@@ -755,7 +753,7 @@ void ShaderPipeline::Cache(const std::string& name)
     HASENPFOTE_ASSERT_MSG(uniform_cache.find(name) != uniform_cache.cend(), "Could not find uniform variable `" << name << "` in shaders.");
 }
 
-bool ShaderManager::LoadShaderProgram(const sys::path& filepath)
+bool ShaderManager::LoadShaderProgram(const std::filesystem::path& filepath)
 {
     LOG_I("Loading shader file: " << filepath.string());
 
@@ -780,21 +778,21 @@ bool ShaderManager::LoadShaderProgram(const sys::path& filepath)
     return false;
 }
 
-void ShaderManager::LoadShaderPrograms(const sys::path& directory)
+void ShaderManager::LoadShaderPrograms(const std::filesystem::path& directory)
 {
     const auto& extensions = ext_type;
 
-    std::vector<sys::path> filepaths;
-    auto func = [&filepaths, &extensions](const sys::path& filepath){
-        if(sys::is_regular_file(filepath)){
+    std::vector<std::filesystem::path> filepaths;
+    auto func = [&filepaths, &extensions](const std::filesystem::path& filepath){
+        if(std::filesystem::is_regular_file(filepath)){
             decltype(ext_type)::const_iterator it = extensions.find(filepath.extension().string());
             if(it != extensions.cend()){
-                filepaths.push_back(filepath);
+                filepaths.push_back(filepath.generic_string());
             }
         }
     };
 
-    std::for_each(sys::directory_iterator(directory), sys::directory_iterator(), func);
+    std::for_each(std::filesystem::directory_iterator(directory), std::filesystem::directory_iterator(), func);
     for(const auto& filepath : filepaths){
         LoadShaderProgram(filepath);
     }
@@ -809,7 +807,7 @@ void ShaderManager::DeleteShaderProgram(std::size_t hash)
     }
 }
 
-void ShaderManager::DeleteShaderProgram(const sys::path& filepath)
+void ShaderManager::DeleteShaderProgram(const std::filesystem::path& filepath)
 {
     const auto hash = std::hash<std::string>()(filepath.string());
     DeleteShaderProgram(hash);
@@ -841,13 +839,13 @@ const ShaderProgram* ShaderManager::GetShaderProgram(std::size_t hash) const
     return nullptr;
 }
 
-ShaderProgram* ShaderManager::GetShaderProgram(const sys::path& filepath)
+ShaderProgram* ShaderManager::GetShaderProgram(const std::filesystem::path& filepath)
 {
     const auto hash = std::hash<std::string>()(filepath.string());
     return GetShaderProgram(hash);
 }
 
-const ShaderProgram* ShaderManager::GetShaderProgram(const sys::path& filepath) const
+const ShaderProgram* ShaderManager::GetShaderProgram(const std::filesystem::path& filepath) const
 {
     const auto hash = std::hash<std::string>()(filepath.string());
     return GetShaderProgram(hash);

@@ -29,7 +29,7 @@ public:
     PngLoader(PngLoader&&) = delete;
     PngLoader& operator = (PngLoader&&) = delete;
 
-    bool Load(const std::tr2::sys::path& filepath, bool allows_vertical_flip = false);
+    bool Load(const std::filesystem::path& filepath, bool allows_vertical_flip = false);
     void Release();
 
     std::uint32_t GetWidth() const { return width ; }

@@ -4,8 +4,6 @@
 #include <png.h>
 #include "png_loader.h"
 
-namespace sys = std::tr2::sys;
-
 static void read_callback(png_structp png_ptr, png_bytep out, png_size_t count)
 {
     png_voidp io_ptr = png_get_io_ptr(png_ptr);
@@ -20,7 +18,7 @@ PngLoader::PngLoader()
 {
 }
 
-bool PngLoader::Load(const sys::path& filepath, bool allows_vertical_flip)
+bool PngLoader::Load(const std::filesystem::path& filepath, bool allows_vertical_flip)
 {
     Release();
 

@@ -23,7 +23,7 @@ public:
     GLuint GetUniformBlockIndex(const std::string& name) const;
 
     bool Create(GLenum type, const std::string& source);
-    bool Create(GLenum type, const std::tr2::sys::path& filepath);
+    bool Create(GLenum type, const std::filesystem::path& filepath);
     void Release();
     //
     void SetUniform1f(const std::string& name, GLfloat v0);
@@ -159,17 +159,17 @@ public:
     ShaderManager(ShaderManager&&) = delete;
     ShaderManager& operator = (ShaderManager&&) = delete;
 
-    bool LoadShaderProgram(const std::tr2::sys::path& filepath);
-    void LoadShaderPrograms(const std::tr2::sys::path& directory);
+    bool LoadShaderProgram(const std::filesystem::path& filepath);
+    void LoadShaderPrograms(const std::filesystem::path& directory);
 
     void DeleteShaderProgram(std::size_t hash);
-    void DeleteShaderProgram(const std::tr2::sys::path& filepath);
+    void DeleteShaderProgram(const std::filesystem::path& filepath);
     void DeleteShaderPrograms();
 
     ShaderProgram* GetShaderProgram(std::size_t hash);
     const ShaderProgram* GetShaderProgram(std::size_t hash) const;
-    ShaderProgram* GetShaderProgram(const std::tr2::sys::path& filepath);
-    const ShaderProgram* GetShaderProgram(const std::tr2::sys::path& filepath) const;
+    ShaderProgram* GetShaderProgram(const std::filesystem::path& filepath);
+    const ShaderProgram* GetShaderProgram(const std::filesystem::path& filepath) const;
 
 private:
     static const std::unordered_map<std::string, GLenum> ext_type;

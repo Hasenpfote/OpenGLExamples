@@ -7,7 +7,7 @@
 #pragma once
 #include <fstream>
 #include <memory>
-#if (__cplusplus > 201402L) || (defined(_MSC_VER) && (_MSC_VER >= 1900))
+#if (__cplusplus > 201402L) || (defined(_MSC_VER) && (_MSVC_LANG > 201402L))
 #include <filesystem>
 #endif
 #include "appender.h"
@@ -18,21 +18,16 @@ class RollingFileAppender final : public IAppender
 {
 public:
     explicit RollingFileAppender(const std::string& filepath, int max_files = 1, std::size_t max_file_size = 1024);
-#if (__cplusplus > 201402L) || defined(_MSC_VER) && (_MSC_VER > 1900)
-#error Function not implemented.
-#elif defined(_MSC_VER) && (_MSC_VER == 1900)
-    explicit RollingFileAppender(const std::tr2::sys::path& filepath, int max_files = 1, std::size_t max_file_size = 1024);
+#if (__cplusplus > 201402L) || (defined(_MSC_VER) && (_MSVC_LANG > 201402L))
+    explicit RollingFileAppender(const std::filesystem::path& filepath, int max_files = 1, std::size_t max_file_size = 1024);
 #endif
     ~RollingFileAppender() = default;
     void Write(const std::string& buffer) override;
 
 private:
     std::unique_ptr<std::ofstream> ofs;
-#if (__cplusplus > 201402L) || (defined(_MSC_VER) && (_MSC_VER > 1900))
-#error Function not implemented.
+#if (__cplusplus > 201402L) || (defined(_MSC_VER) && (_MSVC_LANG > 201402L))
     std::filesystem::path filepath;
-#elif defined(_MSC_VER) && (_MSC_VER == 1900)
-    std::tr2::sys::path filepath;
 #else
     std::string filepath;
 #endif

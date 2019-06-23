@@ -59,20 +59,20 @@ void MyWindow::Setup()
     // load shader.
     {
         auto& man = System::GetMutableInstance().GetShaderManager();
-        std::tr2::sys::path directory("assets/shaders");
+        std::filesystem::path directory("assets/shaders");
         man.LoadShaderPrograms(directory);
     }
 
     // load texture.
     {
-        std::tr2::sys::path directory("assets/textures");
-        const std::tr2::sys::path extension(".png");
+        std::filesystem::path directory("assets/textures");
+        const std::filesystem::path extension(".png");
         auto& man = System::GetMutableInstance().GetTextureManager();
         man.LoadTextures(directory, extension);
     }
     // generate font.
     {
-        std::tr2::sys::path fontpath = "../Common/assets/fonts/test.fnt";
+        std::filesystem::path fontpath = "../Common/assets/fonts/test.fnt";
         auto font = std::make_shared<text::Font>(fontpath);
         text = std::make_unique<SDFText>(font, std::make_shared<SDFTextRenderer>());
         text->SetSmoothness(1.0f);

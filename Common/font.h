@@ -66,7 +66,7 @@ public:
 
 public:
     Font() = delete;
-    explicit Font(const std::tr2::sys::path& filepath);
+    explicit Font(const std::filesystem::path& filepath);
     ~Font();
 
     Font(const Font&) = delete;

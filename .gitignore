@@ -41,6 +41,14 @@ AdaptiveTerrainTessellation/builds/windows/vc2019/AdaptiveTerrainTessellation/Re
 AdaptiveTerrainTessellation/builds/windows/vc2019/AdaptiveTerrainTessellation/AdaptiveTerrainTessellation/Debug/
 AdaptiveTerrainTessellation/builds/windows/vc2019/AdaptiveTerrainTessellation/AdaptiveTerrainTessellation/Release/
 
+RenderTexture/*.exe
+RenderTexture/*.dll
+RenderTexture/builds/windows/vc2019/RenderTexture/.vs
+RenderTexture/builds/windows/vc2019/RenderTexture/Debug/
+RenderTexture/builds/windows/vc2019/RenderTexture/Release/
+RenderTexture/builds/windows/vc2019/RenderTexture/RenderTexture/Debug/
+RenderTexture/builds/windows/vc2019/RenderTexture/RenderTexture/Release/
+
 *.opendb
 
 external/libpng/lpng1622/pnglibconf.h

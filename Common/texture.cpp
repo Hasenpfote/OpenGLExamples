@@ -8,6 +8,35 @@ TextureManager::~TextureManager()
     DeleteTextures();
 }
 
+GLuint TextureManager::CreateTexture(const std::string& name, GLenum internalformat, GLsizei width, GLsizei height)
+{
+    LOG_I("Creating texture file: " << name);
+    auto texture = GetTexture(name);
+    if(glIsTexture(texture)){
+        LOG_E(name << ": Already exists.");
+        return texture;
+    }
+
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexStorage2D(GL_TEXTURE_2D, 1, internalformat, width, height);
+
+    // Poor filtering
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    const auto hash = std::hash<std::string>()(name);
+    this->texture.insert(std::make_pair(hash, texture));
+
+    LOG_I(name << ": Succeed to create the texture. (id=" << texture << ")");
+
+    return texture;
+}
+
 GLuint TextureManager::LoadTexture(const std::filesystem::path& filepath, bool generates_mipmap)
 {
     LOG_I("Loading texture file: " << filepath.string());

@@ -15,6 +15,8 @@ public:
     TextureManager(TextureManager&&) = delete;
     TextureManager& operator = (TextureManager&&) = delete;
 
+    GLuint CreateTexture(const std::string& name, GLenum internalformat, GLsizei width, GLsizei height);
+
     GLuint LoadTexture(const std::filesystem::path& filepath, bool generates_mipmap = true);
     void LoadTextures(const std::filesystem::path& directory, const std::filesystem::path& extension, bool generates_mipmap = true);
 

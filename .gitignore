@@ -49,6 +49,14 @@ RenderTexture/builds/windows/vc2019/RenderTexture/Release/
 RenderTexture/builds/windows/vc2019/RenderTexture/RenderTexture/Debug/
 RenderTexture/builds/windows/vc2019/RenderTexture/RenderTexture/Release/
 
+KawaseBlur/*.exe
+KawaseBlur/*.dll
+KawaseBlur/builds/windows/vc2019/KawaseBlur/.vs
+KawaseBlur/builds/windows/vc2019/KawaseBlur/Debug/
+KawaseBlur/builds/windows/vc2019/KawaseBlur/Release/
+KawaseBlur/builds/windows/vc2019/KawaseBlur/KawaseBlur/Debug/
+KawaseBlur/builds/windows/vc2019/KawaseBlur/KawaseBlur/Release/
+
 *.opendb
 
 external/libpng/lpng1622/pnglibconf.h

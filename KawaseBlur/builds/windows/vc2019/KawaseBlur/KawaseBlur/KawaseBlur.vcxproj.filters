@@ -14,19 +14,13 @@
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
     <Filter Include="Common">
-      <UniqueIdentifier>{173bc764-2789-4524-88bd-0e7d508c22f6}</UniqueIdentifier>
+      <UniqueIdentifier>{0d9a1d53-c24b-4c0c-a0f6-23c0781b72e0}</UniqueIdentifier>
     </Filter>
     <Filter Include="Common\impl">
-      <UniqueIdentifier>{0abbf2fe-11c5-4e67-bf58-b24773825055}</UniqueIdentifier>
+      <UniqueIdentifier>{6e21a651-4957-43b2-8918-e6242331f144}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\..\sources\main.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\sources\mywindow.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\..\..\Common\arcball.cpp">
       <Filter>Common</Filter>
     </ClCompile>
@@ -69,17 +63,20 @@
     <ClCompile Include="..\..\..\..\..\..\Common\window.cpp">
       <Filter>Common</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\..\sources\framebuffer.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\..\sources\fullscreen_pass_geometry.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\sources\framebuffer.cpp">
+    <ClCompile Include="..\..\..\..\..\sources\main.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\sources\mywindow.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\..\sources\mywindow.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\..\..\Common\arcball.h">
       <Filter>Common</Filter>
     </ClInclude>
@@ -128,10 +125,13 @@
     <ClInclude Include="..\..\..\..\..\..\Common\impl\singleton_impl.h">
       <Filter>Common\impl</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\..\sources\framebuffer.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\..\sources\fullscreen_pass_geometry.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\sources\framebuffer.h">
+    <ClInclude Include="..\..\..\..\..\sources\mywindow.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

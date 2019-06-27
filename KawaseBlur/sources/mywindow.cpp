@@ -1,6 +1,7 @@
 ﻿#include <iomanip>
 #include <sstream>
 #include <memory>
+#include <unordered_map>
 #include <GL/glew.h>
 #include <hasenpfote/assert.h>
 //#include <hasenpfote//math/utility.h>
@@ -12,6 +13,17 @@
 #include "../../Common/system.h"
 #include "../../Common/logger.h"
 #include "mywindow.h"
+
+const std::unordered_map <std::string, std::vector<int>> shader_kernel =
+{
+    // Matches a NxN Gaussian blur kernel.
+    {"gaussian_7x7",        {0, 0}},
+    {"gaussian_15x15",      {0, 1, 1}},
+    {"gaussian_23x23",      {0, 1, 1, 2}},
+    {"gaussian_35x35",      {0, 1, 2, 2, 3}},
+    {"gaussian_63x63",      {0, 1, 2, 3, 4, 4, 5}},
+    {"gaussian_127x127",    {0, 1, 2, 3, 4, 5, 7, 8, 9, 10}},
+};
 
 MyWindow::MyWindow()
 {
@@ -93,6 +105,8 @@ void MyWindow::Setup()
     glSamplerParameteri(sampler, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
     glSamplerParameteri(sampler, GL_TEXTURE_LOD_BIAS, 0.0f);
 
+    RecreateResources(width, height);
+
     auto& man = System::GetConstInstance().GetShaderManager();
     pipeline_fullscreen_quad.Create();
     pipeline_fullscreen_quad.SetShaderProgram(man.GetShaderProgram("assets/shaders/fullscreen_quad.vs"));
@@ -102,22 +116,19 @@ void MyWindow::Setup()
     pipeline_apply.SetShaderProgram(man.GetShaderProgram("assets/shaders/apply.vs"));
     pipeline_apply.SetShaderProgram(man.GetShaderProgram("assets/shaders/apply.fs"));
 
-    {
-        auto color = System::GetMutableInstance().GetTextureManager().CreateTexture("scene_rt_color", GL_RGBA8, width, height);
-        scene_rt = std::make_unique<FrameBuffer>(color, 0, 0);
-    }
-    {
-        auto color = System::GetMutableInstance().GetTextureManager().CreateTexture("ds_rt_0_color", GL_RGBA8, width / 2, height / 2);
-        ds_rt_0 = std::make_unique<FrameBuffer>(color, 0, 0);
-    }
-    {
-        auto color = System::GetMutableInstance().GetTextureManager().CreateTexture("ds_rt_1_color", GL_RGBA8, width / 2, height / 2);
-        ds_rt_1 = std::make_unique<FrameBuffer>(color, 0, 0);
-    }
+    pipeline_downsample_2x2.Create();
+    pipeline_downsample_2x2.SetShaderProgram(man.GetShaderProgram("assets/shaders/downsample_2x2.vs"));
+    pipeline_downsample_2x2.SetShaderProgram(man.GetShaderProgram("assets/shaders/downsample_2x2.fs"));
 
-    pipeline_downsample.Create();
-    pipeline_downsample.SetShaderProgram(man.GetShaderProgram("assets/shaders/downsample.vs"));
-    pipeline_downsample.SetShaderProgram(man.GetShaderProgram("assets/shaders/downsample.fs"));
+    pipeline_downsample_4x4.Create();
+    pipeline_downsample_4x4.SetShaderProgram(man.GetShaderProgram("assets/shaders/downsample_4x4.vs"));
+    pipeline_downsample_4x4.SetShaderProgram(man.GetShaderProgram("assets/shaders/downsample_4x4.fs"));
+
+    pipeline_kawase_blur_filter.Create();
+    pipeline_kawase_blur_filter.SetShaderProgram(man.GetShaderProgram("assets/shaders/kawase_blur.vs"));
+    pipeline_kawase_blur_filter.SetShaderProgram(man.GetShaderProgram("assets/shaders/kawase_blur.fs"));
+
+    shader_kernel_name = "gaussian_7x7";
 
     is_filter_enabled = false;
 }
@@ -135,18 +146,52 @@ void MyWindow::OnKey(GLFWwindow* window, int key, int scancode, int action, int 
     auto& camera = System::GetMutableInstance().GetCamera();
     camera.OnKey(key, scancode, action, mods);
 
-    if(key == GLFW_KEY_M && action == GLFW_PRESS){
+    if(key == GLFW_KEY_M && action == GLFW_PRESS)
+    {
         GLboolean ms;
         glGetBooleanv(GL_MULTISAMPLE, &ms);
-        if (ms == GL_TRUE) {
+        if(ms == GL_TRUE)
+        {
             glDisable(GL_MULTISAMPLE);
         }
-        else {
+        else
+        {
             glEnable(GL_MULTISAMPLE);
         }
     }
-    if(key == GLFW_KEY_F && action == GLFW_PRESS){
+    if(key == GLFW_KEY_B && action == GLFW_PRESS)
+    {
         is_filter_enabled = !is_filter_enabled;
+    }
+    if(key == GLFW_KEY_1 && action == GLFW_PRESS)
+    {
+        if(is_filter_enabled)
+            shader_kernel_name = "gaussian_7x7";
+    }
+    if(key == GLFW_KEY_2 && action == GLFW_PRESS)
+    {
+        if(is_filter_enabled)
+            shader_kernel_name = "gaussian_15x15";
+    }
+    if(key == GLFW_KEY_3 && action == GLFW_PRESS)
+    {
+        if(is_filter_enabled)
+            shader_kernel_name = "gaussian_23x23";
+    }
+    if(key == GLFW_KEY_4 && action == GLFW_PRESS)
+    {
+        if(is_filter_enabled)
+            shader_kernel_name = "gaussian_35x35";
+    }
+    if(key == GLFW_KEY_5 && action == GLFW_PRESS)
+    {
+        if(is_filter_enabled)
+            shader_kernel_name = "gaussian_63x63";
+    }
+    if(key == GLFW_KEY_6 && action == GLFW_PRESS)
+    {
+        if(is_filter_enabled)
+            shader_kernel_name = "gaussian_127x127";
     }
 }
 
@@ -170,19 +215,7 @@ void MyWindow::OnResizeFramebuffer(GLFWwindow* window, int width, int height)
     if(HasIconified())
         return;
     // re-create
-    System::GetMutableInstance().GetTextureManager().DeleteTexture("foo");
-    {
-        auto color = System::GetMutableInstance().GetTextureManager().CreateTexture("foo", GL_RGBA8, width, height);
-        scene_rt = std::make_unique<FrameBuffer>(color, 0, 0);
-    }
-    {
-        auto color = System::GetMutableInstance().GetTextureManager().CreateTexture("ds_rt_0_color", GL_RGBA8, width / 2, height / 2);
-        ds_rt_0 = std::make_unique<FrameBuffer>(color, 0, 0);
-    }
-    {
-        auto color = System::GetMutableInstance().GetTextureManager().CreateTexture("ds_rt_1_color", GL_RGBA8, width / 2, height / 2);
-        ds_rt_1 = std::make_unique<FrameBuffer>(color, 0, 0);
-    }
+    RecreateResources(width, height);
 }
 
 void MyWindow::OnResizeWindow(GLFWwindow* window, int width, int height)
@@ -211,16 +244,33 @@ void MyWindow::OnRender()
     const auto height = vp.GetHeight();
     glViewport(0, 0, width, height);
     //
+
+    // 1) シーンをテクスチャへ描画
     scene_rt->Bind();
     DrawFullScreenQuad();
     scene_rt->Unbind();
-
-    auto last_rt = scene_rt.get();
-    if(is_filter_enabled){
-        last_rt = ds_rt_0.get();
-        PassDownsample(scene_rt->GetColorTexture(), last_rt);
+    // 2) 1/4 x 1/4 ダウンサンプルを行う
+    auto last_blur_rt = ds_rt_0.get();
+    PassDownsample(scene_rt->GetColorTexture(), last_blur_rt);
+    // 3) Kawase blur
+    if(is_filter_enabled)
+    {
+        auto it = shader_kernel.find(shader_kernel_name);
+        if(it != shader_kernel.cend())
+        {
+            auto kernel = it->second;
+            const auto num_of_passes = kernel.size();
+            for(auto i = 0; i < num_of_passes; i++)
+            {
+                FrameBuffer* src_blur_rt = last_blur_rt;
+                FrameBuffer* dst_blur_rt = ((i % 2) == 0) ? ds_rt_1.get() : ds_rt_0.get();
+                PassKawaseBlur(src_blur_rt->GetColorTexture(), dst_blur_rt, kernel[i]);
+                last_blur_rt = dst_blur_rt;
+            }
+        }
     }
-    PassApply(last_rt->GetColorTexture());
+    // 4) 結果を表示
+    PassApply(last_blur_rt->GetColorTexture());
 
     // 情報の表示
     auto metrics = text->GetFont().GetFontMetrics();
@@ -271,12 +321,29 @@ void MyWindow::OnRender()
     oss.str("");
     oss.clear(std::stringstream::goodbit);
 
-    oss << "DownSample:" << ((is_filter_enabled == GL_TRUE) ? "On" : "Off") << "(Toggle DownSample: f)";
+    oss << "Kawase blur:" << ((is_filter_enabled == GL_TRUE) ? "On" : "Off") << "(Toggle Kawase blur: b)" << " " << shader_kernel_name;
     text->DrawString(oss.str(), 0.0f, fh * 7.0f, scale);
     oss.str("");
     oss.clear(std::stringstream::goodbit);
 
     text->EndRendering();
+}
+
+void MyWindow::RecreateResources(int width, int height)
+{
+    GLuint color_texture;
+
+    System::GetMutableInstance().GetTextureManager().DeleteTexture("scene_rt_color");
+    color_texture = System::GetMutableInstance().GetTextureManager().CreateTexture("scene_rt_color", GL_RGBA8, width, height);
+    scene_rt = std::make_unique<FrameBuffer>(color_texture, 0, 0);
+
+    System::GetMutableInstance().GetTextureManager().DeleteTexture("ds_rt_0_color");
+    color_texture = System::GetMutableInstance().GetTextureManager().CreateTexture("ds_rt_0_color", GL_RGBA8, width / 4, height / 4);
+    ds_rt_0 = std::make_unique<FrameBuffer>(color_texture, 0, 0);
+
+    System::GetMutableInstance().GetTextureManager().DeleteTexture("ds_rt_1_color");
+    color_texture = System::GetMutableInstance().GetTextureManager().CreateTexture("ds_rt_1_color", GL_RGBA8, width / 4, height / 4);
+    ds_rt_1 = std::make_unique<FrameBuffer>(color_texture, 0, 0);
 }
 
 void MyWindow::DrawFullScreenQuad()
@@ -303,10 +370,10 @@ void MyWindow::PassDownsample(GLuint texture, FrameBuffer* fb)
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
 
-    pipeline_apply.SetUniform1i("texture0", 0);
-    pipeline_apply.SetUniform2f("pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
+    pipeline_downsample_4x4.SetUniform1i("texture0", 0);
+    pipeline_downsample_4x4.SetUniform2f("pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
 
-    pipeline_apply.Bind();
+    pipeline_downsample_4x4.Bind();
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture);
@@ -316,7 +383,32 @@ void MyWindow::PassDownsample(GLuint texture, FrameBuffer* fb)
 
     glActiveTexture(GL_TEXTURE0);
 
-    pipeline_apply.Unbind();
+    pipeline_downsample_4x4.Unbind();
+
+    fb->Unbind();
+}
+
+void MyWindow::PassKawaseBlur(GLuint texture, FrameBuffer* fb, int iteration)
+{
+    fb->Bind();
+
+    GLint viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
+
+    pipeline_kawase_blur_filter.SetUniform1i("texture0", 0);
+    pipeline_kawase_blur_filter.SetUniform3f("params", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]), static_cast<float>(iteration));
+
+    pipeline_kawase_blur_filter.Bind();
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glBindSampler(0, sampler);
+
+    fsp_geom.Draw();
+
+    glActiveTexture(GL_TEXTURE0);
+
+    pipeline_kawase_blur_filter.Unbind();
 
     fb->Unbind();
 }

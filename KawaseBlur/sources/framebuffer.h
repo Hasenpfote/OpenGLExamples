@@ -7,6 +7,11 @@ public:
     FrameBuffer(GLuint color, GLuint depth, GLuint stencil);
     ~FrameBuffer();
 
+    FrameBuffer(const FrameBuffer&) = delete;
+    FrameBuffer& operator = (const FrameBuffer&) = delete;
+    FrameBuffer(FrameBuffer&&) = delete;
+    FrameBuffer& operator = (FrameBuffer&&) = delete;
+
     void Bind();
     void Unbind();
 

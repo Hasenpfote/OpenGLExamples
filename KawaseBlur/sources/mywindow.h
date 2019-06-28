@@ -35,7 +35,7 @@ private:
 
 private:
     std::unique_ptr<SDFText> text;
-    FullscreenPassGeometry fsp_geom;
+    std::unique_ptr<FullscreenPassGeometry> fs_pass_geom;
     GLuint sampler;
     GLuint texture;
     ShaderPipeline pipeline_fullscreen_quad;

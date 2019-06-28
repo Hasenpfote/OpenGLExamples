@@ -94,7 +94,7 @@ void MyWindow::Setup()
     //
     texture = System::GetConstInstance().GetTextureManager().GetTexture("assets/textures/testimg_1920x1080.png");
 
-    fsp_geom.Initialize();
+    fs_pass_geom = std::make_unique<FullscreenPassGeometry>();
 
     glGenSamplers(1, &sampler);
 
@@ -356,7 +356,7 @@ void MyWindow::DrawFullScreenQuad()
     glBindTexture(GL_TEXTURE_2D, texture);
     glBindSampler(0, sampler);
 
-    fsp_geom.Draw();
+    fs_pass_geom->Draw();
 
     glActiveTexture(GL_TEXTURE0);
 
@@ -379,7 +379,7 @@ void MyWindow::PassDownsampling(GLuint texture, FrameBuffer* fb)
     glBindTexture(GL_TEXTURE_2D, texture);
     glBindSampler(0, sampler);
 
-    fsp_geom.Draw();
+    fs_pass_geom->Draw();
 
     glActiveTexture(GL_TEXTURE0);
 
@@ -404,7 +404,7 @@ void MyWindow::PassKawaseBlur(GLuint texture, FrameBuffer* fb, int iteration)
     glBindTexture(GL_TEXTURE_2D, texture);
     glBindSampler(0, sampler);
 
-    fsp_geom.Draw();
+    fs_pass_geom->Draw();
 
     glActiveTexture(GL_TEXTURE0);
 
@@ -427,7 +427,7 @@ void MyWindow::PassApply(GLuint texture)
     glBindTexture(GL_TEXTURE_2D, texture);
     glBindSampler(0, sampler);
 
-    fsp_geom.Draw();
+    fs_pass_geom->Draw();
 
     glActiveTexture(GL_TEXTURE0);
 

@@ -5,21 +5,7 @@
 
 FullscreenPassGeometry::FullscreenPassGeometry()
 {
-}
-
-FullscreenPassGeometry::~FullscreenPassGeometry()
-{
-    if(glIsBuffer(position_buffer_object))
-        glDeleteBuffers(1, &position_buffer_object);
-    if(glIsBuffer(index_buffer_object))
-        glDeleteBuffers(1, &index_buffer_object);
-    if(glIsVertexArray(vao))
-        glDeleteVertexArrays(1, &vao);
-}
-
-void FullscreenPassGeometry::Initialize()
-{
-    static float vertices[] =
+    const float vertices[] =
     {
         -1.0f, -1.0f, // left bottom
          1.0f, -1.0f, // right bottom  
@@ -27,7 +13,7 @@ void FullscreenPassGeometry::Initialize()
         -1.0f,  1.0f  // left top
     };
 
-    static int indices[] =
+    const int indices[] =
     {
         0, 1, 2,
         0, 2, 3
@@ -49,6 +35,16 @@ void FullscreenPassGeometry::Initialize()
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     glBindVertexArray(0);
+}
+
+FullscreenPassGeometry::~FullscreenPassGeometry()
+{
+    if(glIsBuffer(position_buffer_object))
+        glDeleteBuffers(1, &position_buffer_object);
+    if(glIsBuffer(index_buffer_object))
+        glDeleteBuffers(1, &index_buffer_object);
+    if(glIsVertexArray(vao))
+        glDeleteVertexArrays(1, &vao);
 }
 
 void FullscreenPassGeometry::Draw()

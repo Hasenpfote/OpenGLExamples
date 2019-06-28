@@ -57,6 +57,14 @@ KawaseBlur/builds/windows/vc2019/KawaseBlur/Release/
 KawaseBlur/builds/windows/vc2019/KawaseBlur/KawaseBlur/Debug/
 KawaseBlur/builds/windows/vc2019/KawaseBlur/KawaseBlur/Release/
 
+Bloom/*.exe
+Bloom/*.dll
+Bloom/builds/windows/vc2019/Bloom/.vs
+Bloom/builds/windows/vc2019/Bloom/Debug/
+Bloom/builds/windows/vc2019/Bloom/Release/
+Bloom/builds/windows/vc2019/Bloom/Bloom/Debug/
+Bloom/builds/windows/vc2019/Bloom/Bloom/Release/
+
 *.opendb
 
 external/libpng/lpng1622/pnglibconf.h

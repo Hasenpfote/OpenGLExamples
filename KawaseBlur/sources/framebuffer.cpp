@@ -13,18 +13,23 @@ static void GetFrameBufferSize(GLuint fbo, GLint* width, GLint* height)
     GLint texture;
     glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &texture);
     if(glIsTexture(texture)){
+
+        GLint prev_texture;
+        glGetIntegerv(GL_TEXTURE_BINDING_2D, &prev_texture);
         glBindTexture(GL_TEXTURE_2D, texture);
         glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, width);
         glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, height);
-        glBindTexture(GL_TEXTURE_2D, 0);
+        glBindTexture(GL_TEXTURE_2D, prev_texture);
     }
     else{
         glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &texture);
         if(glIsTexture(texture)){
+            GLint prev_texture;
+            glGetIntegerv(GL_TEXTURE_BINDING_2D, &prev_texture);
             glBindTexture(GL_TEXTURE_2D, texture);
             glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, width);
             glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, height);
-            glBindTexture(GL_TEXTURE_2D, 0);
+            glBindTexture(GL_TEXTURE_2D, prev_texture);
         }
         else{
             assert(false);
@@ -88,10 +93,12 @@ void FrameBuffer::Unbind()
 GLuint FrameBuffer::GetColorTexture()
 {
     GLint texture = 0;
+    GLint prev_fbo;
 
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prev_fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &texture);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, prev_fbo);
 
     return texture;
 }
@@ -99,10 +106,12 @@ GLuint FrameBuffer::GetColorTexture()
 GLuint FrameBuffer::GetDepthTexture()
 {
     GLint texture = 0;
+    GLint prev_fbo;
 
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prev_fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &texture);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, prev_fbo);
 
     return texture;
 }

@@ -4,7 +4,7 @@
 class FrameBuffer final
 {
 public:
-    FrameBuffer(GLuint color, GLuint depth, GLuint stencil);
+    FrameBuffer(GLuint color, GLuint depth = 0, GLuint stencil = 0);
     ~FrameBuffer();
 
     FrameBuffer(const FrameBuffer&) = delete;

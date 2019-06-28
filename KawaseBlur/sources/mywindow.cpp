@@ -116,17 +116,17 @@ void MyWindow::Setup()
     pipeline_apply.SetShaderProgram(man.GetShaderProgram("assets/shaders/apply.vs"));
     pipeline_apply.SetShaderProgram(man.GetShaderProgram("assets/shaders/apply.fs"));
 
-    pipeline_downsample_2x2.Create();
-    pipeline_downsample_2x2.SetShaderProgram(man.GetShaderProgram("assets/shaders/downsample_2x2.vs"));
-    pipeline_downsample_2x2.SetShaderProgram(man.GetShaderProgram("assets/shaders/downsample_2x2.fs"));
+    pipeline_downsampling_2x2.Create();
+    pipeline_downsampling_2x2.SetShaderProgram(man.GetShaderProgram("assets/shaders/downsampling.vs"));
+    pipeline_downsampling_2x2.SetShaderProgram(man.GetShaderProgram("assets/shaders/downsampling_2x2.fs"));
 
-    pipeline_downsample_4x4.Create();
-    pipeline_downsample_4x4.SetShaderProgram(man.GetShaderProgram("assets/shaders/downsample_4x4.vs"));
-    pipeline_downsample_4x4.SetShaderProgram(man.GetShaderProgram("assets/shaders/downsample_4x4.fs"));
+    pipeline_downsampling_4x4.Create();
+    pipeline_downsampling_4x4.SetShaderProgram(man.GetShaderProgram("assets/shaders/downsampling.vs"));
+    pipeline_downsampling_4x4.SetShaderProgram(man.GetShaderProgram("assets/shaders/downsampling_4x4.fs"));
 
-    pipeline_kawase_blur_filter.Create();
-    pipeline_kawase_blur_filter.SetShaderProgram(man.GetShaderProgram("assets/shaders/kawase_blur.vs"));
-    pipeline_kawase_blur_filter.SetShaderProgram(man.GetShaderProgram("assets/shaders/kawase_blur.fs"));
+    pipeline_kawase_blur.Create();
+    pipeline_kawase_blur.SetShaderProgram(man.GetShaderProgram("assets/shaders/kawase_blur.vs"));
+    pipeline_kawase_blur.SetShaderProgram(man.GetShaderProgram("assets/shaders/kawase_blur.fs"));
 
     shader_kernel_name = "gaussian_7x7";
 
@@ -251,7 +251,7 @@ void MyWindow::OnRender()
     scene_rt->Unbind();
     // 2) 1/4 x 1/4 ダウンサンプルを行う
     auto last_blur_rt = ds_rt_0.get();
-    PassDownsample(scene_rt->GetColorTexture(), last_blur_rt);
+    PassDownsampling(scene_rt->GetColorTexture(), last_blur_rt);
     // 3) Kawase blur
     if(is_filter_enabled)
     {
@@ -363,17 +363,17 @@ void MyWindow::DrawFullScreenQuad()
     pipeline_fullscreen_quad.Unbind();
 }
 
-void MyWindow::PassDownsample(GLuint texture, FrameBuffer* fb)
+void MyWindow::PassDownsampling(GLuint texture, FrameBuffer* fb)
 {
     fb->Bind();
 
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
 
-    pipeline_downsample_4x4.SetUniform1i("texture0", 0);
-    pipeline_downsample_4x4.SetUniform2f("pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
+    pipeline_downsampling_4x4.SetUniform1i("texture0", 0);
+    pipeline_downsampling_4x4.SetUniform2f("pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
 
-    pipeline_downsample_4x4.Bind();
+    pipeline_downsampling_4x4.Bind();
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture);
@@ -383,7 +383,7 @@ void MyWindow::PassDownsample(GLuint texture, FrameBuffer* fb)
 
     glActiveTexture(GL_TEXTURE0);
 
-    pipeline_downsample_4x4.Unbind();
+    pipeline_downsampling_4x4.Unbind();
 
     fb->Unbind();
 }
@@ -395,10 +395,10 @@ void MyWindow::PassKawaseBlur(GLuint texture, FrameBuffer* fb, int iteration)
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
 
-    pipeline_kawase_blur_filter.SetUniform1i("texture0", 0);
-    pipeline_kawase_blur_filter.SetUniform3f("params", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]), static_cast<float>(iteration));
+    pipeline_kawase_blur.SetUniform1i("texture0", 0);
+    pipeline_kawase_blur.SetUniform3f("params", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]), static_cast<float>(iteration));
 
-    pipeline_kawase_blur_filter.Bind();
+    pipeline_kawase_blur.Bind();
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture);
@@ -408,7 +408,7 @@ void MyWindow::PassKawaseBlur(GLuint texture, FrameBuffer* fb, int iteration)
 
     glActiveTexture(GL_TEXTURE0);
 
-    pipeline_kawase_blur_filter.Unbind();
+    pipeline_kawase_blur.Unbind();
 
     fb->Unbind();
 }

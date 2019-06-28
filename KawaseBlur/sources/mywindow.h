@@ -29,7 +29,7 @@ private:
     void RecreateResources(int width, int height);
 
     void DrawFullScreenQuad();
-    void PassDownsample(GLuint texture, FrameBuffer* fb);
+    void PassDownsampling(GLuint texture, FrameBuffer* fb);
     void PassKawaseBlur(GLuint texture, FrameBuffer* fb, int iteration);
     void PassApply(GLuint texture);
 
@@ -39,10 +39,10 @@ private:
     GLuint sampler;
     GLuint texture;
     ShaderPipeline pipeline_fullscreen_quad;
+    ShaderPipeline pipeline_downsampling_2x2;
+    ShaderPipeline pipeline_downsampling_4x4;
+    ShaderPipeline pipeline_kawase_blur;
     ShaderPipeline pipeline_apply;
-    ShaderPipeline pipeline_downsample_2x2;
-    ShaderPipeline pipeline_downsample_4x4;
-    ShaderPipeline pipeline_kawase_blur_filter;
 
     std::unique_ptr<FrameBuffer> scene_rt;
     std::unique_ptr<FrameBuffer> ds_rt_0;

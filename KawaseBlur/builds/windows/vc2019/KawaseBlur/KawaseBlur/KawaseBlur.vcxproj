@@ -177,6 +177,7 @@ del /Q "$(LocalDebuggerWorkingDirectory)*.dll"
     <ClCompile Include="..\..\..\..\..\..\Common\custom_camera.cpp" />
     <ClCompile Include="..\..\..\..\..\..\Common\fnt_parser.cpp" />
     <ClCompile Include="..\..\..\..\..\..\Common\font.cpp" />
+    <ClCompile Include="..\..\..\..\..\..\Common\framebuffer.cpp" />
     <ClCompile Include="..\..\..\..\..\..\Common\png_loader.cpp" />
     <ClCompile Include="..\..\..\..\..\..\Common\sdf_text.cpp" />
     <ClCompile Include="..\..\..\..\..\..\Common\shader.cpp" />
@@ -185,7 +186,6 @@ del /Q "$(LocalDebuggerWorkingDirectory)*.dll"
     <ClCompile Include="..\..\..\..\..\..\Common\text.cpp" />
     <ClCompile Include="..\..\..\..\..\..\Common\texture.cpp" />
     <ClCompile Include="..\..\..\..\..\..\Common\window.cpp" />
-    <ClCompile Include="..\..\..\..\..\sources\framebuffer.cpp" />
     <ClCompile Include="..\..\..\..\..\sources\fullscreen_pass_geometry.cpp" />
     <ClCompile Include="..\..\..\..\..\sources\main.cpp" />
     <ClCompile Include="..\..\..\..\..\sources\mywindow.cpp" />
@@ -197,6 +197,7 @@ del /Q "$(LocalDebuggerWorkingDirectory)*.dll"
     <ClInclude Include="..\..\..\..\..\..\Common\custom_camera.h" />
     <ClInclude Include="..\..\..\..\..\..\Common\fnt_parser.h" />
     <ClInclude Include="..\..\..\..\..\..\Common\font.h" />
+    <ClInclude Include="..\..\..\..\..\..\Common\framebuffer.h" />
     <ClInclude Include="..\..\..\..\..\..\Common\impl\singleton_impl.h" />
     <ClInclude Include="..\..\..\..\..\..\Common\logger.h" />
     <ClInclude Include="..\..\..\..\..\..\Common\png_loader.h" />
@@ -207,7 +208,6 @@ del /Q "$(LocalDebuggerWorkingDirectory)*.dll"
     <ClInclude Include="..\..\..\..\..\..\Common\text.h" />
     <ClInclude Include="..\..\..\..\..\..\Common\texture.h" />
     <ClInclude Include="..\..\..\..\..\..\Common\window.h" />
-    <ClInclude Include="..\..\..\..\..\sources\framebuffer.h" />
     <ClInclude Include="..\..\..\..\..\sources\fullscreen_pass_geometry.h" />
     <ClInclude Include="..\..\..\..\..\sources\mywindow.h" />
   </ItemGroup>

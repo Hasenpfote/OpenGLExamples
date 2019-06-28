@@ -63,9 +63,6 @@
     <ClCompile Include="..\..\..\..\..\..\Common\window.cpp">
       <Filter>Common</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\sources\framebuffer.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\..\sources\fullscreen_pass_geometry.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -74,6 +71,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\..\sources\mywindow.cpp">
       <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\Common\framebuffer.cpp">
+      <Filter>Common</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -125,14 +125,14 @@
     <ClInclude Include="..\..\..\..\..\..\Common\impl\singleton_impl.h">
       <Filter>Common\impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\sources\framebuffer.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\..\sources\fullscreen_pass_geometry.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\..\sources\mywindow.h">
       <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\Common\framebuffer.h">
+      <Filter>Common</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,7 +1,7 @@
 #include <cassert>
 #include <memory>
 #include <GL/glew.h>
-#include "../../Common/logger.h"
+#include "logger.h"
 #include "framebuffer.h"
 
 static void GetFrameBufferSize(GLuint fbo, GLint* width, GLint* height)

@@ -65,6 +65,14 @@ Bloom/builds/windows/vc2019/Bloom/Release/
 Bloom/builds/windows/vc2019/Bloom/Bloom/Debug/
 Bloom/builds/windows/vc2019/Bloom/Bloom/Release/
 
+LightStreak/*.exe
+LightStreak/*.dll
+LightStreak/builds/windows/vc2019/LightStreak/.vs
+LightStreak/builds/windows/vc2019/LightStreak/Debug/
+LightStreak/builds/windows/vc2019/LightStreak/Release/
+LightStreak/builds/windows/vc2019/LightStreak/LightStreak/Debug/
+LightStreak/builds/windows/vc2019/LightStreak/LightStreak/Release/
+
 *.opendb
 
 external/libpng/lpng1622/pnglibconf.h

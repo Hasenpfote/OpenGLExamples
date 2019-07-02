@@ -7,7 +7,6 @@ public:
     FullscreenPassGeometry();
     ~FullscreenPassGeometry();
 
-    void Initialize();
     void Draw();
 
 private:

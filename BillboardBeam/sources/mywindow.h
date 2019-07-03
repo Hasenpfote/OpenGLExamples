@@ -1,6 +1,9 @@
 ﻿#pragma once
 #include <iostream>
+#include <vector>
+#include <deque>
 #include <hasenpfote/math/quaternion.h>
+#include <hasenpfote/math/vector3.h>
 #include "../../Common/window.h"
 #include "../../Common/sdf_text.h"
 #include "billboard_beam.h"
@@ -28,9 +31,14 @@ private:
     void DrawCube();
     void DrawLines();
     void DrawPoints();
+    void DrawCurve();
 
 private:
     std::unique_ptr<SDFText> text;
     BillboardBeam bb;
     float theta;
+
+    std::vector<hasenpfote::math::Vector3> ctrl_points;
+    std::deque<hasenpfote::math::Vector3> points;
+    float t;
 };

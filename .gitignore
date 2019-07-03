@@ -73,6 +73,8 @@ LightStreak/builds/windows/vc2019/LightStreak/Release/
 LightStreak/builds/windows/vc2019/LightStreak/LightStreak/Debug/
 LightStreak/builds/windows/vc2019/LightStreak/LightStreak/Release/
 
+ToneMapping/
+
 *.opendb
 
 external/libpng/lpng1622/pnglibconf.h

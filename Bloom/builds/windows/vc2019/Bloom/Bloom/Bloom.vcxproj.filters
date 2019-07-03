@@ -75,6 +75,9 @@
     <ClCompile Include="..\..\..\..\..\..\Common\framebuffer.cpp">
       <Filter>Common</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\Common\exr_loader.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\..\..\Common\arcball.h">
@@ -132,6 +135,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\..\..\Common\framebuffer.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\Common\exr_loader.h">
       <Filter>Common</Filter>
     </ClInclude>
   </ItemGroup>

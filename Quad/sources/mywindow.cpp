@@ -66,9 +66,8 @@ void MyWindow::Setup()
     // load texture.
     {
         std::filesystem::path directory("assets/textures");
-        const std::filesystem::path extension(".png");
         auto& man = System::GetMutableInstance().GetTextureManager();
-        man.LoadTextures(directory, extension);
+        man.LoadTextures(directory);
     }
     // generate font.
     {

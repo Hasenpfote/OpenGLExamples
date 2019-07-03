@@ -63,6 +63,7 @@
     <Import Project="..\..\..\..\..\..\configurations\windows\vc2019\libpng.props" />
     <Import Project="..\..\..\..\..\..\configurations\windows\vc2019\hasenpfote.props" />
     <Import Project="fbx_sdk.props" />
+    <Import Project="..\..\..\..\..\..\configurations\windows\vc2019\tinyexr.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -71,6 +72,7 @@
     <Import Project="..\..\..\..\..\..\configurations\windows\vc2019\libpng.props" />
     <Import Project="..\..\..\..\..\..\configurations\windows\vc2019\hasenpfote.props" />
     <Import Project="fbx_sdk.props" />
+    <Import Project="..\..\..\..\..\..\configurations\windows\vc2019\tinyexr.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -79,6 +81,7 @@
     <Import Project="..\..\..\..\..\..\configurations\windows\vc2019\libpng.props" />
     <Import Project="..\..\..\..\..\..\configurations\windows\vc2019\hasenpfote.props" />
     <Import Project="fbx_sdk.props" />
+    <Import Project="..\..\..\..\..\..\configurations\windows\vc2019\tinyexr.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -87,6 +90,7 @@
     <Import Project="..\..\..\..\..\..\configurations\windows\vc2019\libpng.props" />
     <Import Project="..\..\..\..\..\..\configurations\windows\vc2019\hasenpfote.props" />
     <Import Project="fbx_sdk.props" />
+    <Import Project="..\..\..\..\..\..\configurations\windows\vc2019\tinyexr.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -216,6 +220,7 @@ del /Q "$(LocalDebuggerWorkingDirectory)*.dll"
     <ClInclude Include="..\..\..\..\..\..\Common\camera.h" />
     <ClInclude Include="..\..\..\..\..\..\Common\controllable_camera.h" />
     <ClInclude Include="..\..\..\..\..\..\Common\custom_camera.h" />
+    <ClInclude Include="..\..\..\..\..\..\Common\exr_loader.h" />
     <ClInclude Include="..\..\..\..\..\..\Common\fnt_parser.h" />
     <ClInclude Include="..\..\..\..\..\..\Common\font.h" />
     <ClInclude Include="..\..\..\..\..\..\Common\impl\singleton_impl.h" />
@@ -238,6 +243,7 @@ del /Q "$(LocalDebuggerWorkingDirectory)*.dll"
     <ClCompile Include="..\..\..\..\..\..\Common\camera.cpp" />
     <ClCompile Include="..\..\..\..\..\..\Common\controllable_camera.cpp" />
     <ClCompile Include="..\..\..\..\..\..\Common\custom_camera.cpp" />
+    <ClCompile Include="..\..\..\..\..\..\Common\exr_loader.cpp" />
     <ClCompile Include="..\..\..\..\..\..\Common\fnt_parser.cpp" />
     <ClCompile Include="..\..\..\..\..\..\Common\font.cpp" />
     <ClCompile Include="..\..\..\..\..\..\Common\png_loader.cpp" />

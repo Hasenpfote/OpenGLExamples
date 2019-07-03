@@ -75,6 +75,9 @@
     <ClCompile Include="..\..\..\..\..\sources\mywindow.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\Common\exr_loader.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\..\..\Common\arcball.h">
@@ -133,6 +136,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\..\sources\mywindow.h">
       <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\Common\exr_loader.h">
+      <Filter>Common</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

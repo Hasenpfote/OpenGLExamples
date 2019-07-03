@@ -64,7 +64,7 @@ void BillboardBeam::Initialize()
     glSamplerParameteri(sampler, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glSamplerParameteri(sampler, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    //texture = System::GetInstance().GetTextureManager().GetTexture("assets/textures/beam.png");
+    //texture = System::GetConstInstance().GetTextureManager().GetTexture("assets/textures/beam.png");
     texture = System::GetConstInstance().GetTextureManager().GetTexture("assets/textures/beam_a.png");
 
     auto& man = System::GetConstInstance().GetShaderManager();

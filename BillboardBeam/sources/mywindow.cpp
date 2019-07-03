@@ -4,12 +4,64 @@
 #include <GL/glew.h>
 #include <hasenpfote/assert.h>
 #include <hasenpfote//math/utils.h>
-#include <hasenpfote/math/vector3.h>
 #include <hasenpfote/math/cmatrix4.h>
 #include <hasenpfote/math/axis_angle.h>
 #include "../../Common/system.h"
 #include "../../Common/logger.h"
 #include "mywindow.h"
+//////////
+#include <cmath>
+#include <cassert>
+#include <vector>
+#include <deque>
+
+uint64_t nchoosek(uint64_t n, uint64_t k)
+{
+    assert(n >= k);
+
+    uint64_t r = 1;
+    for (uint64_t d = 1; d <= k; ++d) {
+        r *= n--;
+        r /= d;
+    }
+    return r;
+}
+
+float bernstein_basis(uint32_t n, uint32_t k, float t)
+{
+    // nCk * t^k * (1-t)^(n-k)
+    return static_cast<float>(nchoosek(n, k)) * std::pow(t, static_cast<float>(k)) * std::pow(1.0f - t, static_cast<float>(n - k));
+}
+
+float derivative_of_bernstein_basis(uint32_t n, uint32_t k, float t)
+{
+    //
+    // b(t) = nCk * t^k * (1-t)^(n-k)
+    //
+    // f(t) = t^k
+    // g(t) = (1-t)^(n-k)
+    // b'(t) = nCk * { kt^(k-1) * (1-t)^(n-k) - t^k * (n-k)(1-t)^(n-k-1) }
+    //
+    float f = std::pow(t, static_cast<float>(k));
+    float g = std::pow(1.0f - t, static_cast<float>(n - k));
+    float dfdt = static_cast<float>(k) * std::pow(t, static_cast<float>(k - 1));
+    float dgdt = -static_cast<float>(n - k) * std::pow(1.0f - t, static_cast<float>(n - k - 1));
+    return static_cast<float>(nchoosek(n, k)) * (dfdt * g + f * dgdt);
+}
+
+hasenpfote::math::Vector3 calc_bezier_point(std::vector<hasenpfote::math::Vector3> ctrl_points, float t)
+{
+    hasenpfote::math::Vector3 point(0.0f, 0.0f, 0.0f);
+    uint32_t n = ctrl_points.size();
+    uint32_t k = 0;
+    for (auto ctrl_point : ctrl_points)
+    {
+        auto b = bernstein_basis(n - 1, k, t);
+        point += b * ctrl_point;
+        k++;
+    }
+    return point;
+}
 
 MyWindow::MyWindow()
 {
@@ -67,9 +119,8 @@ void MyWindow::Setup()
     // load texture.
     {
         std::filesystem::path directory("assets/textures");
-        const std::filesystem::path extension(".png");
         auto& man = System::GetMutableInstance().GetTextureManager();
-        man.LoadTextures(directory, extension);
+        man.LoadTextures(directory);
     }
     // generate font.
     {
@@ -80,6 +131,24 @@ void MyWindow::Setup()
     }
     //
     bb.Initialize();
+    //
+    ctrl_points.push_back({ -5.0f,  5.0f, 0.0f});
+    ctrl_points.push_back({-10.0f, 10.0f, 0.0f});
+    ctrl_points.push_back({-15.0f, 10.0f, 0.0f});
+    ctrl_points.push_back({-20.0f,  5.0f, 0.0f});
+    ctrl_points.push_back({-20.0f, -5.0f, 0.0f});
+    ctrl_points.push_back({-15.0f,-10.0f, 0.0f});
+    ctrl_points.push_back({ -5.0f, -5.0f, 0.0f});
+    ctrl_points.push_back({  5.0f,  5.0f, 0.0f});
+    ctrl_points.push_back({ 10.0f, 10.0f, 0.0f});
+    ctrl_points.push_back({ 15.0f, 10.0f, 0.0f});
+    ctrl_points.push_back({ 20.0f,  5.0f, 0.0f});
+    ctrl_points.push_back({ 20.0f, -5.0f, 0.0f});
+    ctrl_points.push_back({ 15.0f,-10.0f, 0.0f});
+    ctrl_points.push_back({ 10.0f,-10.0f, 0.0f});
+    ctrl_points.push_back({  5.0f, -5.0f, 0.0f});
+    ctrl_points.push_back({ -5.0f,  5.0f, 0.0f});
+    t = 0.0f;
 }
 
 void MyWindow::Cleanup()
@@ -140,6 +209,15 @@ void MyWindow::OnUpdate(double dt)
 
     theta += 10.0f * dt;
     theta = std::fmodf(theta, 360.0f);
+
+    t += static_cast<float>(dt);
+    if(t > 1.0f)
+        t = 0.0f;
+    auto point = calc_bezier_point(ctrl_points, t);
+    points.push_front(point);
+    if(points.size() >= 10){
+        points.pop_back();
+    }
 }
 
 void MyWindow::OnRender()
@@ -164,6 +242,8 @@ void MyWindow::OnRender()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     DrawPoints();
     DrawLines();
+
+    DrawCurve();
 
     glDepthMask(GL_TRUE);
     glDisable(GL_BLEND);
@@ -262,4 +342,24 @@ void MyWindow::DrawPoints()
     bb.Draw(Vector3(-20.0f, 5.0f,  0.0f), Vector3(-20.0f, 5.0f, 0.0f), Vector4(1.0f, 0.0f, 0.0f, 0.5f), 1.0f);
     bb.Draw(Vector3(  0.0f, 5.0f,  0.0f), Vector3(  0.0f, 5.0f, 0.0f), Vector4(0.0f, 1.0f, 0.0f, 0.5f), 1.0f);
     bb.Draw(Vector3( 20.0f, 5.0f,  0.0f), Vector3( 20.0f, 5.0f, 0.0f), Vector4(0.0f, 0.0f, 1.0f, 0.5f), 1.0f);
+}
+
+void MyWindow::DrawCurve()
+{
+    using namespace hasenpfote::math;
+
+    auto size = points.size();
+    if(size < 2)
+        return;
+
+    bb.UpdateMatrices(CMatrix4::IDENTITY);
+
+    float delta = 1.0f / static_cast<float>(size - 1);
+    float alpha = 1.0f;
+    for(auto i = 0; i < size-1; i++){
+        auto p0 = points[i];
+        auto p1 = points[i+1];
+        bb.Draw(p0, p1, Vector4(1.0f, 1.0f, 0.0f, alpha), Vector4(1.0f, 1.0f, 0.0f, alpha - delta), 0.25f);
+        alpha -= delta;
+    }
 }

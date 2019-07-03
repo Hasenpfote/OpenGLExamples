@@ -16,9 +16,12 @@ public:
     TextureManager& operator = (TextureManager&&) = delete;
 
     GLuint CreateTexture(const std::string& name, GLenum internalformat, GLsizei width, GLsizei height);
+    GLuint CreateTextureFromPng(const std::filesystem::path& filepath, bool generates_mipmap = true);
+    GLuint CreateTextureFromExr(const std::filesystem::path& filepath, bool generates_mipmap = true);
 
     GLuint LoadTexture(const std::filesystem::path& filepath, bool generates_mipmap = true);
     void LoadTextures(const std::filesystem::path& directory, const std::filesystem::path& extension, bool generates_mipmap = true);
+    void LoadTextures(const std::filesystem::path& directory, bool generates_mipmap = true);
 
     void DeleteTexture(std::size_t hash);
     void DeleteTexture(const std::filesystem::path& filepath);

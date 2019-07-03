@@ -1,0 +1,144 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="ソース ファイル">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="ヘッダー ファイル">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="リソース ファイル">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Commom">
+      <UniqueIdentifier>{b43bec75-32d5-46eb-851b-44101da8fd42}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Commom\impl">
+      <UniqueIdentifier>{fd108c4d-8184-489a-abe5-f9c5add64206}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\..\..\..\Common\arcball.cpp">
+      <Filter>Commom</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\Common\camera.cpp">
+      <Filter>Commom</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\Common\controllable_camera.cpp">
+      <Filter>Commom</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\Common\custom_camera.cpp">
+      <Filter>Commom</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\Common\fnt_parser.cpp">
+      <Filter>Commom</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\Common\font.cpp">
+      <Filter>Commom</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\Common\framebuffer.cpp">
+      <Filter>Commom</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\Common\png_loader.cpp">
+      <Filter>Commom</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\Common\sdf_text.cpp">
+      <Filter>Commom</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\Common\shader.cpp">
+      <Filter>Commom</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\Common\singleton.cpp">
+      <Filter>Commom</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\Common\system.cpp">
+      <Filter>Commom</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\Common\text.cpp">
+      <Filter>Commom</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\Common\texture.cpp">
+      <Filter>Commom</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\Common\window.cpp">
+      <Filter>Commom</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\sources\fullscreen_pass_geometry.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\sources\main.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\sources\mywindow.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\..\Common\exr_loader.cpp">
+      <Filter>Commom</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\..\..\..\Common\arcball.h">
+      <Filter>Commom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\Common\camera.h">
+      <Filter>Commom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\Common\controllable_camera.h">
+      <Filter>Commom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\Common\custom_camera.h">
+      <Filter>Commom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\Common\fnt_parser.h">
+      <Filter>Commom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\Common\font.h">
+      <Filter>Commom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\Common\framebuffer.h">
+      <Filter>Commom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\Common\logger.h">
+      <Filter>Commom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\Common\png_loader.h">
+      <Filter>Commom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\Common\sdf_text.h">
+      <Filter>Commom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\Common\shader.h">
+      <Filter>Commom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\Common\singleton.h">
+      <Filter>Commom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\Common\system.h">
+      <Filter>Commom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\Common\text.h">
+      <Filter>Commom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\Common\texture.h">
+      <Filter>Commom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\Common\window.h">
+      <Filter>Commom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\Common\impl\singleton_impl.h">
+      <Filter>Commom\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\sources\fullscreen_pass_geometry.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\sources\mywindow.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\..\Common\exr_loader.h">
+      <Filter>Commom</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

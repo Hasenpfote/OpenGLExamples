@@ -73,7 +73,13 @@ LightStreak/builds/windows/vc2019/LightStreak/Release/
 LightStreak/builds/windows/vc2019/LightStreak/LightStreak/Debug/
 LightStreak/builds/windows/vc2019/LightStreak/LightStreak/Release/
 
-ToneMapping/
+ToneMapping/*.exe
+ToneMapping/*.dll
+ToneMapping/builds/windows/vc2019/ToneMapping/.vs
+ToneMapping/builds/windows/vc2019/ToneMapping/Debug/
+ToneMapping/builds/windows/vc2019/ToneMapping/Release/
+ToneMapping/builds/windows/vc2019/ToneMapping/ToneMapping/Debug/
+ToneMapping/builds/windows/vc2019/ToneMapping/ToneMapping/Release/
 
 *.opendb
 

@@ -1,5 +1,10 @@
 ﻿#pragma once
 #include <iostream>
+#include <memory>
+#include <filesystem>
+#include <vector>
+#include <array>
+#include <tuple>
 #include <hasenpfote/math/quaternion.h>
 #include "../../Common/window.h"
 #include "../../Common/sdf_text.h"
@@ -27,6 +32,7 @@ private:
     void OnRender() override;
 
     void RecreateResources(int width, int height);
+    void DrawTextLines(std::vector<std::string> text_lines);
 
     void DrawFullScreenQuad(GLuint texture);
 
@@ -44,7 +50,7 @@ private:
     std::unique_ptr<SDFText> text;
     std::unique_ptr<FullscreenPassGeometry> fs_pass_geom;
     GLuint sampler;
-    std::vector<GLuint> textures;
+    std::vector<std::tuple<GLuint, std::filesystem::path>> selectable_textures;
     int selected_texture_index;
 
     ShaderPipeline pipeline_fullscreen_quad;
@@ -63,6 +69,8 @@ private:
     std::array<std::unique_ptr<FrameBuffer>, 3> streak_rts;
 
     float exposure;
+    float lum_soft_threshold;
+    float lum_hard_threshold;
     bool is_bloom_enabled;
     bool is_streak_enabled;
     bool is_debug_enabled;

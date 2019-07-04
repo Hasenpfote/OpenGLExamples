@@ -1,7 +1,5 @@
 ﻿#include <iomanip>
 #include <sstream>
-#include <memory>
-#include <unordered_map>
 #include <GL/glew.h>
 #include <hasenpfote/assert.h>
 //#include <hasenpfote//math/utility.h>
@@ -80,11 +78,20 @@ void MyWindow::Setup()
         text->SetSmoothness(1.0f);
     }
     //
-    auto texture = System::GetConstInstance().GetTextureManager().GetTexture("assets/textures/street_lamp_1k.exr");
-    textures.push_back(texture);
-    texture = System::GetConstInstance().GetTextureManager().GetTexture("assets/textures/satara_night_no_lamps_1k.exr");
-    textures.push_back(texture);
-    selected_texture_index = 0;
+    {
+        std::filesystem::path texpath;
+        GLuint texture;
+
+        texpath = "assets/textures/street_lamp_1k.exr";
+        texture = System::GetConstInstance().GetTextureManager().GetTexture(texpath);
+        selectable_textures.push_back(std::make_tuple(texture, texpath));
+
+        texpath = "assets/textures/satara_night_no_lamps_1k.exr";
+        texture = System::GetConstInstance().GetTextureManager().GetTexture(texpath);
+        selectable_textures.push_back(std::make_tuple(texture, texpath));
+
+        selected_texture_index = 0;
+    }
 
     fs_pass_geom = std::make_unique<FullscreenPassGeometry>();
 
@@ -133,6 +140,8 @@ void MyWindow::Setup()
     pipeline_apply.SetShaderProgram(man.GetShaderProgram("assets/shaders/apply.fs"));
 
     exposure = 2.0f;
+    lum_soft_threshold = 0.5f;
+    lum_hard_threshold = 1.0f;
     is_bloom_enabled = false;
     is_streak_enabled = false;
     is_debug_enabled = false;
@@ -176,33 +185,38 @@ void MyWindow::OnKey(GLFWwindow* window, int key, int scancode, int action, int 
     {
         is_streak_enabled = !is_streak_enabled;
     }
-    if(key == GLFW_KEY_UP && (action == GLFW_PRESS || action == GLFW_REPEAT))
+    if(key == GLFW_KEY_F1 && (action == GLFW_PRESS || action == GLFW_REPEAT))
     {
-        exposure += 0.1f;
-    }
-    if(key == GLFW_KEY_DOWN && (action == GLFW_PRESS || action == GLFW_REPEAT))
-    {
-        exposure -= 0.1f;
-        if(exposure < 0.0f)
-            exposure = 0.0f;
-    }
-    if(key == GLFW_KEY_LEFT && (action == GLFW_PRESS || action == GLFW_REPEAT))
-    {
-        if(!textures.empty())
+        if(!selectable_textures.empty())
         {
-            selected_texture_index--;
+            selected_texture_index += (mods == GLFW_MOD_SHIFT) ? -1 : 1;
             if(selected_texture_index < 0)
-                selected_texture_index = textures.size() - 1;
-        }
-    }
-    if(key == GLFW_KEY_RIGHT && (action == GLFW_PRESS || action == GLFW_REPEAT))
-    {
-        if(!textures.empty())
-        {
-            selected_texture_index++;
-            if(selected_texture_index >= textures.size())
+                selected_texture_index = selectable_textures.size() - 1;
+            else
+            if(selected_texture_index >= selectable_textures.size())
                 selected_texture_index = 0;
         }
+    }
+    if(key == GLFW_KEY_F2 && (action == GLFW_PRESS || action == GLFW_REPEAT))
+    {
+        exposure += (mods == GLFW_MOD_SHIFT) ? -0.1f : 0.1f;
+        if (exposure < 0.0f)
+            exposure = 0.0f;
+    }
+    if(key == GLFW_KEY_F3 && (action == GLFW_PRESS || action == GLFW_REPEAT))
+    {
+        lum_soft_threshold += (mods == GLFW_MOD_SHIFT) ? -0.1f : 0.1f;
+        if(lum_soft_threshold < 0.0f)
+            lum_soft_threshold = 0.0f;
+        else
+        if(lum_soft_threshold > 1.0f)
+            lum_soft_threshold = 1.0f;
+    }
+    if(key == GLFW_KEY_F4 && (action == GLFW_PRESS || action == GLFW_REPEAT))
+    {
+        lum_hard_threshold += (mods == GLFW_MOD_SHIFT) ? -0.1f : 0.1f;
+        if(lum_hard_threshold < 0.0f)
+            lum_hard_threshold = 0.0f;
     }
 }
 
@@ -257,8 +271,9 @@ void MyWindow::OnRender()
     //
 
     // 1) シーンをテクスチャへ描画
+    auto texture = std::get<0>(selectable_textures[selected_texture_index]);
     scene_rt->Bind();
-    DrawFullScreenQuad(textures[selected_texture_index]);
+    DrawFullScreenQuad(texture);
     scene_rt->Unbind();
 
     // 2) 高輝度領域の抽出(兼ダウンサンプリング)
@@ -287,75 +302,83 @@ void MyWindow::OnRender()
     PassTonemapping(output_rt);
 
     // 情報の表示
-    auto metrics = text->GetFont().GetFontMetrics();
-    auto line_height = static_cast<float>(metrics.GetLineHeight()); 
-    const float scale = 1.0f;
-    const float fh = line_height * scale;
-
-    static const Vector4 color(1.0f, 1.0f, 1.0f, 1.0f);
-    text->SetColor(static_cast<const GLfloat*>(color));
-
-    text->BeginRendering();
-
+    std::vector<std::string> text_lines;
     std::ostringstream oss;
+
     oss << "FPS:UPS=";
     oss << std::fixed << std::setprecision(2);
     oss << GetFPS() << ":" << GetUPS();
-    text->DrawString(oss.str(), 0.0f, fh, scale);
+    text_lines.push_back(oss.str());
     oss.str("");
     oss.clear(std::stringstream::goodbit);
 
     oss << "Screen size:";
     oss << camera.GetViewport().GetWidth() << "x" << camera.GetViewport().GetHeight();
-    text->DrawString(oss.str(), 0.0f, fh * 2.0f, scale);
+    text_lines.push_back(oss.str());
     oss.str("");
     oss.clear(std::stringstream::goodbit);
 
     oss << "Aov D=" << ConvertRadiansToDegrees(camera.GetAngleOfView(CustomCamera::AngleOfView::Diagonal));
     oss << " H=" << ConvertRadiansToDegrees(camera.GetAngleOfView(CustomCamera::AngleOfView::Horizontal));
     oss << " V=" << ConvertRadiansToDegrees(camera.GetAngleOfView(CustomCamera::AngleOfView::Vertical));
-    text->DrawString(oss.str(), 0.0f, fh * 3.0f, scale);
+    text_lines.push_back(oss.str());
     oss.str("");
     oss.clear(std::stringstream::goodbit);
 
     oss << "Focal length=" << camera.GetFocalLength() << " (35mm=" << camera.Get35mmEquivalentFocalLength() << ")";
-    text->DrawString(oss.str(), 0.0f, fh * 4.0f, scale);
+    text_lines.push_back(oss.str());
     oss.str("");
     oss.clear(std::stringstream::goodbit);
 
     oss << "Zoom=x" << camera.GetZoomMagnification();
-    text->DrawString(oss.str(), 0.0f, fh * 5.0f, scale);
+    text_lines.push_back(oss.str());
     oss.str("");
     oss.clear(std::stringstream::goodbit);
 
     GLboolean ms;
     glGetBooleanv(GL_MULTISAMPLE, &ms);
     oss << "MultiSample:" << ((ms == GL_TRUE) ? "On" : "Off") << "(Toggle MultiSample: m)";
-    text->DrawString(oss.str(), 0.0f, fh * 6.0f, scale);
+    text_lines.push_back(oss.str());
     oss.str("");
     oss.clear(std::stringstream::goodbit);
 
-    oss << "Exposure=" << exposure << " (Up / Down)";
-    text->DrawString(oss.str(), 0.0f, fh * 7.0f, scale);
+    const auto& texpath = std::get<1>(selectable_textures[selected_texture_index]);
+    oss << "Texture:" << texpath << " ([Shift +] F1)";
+    text_lines.push_back(oss.str());
     oss.str("");
     oss.clear(std::stringstream::goodbit);
 
-    oss << "Debug:" << (is_debug_enabled ? "On" : "Off") << "(Debug: p)";
-    text->DrawString(oss.str(), 0.0f, fh * 8.0f, scale);
+    oss << "Exposure=" << exposure << " ([Shift +] F2)";
+    text_lines.push_back(oss.str());
     oss.str("");
     oss.clear(std::stringstream::goodbit);
 
-    oss << "Bloom:" << (is_bloom_enabled ? "On" : "Off") << "(Bloom: b)";
-    text->DrawString(oss.str(), 0.0f, fh * 9.0f, scale);
+    oss << "Soft Threshold=" << lum_soft_threshold << " ([Shift +] F3)";
+    text_lines.push_back(oss.str());
     oss.str("");
     oss.clear(std::stringstream::goodbit);
 
-    oss << "Streak:" << (is_streak_enabled ? "On" : "Off") << "(Streak: l)";
-    text->DrawString(oss.str(), 0.0f, fh * 10.0f, scale);
+    oss << "Hard Threshold=" << lum_hard_threshold << " ([Shift +] F4)";
+    text_lines.push_back(oss.str());
     oss.str("");
     oss.clear(std::stringstream::goodbit);
 
-    text->EndRendering();
+    oss << "Debug:" << (is_debug_enabled ? "On" : "Off") << "(Toggle Debug: p)";
+    text_lines.push_back(oss.str());
+    oss.str("");
+    oss.clear(std::stringstream::goodbit);
+
+    oss << "Bloom:" << (is_bloom_enabled ? "On" : "Off") << "(Toggle Bloom: b)";
+    text_lines.push_back(oss.str());
+    oss.str("");
+    oss.clear(std::stringstream::goodbit);
+
+    oss << "Streak:" << (is_streak_enabled ? "On" : "Off") << "(Toggle Streak: l)";
+    text_lines.push_back(oss.str());
+    oss.str("");
+    oss.clear(std::stringstream::goodbit);
+
+    DrawTextLines(text_lines);
 }
 
 void MyWindow::RecreateResources(int width, int height)
@@ -445,6 +468,32 @@ void MyWindow::RecreateResources(int width, int height)
     }
 }
 
+void MyWindow::DrawTextLines(std::vector<std::string> text_lines)
+{
+    if(text_lines.empty())
+        return;
+
+    using namespace hasenpfote::math;
+
+    auto metrics = text->GetFont().GetFontMetrics();
+    auto line_height = static_cast<float>(metrics.GetLineHeight());
+    const float scale = 0.5f;
+    const float fh = line_height * scale;
+
+    static const Vector4 color(1.0f, 1.0f, 1.0f, 1.0f);
+    text->SetColor(static_cast<const GLfloat*>(color));
+
+    text->BeginRendering();
+    int line_no = 1;
+    for(const auto& text_line : text_lines)
+    {
+        text->DrawString(text_line, 0.0f, fh * static_cast<float>(line_no), scale);
+        line_no++;
+    }
+
+    text->EndRendering();
+}
+
 void MyWindow::DrawFullScreenQuad(GLuint texture)
 {
     pipeline_fullscreen_quad.SetUniform1i("u_tex0", 0);
@@ -472,8 +521,8 @@ void MyWindow::PassHighLuminanceRegionExtraction(FrameBuffer* input, FrameBuffer
         pipeline_high_luminance_region_extraction.SetUniform1i("u_tex0", 0);
         pipeline_high_luminance_region_extraction.SetUniform2f("u_pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
         pipeline_high_luminance_region_extraction.SetUniform1f("u_exposure", exposure);
-        pipeline_high_luminance_region_extraction.SetUniform1f("u_threshold", 1.0f);
-        pipeline_high_luminance_region_extraction.SetUniform1f("u_soft_threshold", 0.5f);
+        pipeline_high_luminance_region_extraction.SetUniform1f("u_threshold", lum_hard_threshold);
+        pipeline_high_luminance_region_extraction.SetUniform1f("u_soft_threshold", lum_soft_threshold);
 
         pipeline_high_luminance_region_extraction.Bind();
         {

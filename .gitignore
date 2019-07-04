@@ -81,6 +81,14 @@ ToneMapping/builds/windows/vc2019/ToneMapping/Release/
 ToneMapping/builds/windows/vc2019/ToneMapping/ToneMapping/Debug/
 ToneMapping/builds/windows/vc2019/ToneMapping/ToneMapping/Release/
 
+Demo1/*.exe
+Demo1/*.dll
+Demo1/builds/windows/vc2019/Demo1/.vs
+Demo1/builds/windows/vc2019/Demo1/Debug/
+Demo1/builds/windows/vc2019/Demo1/Release/
+Demo1/builds/windows/vc2019/Demo1/Demo1/Debug/
+Demo1/builds/windows/vc2019/Demo1/Demo1/Release/
+
 *.opendb
 
 external/libpng/lpng1622/pnglibconf.h

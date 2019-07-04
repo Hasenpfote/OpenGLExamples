@@ -145,6 +145,7 @@ void MyWindow::Setup()
     is_bloom_enabled = false;
     is_streak_enabled = false;
     is_debug_enabled = false;
+    is_tonemapping_enabled = true;
 }
 
 void MyWindow::Cleanup()
@@ -184,6 +185,10 @@ void MyWindow::OnKey(GLFWwindow* window, int key, int scancode, int action, int 
     if(key == GLFW_KEY_L && action == GLFW_PRESS)
     {
         is_streak_enabled = !is_streak_enabled;
+    }
+    if(key == GLFW_KEY_T && action == GLFW_PRESS)
+    {
+        is_tonemapping_enabled = !is_tonemapping_enabled;
     }
     if(key == GLFW_KEY_F1 && (action == GLFW_PRESS || action == GLFW_REPEAT))
     {
@@ -299,7 +304,10 @@ void MyWindow::OnRender()
     if(is_streak_enabled)
         PassStreak(high_luminance_region_rt.get(), output_rt);
 
-    PassTonemapping(output_rt);
+    if(is_tonemapping_enabled)
+        PassTonemapping(output_rt);
+    else
+        PassApply(output_rt);
 
     // 情報の表示
     std::vector<std::string> text_lines;
@@ -363,17 +371,22 @@ void MyWindow::OnRender()
     oss.str("");
     oss.clear(std::stringstream::goodbit);
 
-    oss << "Debug:" << (is_debug_enabled ? "On" : "Off") << "(Toggle Debug: p)";
-    text_lines.push_back(oss.str());
-    oss.str("");
-    oss.clear(std::stringstream::goodbit);
-
     oss << "Bloom:" << (is_bloom_enabled ? "On" : "Off") << "(Toggle Bloom: b)";
     text_lines.push_back(oss.str());
     oss.str("");
     oss.clear(std::stringstream::goodbit);
 
     oss << "Streak:" << (is_streak_enabled ? "On" : "Off") << "(Toggle Streak: l)";
+    text_lines.push_back(oss.str());
+    oss.str("");
+    oss.clear(std::stringstream::goodbit);
+
+    oss << "Debug:" << (is_debug_enabled ? "On" : "Off") << "(Toggle Debug: p)";
+    text_lines.push_back(oss.str());
+    oss.str("");
+    oss.clear(std::stringstream::goodbit);
+
+    oss << "Tone Mapping:" << (is_tonemapping_enabled ? "On" : "Off") << "(Toggle Tone Mapping: t)";
     text_lines.push_back(oss.str());
     oss.str("");
     oss.clear(std::stringstream::goodbit);

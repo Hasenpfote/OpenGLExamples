@@ -74,4 +74,5 @@ private:
     bool is_bloom_enabled;
     bool is_streak_enabled;
     bool is_debug_enabled;
+    bool is_tonemapping_enabled;
 };

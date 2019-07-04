@@ -28,7 +28,7 @@ Demo1
 
 #### Exposure=5.0
 
-![Preview4](Preview4.png)
+![Preview4](preview4.png)
 
 
 

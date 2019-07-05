@@ -36,6 +36,8 @@ private:
 
     void DrawFullScreenQuad(GLuint texture);
 
+    float ComputeAverageLuminance(FrameBuffer* input);
+    void PassLogLuminance(FrameBuffer* input, FrameBuffer* output);
     void PassHighLuminanceRegionExtraction(FrameBuffer* input, FrameBuffer* output);
     void PassDownsampling2x2(FrameBuffer* input, FrameBuffer* output);
     void PassDownsampling4x4(FrameBuffer* input, FrameBuffer* output);
@@ -54,6 +56,7 @@ private:
     int selected_texture_index;
 
     ShaderPipeline pipeline_fullscreen_quad;
+    ShaderPipeline pipeline_log_luminance;
     ShaderPipeline pipeline_high_luminance_region_extraction;
     ShaderPipeline pipeline_downsampling_2x2;
     ShaderPipeline pipeline_downsampling_4x4;
@@ -63,6 +66,7 @@ private:
     ShaderPipeline pipeline_apply;
 
     std::unique_ptr<FrameBuffer> scene_rt;
+    std::unique_ptr<FrameBuffer> luminance_rt;
     std::unique_ptr<FrameBuffer> debug_rt;
     std::unique_ptr<FrameBuffer> high_luminance_region_rt;
     std::vector<std::array<std::unique_ptr<FrameBuffer>, 3>> bloom_rts;
@@ -75,4 +79,5 @@ private:
     bool is_streak_enabled;
     bool is_debug_enabled;
     bool is_tonemapping_enabled;
+    bool is_auto_exposure_enabled;
 };

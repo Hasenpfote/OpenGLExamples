@@ -2,7 +2,7 @@
 #include <sstream>
 #include <GL/glew.h>
 #include <hasenpfote/assert.h>
-//#include <hasenpfote//math/utility.h>
+#include <hasenpfote/fp_conversion.h>
 #include <hasenpfote//math/utils.h>
 #include <hasenpfote/math/vector3.h>
 #include <hasenpfote/math/vector4.h>
@@ -111,6 +111,10 @@ void MyWindow::Setup()
     pipeline_fullscreen_quad.SetShaderProgram(man.GetShaderProgram("assets/shaders/fullscreen_quad.vs"));
     pipeline_fullscreen_quad.SetShaderProgram(man.GetShaderProgram("assets/shaders/fullscreen_quad.fs"));
 
+    pipeline_log_luminance.Create();
+    pipeline_log_luminance.SetShaderProgram(man.GetShaderProgram("assets/shaders/log_luminance.vs"));
+    pipeline_log_luminance.SetShaderProgram(man.GetShaderProgram("assets/shaders/log_luminance.fs"));
+
     pipeline_high_luminance_region_extraction.Create();
     pipeline_high_luminance_region_extraction.SetShaderProgram(man.GetShaderProgram("assets/shaders/high_luminance_region_extraction.vs"));
     pipeline_high_luminance_region_extraction.SetShaderProgram(man.GetShaderProgram("assets/shaders/high_luminance_region_extraction.fs"));
@@ -146,6 +150,7 @@ void MyWindow::Setup()
     is_streak_enabled = false;
     is_debug_enabled = false;
     is_tonemapping_enabled = true;
+    is_auto_exposure_enabled = false;
 }
 
 void MyWindow::Cleanup()
@@ -173,6 +178,10 @@ void MyWindow::OnKey(GLFWwindow* window, int key, int scancode, int action, int 
         {
             glEnable(GL_MULTISAMPLE);
         }
+    }
+    if(key == GLFW_KEY_X && action == GLFW_PRESS)
+    {
+        is_auto_exposure_enabled = !is_auto_exposure_enabled;
     }
     if(key == GLFW_KEY_P && action == GLFW_PRESS)
     {
@@ -275,13 +284,13 @@ void MyWindow::OnRender()
     glViewport(0, 0, width, height);
     //
 
-    // 1) シーンをテクスチャへ描画
+    // 1) Render scene to texture.
     auto texture = std::get<0>(selectable_textures[selected_texture_index]);
     scene_rt->Bind();
     DrawFullScreenQuad(texture);
     scene_rt->Unbind();
 
-    // 2) 高輝度領域の抽出(兼ダウンサンプリング)
+    // 2) Extract high luminance region.
     PassHighLuminanceRegionExtraction(scene_rt.get(), high_luminance_region_rt.get());
 
     FrameBuffer* output_rt;
@@ -296,20 +305,32 @@ void MyWindow::OnRender()
         output_rt = scene_rt.get();
     }
 
-    // 3) Bloom 
+    // 3) Apply Bloom effect.
     if(is_bloom_enabled)
         PassBloom(high_luminance_region_rt.get(), output_rt);
 
-    // 4) Streak
+    // 4) Apply Streak effect.
     if(is_streak_enabled)
         PassStreak(high_luminance_region_rt.get(), output_rt);
 
+    // 5) Mesure an average luminance of the scene for automatic exposure.
+    auto average_luminance = ComputeAverageLuminance(output_rt);
+
+    // 6) Render HDR to LDR using tone mapping.
     if(is_tonemapping_enabled)
         PassTonemapping(output_rt);
     else
-        PassApply(output_rt);
+        PassApply(output_rt);   // Render HDR to LDR directly.
 
-    // 情報の表示
+    // Determine an exposure value automatically.
+    if(is_auto_exposure_enabled)
+    {
+        const float key_value = 0.18f;
+        auto target_exposure = key_value / std::max(average_luminance, 0.00001f);
+        exposure += (target_exposure - exposure) * 0.01f;
+    }
+
+    // Display debug information.
     std::vector<std::string> text_lines;
     std::ostringstream oss;
 
@@ -352,6 +373,11 @@ void MyWindow::OnRender()
 
     const auto& texpath = std::get<1>(selectable_textures[selected_texture_index]);
     oss << "Texture:" << texpath << " ([Shift +] F1)";
+    text_lines.push_back(oss.str());
+    oss.str("");
+    oss.clear(std::stringstream::goodbit);
+
+    oss << "Auto Exposure:" << (is_auto_exposure_enabled ? "On" : "Off") << "(Toggle Auto Exposure: x)";
     text_lines.push_back(oss.str());
     oss.str("");
     oss.clear(std::stringstream::goodbit);
@@ -402,6 +428,12 @@ void MyWindow::RecreateResources(int width, int height)
     System::GetMutableInstance().GetTextureManager().DeleteTexture("scene_rt_color");
     color_texture = System::GetMutableInstance().GetTextureManager().CreateTexture("scene_rt_color", GL_RGBA16F, width, height);
     scene_rt = std::make_unique<FrameBuffer>(color_texture, 0, 0);
+
+    // for luminance.
+    System::GetMutableInstance().GetTextureManager().DeleteTexture("luminance_rt_color");
+    auto levels = TextureManager::CalcNumOfMipmapLevels(width, height);
+    color_texture = System::GetMutableInstance().GetTextureManager().CreateTexture("luminance_rt_color", levels, GL_R16F, width, height);
+    luminance_rt = std::make_unique<FrameBuffer>(color_texture, 0, 0);
 
     // for debug.
     System::GetMutableInstance().GetTextureManager().DeleteTexture("debug_rt_color");
@@ -519,9 +551,64 @@ void MyWindow::DrawFullScreenQuad(GLuint texture)
 
     fs_pass_geom->Draw();
 
-    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, 0);
 
     pipeline_fullscreen_quad.Unbind();
+}
+
+float MyWindow::ComputeAverageLuminance(FrameBuffer* input)
+{
+    PassLogLuminance(input, luminance_rt.get());
+    luminance_rt->UpdateAllMipmapLevels();
+
+    float result = 0.0f;
+
+    auto texture = luminance_rt->GetColorTexture();
+    if (!glIsTexture(texture))
+        return result;
+
+    GLint prev_texture;
+    glGetIntegerv(GL_TEXTURE_BINDING_2D, &prev_texture);
+
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    GLint max_level;
+    glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, &max_level);
+
+    GLushort pixel;
+    glGetTexImage(GL_TEXTURE_2D, max_level, GL_RED, GL_HALF_FLOAT, &pixel);
+
+    result = hasenpfote::ConvertHalfToSingle(pixel);
+    result = std::exp(result);
+
+    glBindTexture(GL_TEXTURE_2D, prev_texture);
+
+    return result;
+}
+
+void MyWindow::PassLogLuminance(FrameBuffer* input, FrameBuffer* output)
+{
+    output->Bind();
+    {
+        GLint viewport[4];
+        glGetIntegerv(GL_VIEWPORT, viewport);
+
+        pipeline_log_luminance.SetUniform1i("u_tex0", 0);
+        pipeline_log_luminance.SetUniform2f("u_pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
+
+        pipeline_log_luminance.Bind();
+        {
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, input->GetColorTexture());
+            glBindSampler(0, sampler);
+
+            fs_pass_geom->Draw();
+
+            glBindTexture(GL_TEXTURE_2D, 0);
+        }
+        pipeline_log_luminance.Unbind();
+    }
+    output->Unbind();
 }
 
 void MyWindow::PassHighLuminanceRegionExtraction(FrameBuffer* input, FrameBuffer* output)
@@ -545,7 +632,7 @@ void MyWindow::PassHighLuminanceRegionExtraction(FrameBuffer* input, FrameBuffer
 
             fs_pass_geom->Draw();
 
-            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, 0);
         }
         pipeline_high_luminance_region_extraction.Unbind();
     }
@@ -570,7 +657,7 @@ void MyWindow::PassDownsampling2x2(FrameBuffer* input, FrameBuffer* output)
 
             fs_pass_geom->Draw();
 
-            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, 0);
         }
         pipeline_downsampling_2x2.Unbind();
     }
@@ -595,7 +682,7 @@ void MyWindow::PassDownsampling4x4(FrameBuffer* input, FrameBuffer* output)
 
             fs_pass_geom->Draw();
 
-            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, 0);
         }
         pipeline_downsampling_4x4.Unbind();
     }
@@ -621,7 +708,7 @@ void MyWindow::PassKawaseBlur(FrameBuffer* input, FrameBuffer* output, int itera
 
             fs_pass_geom->Draw();
 
-            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, 0);
         }
         pipeline_kawase_blur.Unbind();
     }
@@ -746,7 +833,7 @@ void MyWindow::PassStreak(FrameBuffer* input, FrameBuffer* output, float dx, flo
 
             fs_pass_geom->Draw();
 
-            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, 0);
         }
         pipeline_streak.Unbind();
     }
@@ -773,7 +860,7 @@ void MyWindow::PassTonemapping(FrameBuffer* input, FrameBuffer* output)
 
         fs_pass_geom->Draw();
 
-        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, 0);
     }
     pipeline_tonemapping.Unbind();
 
@@ -800,7 +887,7 @@ void MyWindow::PassApply(FrameBuffer* input, FrameBuffer* output)
 
         fs_pass_geom->Draw();
 
-        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, 0);
     }
     pipeline_apply.Unbind();
 

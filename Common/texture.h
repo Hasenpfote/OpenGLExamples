@@ -15,6 +15,7 @@ public:
     TextureManager(TextureManager&&) = delete;
     TextureManager& operator = (TextureManager&&) = delete;
 
+    GLuint CreateTexture(const std::string& name, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height);
     GLuint CreateTexture(const std::string& name, GLenum internalformat, GLsizei width, GLsizei height);
     GLuint CreateTextureFromPng(const std::filesystem::path& filepath, bool generates_mipmap = true);
     GLuint CreateTextureFromExr(const std::filesystem::path& filepath, bool generates_mipmap = true);
@@ -29,6 +30,9 @@ public:
 
     GLuint GetTexture(std::size_t hash) const;
     GLuint GetTexture(const std::filesystem::path& filepath) const;
+
+    static GLsizei CalcNumOfMipmapLevels(GLsizei width);
+    static GLsizei CalcNumOfMipmapLevels(GLsizei width, GLsizei height);
 
 private:
     std::unordered_map<std::size_t, GLuint> texture;

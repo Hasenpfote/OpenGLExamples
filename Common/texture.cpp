@@ -1,4 +1,5 @@
 ﻿#include <functional>
+#include <hasenpfote/assert.h>
 #include "logger.h"
 #include "png_loader.h"
 #include "exr_loader.h"
@@ -9,8 +10,10 @@ TextureManager::~TextureManager()
     DeleteTextures();
 }
 
-GLuint TextureManager::CreateTexture(const std::string& name, GLenum internalformat, GLsizei width, GLsizei height)
+GLuint TextureManager::CreateTexture(const std::string& name, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height)
 {
+    HASENPFOTE_ASSERT(levels > 0);
+
     LOG_I("Creating texture file: " << name);
     auto texture = GetTexture(name);
     if(glIsTexture(texture)){
@@ -18,16 +21,30 @@ GLuint TextureManager::CreateTexture(const std::string& name, GLenum internalfor
         return texture;
     }
 
+    GLenum target = GL_TEXTURE_2D;
+
     glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexStorage2D(GL_TEXTURE_2D, 1, internalformat, width, height);
+    glBindTexture(target, texture);
+    glTexStorage2D(target, levels, internalformat, width, height);
 
     // Poor filtering
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
+    glTexParameteri(target, GL_TEXTURE_BASE_LEVEL, 0);
+    glTexParameteri(target, GL_TEXTURE_MAX_LEVEL, levels - 1);
+#if 0
+    {
+        int baselevel;
+        int maxlevel;
+        glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, &baselevel);
+        glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, &maxlevel);
+        int a;
+        a = 0;
+    }
+#endif
     glBindTexture(GL_TEXTURE_2D, 0);
 
     const auto hash = std::hash<std::string>()(name);
@@ -36,6 +53,11 @@ GLuint TextureManager::CreateTexture(const std::string& name, GLenum internalfor
     LOG_I(name << ": Succeed to create the texture. (id=" << texture << ")");
 
     return texture;
+}
+
+GLuint TextureManager::CreateTexture(const std::string& name, GLenum internalformat, GLsizei width, GLsizei height)
+{
+    return CreateTexture(name, 1, internalformat, width, height);
 }
 
 GLuint TextureManager::CreateTextureFromPng(const std::filesystem::path& filepath, bool generates_mipmap)
@@ -52,18 +74,25 @@ GLuint TextureManager::CreateTextureFromPng(const std::filesystem::path& filepat
         LOG_E(filepath.string() << ": Failed to load the file.");
         return 0;
     }
+
+    GLenum target = GL_TEXTURE_2D;
     GLenum format = (png.GetColorFormat() == PngLoader::ColorFormat::RGB)? GL_RGB : GL_RGBA;
     GLint alignment = (png.GetColorFormat() == PngLoader::ColorFormat::RGB)? 1 : 4;
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glPixelStorei(GL_UNPACK_ALIGNMENT, alignment);
-    glTexImage2D(GL_TEXTURE_2D, 0, format, png.GetWidth(), png.GetHeight(), 0, format, GL_UNSIGNED_BYTE, png.GetData());
 
+    glGenTextures(1, &texture);
+    glBindTexture(target, texture);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, alignment);
+    glTexImage2D(target, 0, format, png.GetWidth(), png.GetHeight(), 0, format, GL_UNSIGNED_BYTE, png.GetData());
+
+    GLsizei levels = 1;
     if(generates_mipmap){
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glGenerateMipmap(GL_TEXTURE_2D);
+        glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glGenerateMipmap(target);
+        levels = CalcNumOfMipmapLevels(png.GetWidth(), png.GetHeight());
     }
+    glTexParameteri(target, GL_TEXTURE_BASE_LEVEL, 0);
+    glTexParameteri(target, GL_TEXTURE_MAX_LEVEL, levels - 1);
 
     glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -92,6 +121,7 @@ GLuint TextureManager::CreateTextureFromExr(const std::filesystem::path& filepat
         return 0;
     }
 
+    GLenum target = GL_TEXTURE_2D;
     GLenum format;
     GLint internal_format;
     GLenum type;
@@ -131,16 +161,20 @@ GLuint TextureManager::CreateTextureFromExr(const std::filesystem::path& filepat
     }
 
     glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
+    glBindTexture(target, texture);
     glPixelStorei(GL_UNPACK_ALIGNMENT, alignment);
-    glTexImage2D(GL_TEXTURE_2D, 0, internal_format, exr.GetWidth(), exr.GetHeight(), 0, format, type, exr.GetData());
+    glTexImage2D(target, 0, internal_format, exr.GetWidth(), exr.GetHeight(), 0, format, type, exr.GetData());
 
+    GLsizei levels = 1;
     if(generates_mipmap)
     {
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glGenerateMipmap(GL_TEXTURE_2D);
+        glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glGenerateMipmap(target);
+        levels = CalcNumOfMipmapLevels(exr.GetWidth(), exr.GetHeight());
     }
+    glTexParameteri(target, GL_TEXTURE_BASE_LEVEL, 0);
+    glTexParameteri(target, GL_TEXTURE_MAX_LEVEL, levels - 1);
 
     glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -232,4 +266,14 @@ GLuint TextureManager::GetTexture(std::size_t hash) const
 {
     decltype(texture)::const_iterator it = texture.find(hash);
     return (it != texture.cend())? it->second : 0;
+}
+
+GLsizei TextureManager::CalcNumOfMipmapLevels(GLsizei width)
+{
+    return std::log2(static_cast<float>(width)) + 1;
+}
+
+GLsizei TextureManager::CalcNumOfMipmapLevels(GLsizei width, GLsizei height)
+{
+    return std::log2(static_cast<float>(std::max(width, height))) + 1;
 }

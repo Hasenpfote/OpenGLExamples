@@ -16,6 +16,5 @@ void main(void)
 
     vec3 color = texture(u_tex0, tex_coord).rgb;
     float luminance = get_luminance(color);
-    o_color = log(luminance);
-    //o_color = log(luminance + 0.5);
+    o_color = log(max(luminance, 0.001));
 }

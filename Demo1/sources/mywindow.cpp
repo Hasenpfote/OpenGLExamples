@@ -146,11 +146,12 @@ void MyWindow::Setup()
     exposure = 2.0f;
     lum_soft_threshold = 0.5f;
     lum_hard_threshold = 1.0f;
+    average_luminance = 0.0f;
     is_bloom_enabled = false;
     is_streak_enabled = false;
     is_debug_enabled = false;
     is_tonemapping_enabled = true;
-    is_auto_exposure_enabled = false;
+    is_auto_exposure_enabled = true;
 }
 
 void MyWindow::Cleanup()
@@ -268,6 +269,14 @@ void MyWindow::OnUpdate(double dt)
 {
     auto& camera = System::GetMutableInstance().GetCamera();
     camera.Update(dt);
+
+    // Determine an exposure value automatically.
+    if(is_auto_exposure_enabled)
+    {
+        const float key_value = 0.18f;
+        auto target_exposure = key_value / std::max(average_luminance, 0.00001f);
+        exposure += (target_exposure - exposure) * 0.1f;
+    }
 }
 
 void MyWindow::OnRender()
@@ -314,7 +323,7 @@ void MyWindow::OnRender()
         PassStreak(high_luminance_region_rt.get(), output_rt);
 
     // 5) Mesure an average luminance of the scene for automatic exposure.
-    auto average_luminance = ComputeAverageLuminance(output_rt);
+    average_luminance = ComputeAverageLuminance(output_rt);
 
     // 6) Render HDR to LDR using tone mapping.
     if(is_tonemapping_enabled)
@@ -322,20 +331,14 @@ void MyWindow::OnRender()
     else
         PassApply(output_rt);   // Render HDR to LDR directly.
 
-    // Determine an exposure value automatically.
-    if(is_auto_exposure_enabled)
-    {
-        const float key_value = 0.18f;
-        auto target_exposure = key_value / std::max(average_luminance, 0.00001f);
-        exposure += (target_exposure - exposure) * 0.01f;
-    }
-
     // Display debug information.
     std::vector<std::string> text_lines;
     std::ostringstream oss;
+    //std::streamsize ss = std::cout.precision();
+
+    oss << std::fixed << std::setprecision(2);
 
     oss << "FPS:UPS=";
-    oss << std::fixed << std::setprecision(2);
     oss << GetFPS() << ":" << GetUPS();
     text_lines.push_back(oss.str());
     oss.str("");
@@ -376,6 +379,13 @@ void MyWindow::OnRender()
     text_lines.push_back(oss.str());
     oss.str("");
     oss.clear(std::stringstream::goodbit);
+
+    oss << std::fixed << std::setprecision(4);
+    oss << "Average Luminance:" << std::fixed << std::setprecision(4) << average_luminance;
+    text_lines.push_back(oss.str());
+    oss.str("");
+    oss.clear(std::stringstream::goodbit);
+    oss << std::fixed << std::setprecision(2);
 
     oss << "Auto Exposure:" << (is_auto_exposure_enabled ? "On" : "Off") << "(Toggle Auto Exposure: x)";
     text_lines.push_back(oss.str());
@@ -577,7 +587,6 @@ float MyWindow::ComputeAverageLuminance(FrameBuffer* input)
 
     GLushort pixel;
     glGetTexImage(GL_TEXTURE_2D, max_level, GL_RED, GL_HALF_FLOAT, &pixel);
-
     result = hasenpfote::ConvertHalfToSingle(pixel);
     result = std::exp(result);
 

@@ -75,6 +75,7 @@ private:
     float exposure;
     float lum_soft_threshold;
     float lum_hard_threshold;
+    float average_luminance;
     bool is_bloom_enabled;
     bool is_streak_enabled;
     bool is_debug_enabled;

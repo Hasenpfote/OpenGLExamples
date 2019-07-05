@@ -14,6 +14,7 @@ public:
 
     void Bind();
     void Unbind();
+    void UpdateAllMipmapLevels();
 
     GLuint GetColorTexture();
     GLuint GetDepthTexture();

@@ -95,14 +95,21 @@ void MyWindow::Setup()
 
     fs_pass_geom = std::make_unique<FullscreenPassGeometry>();
 
-    glGenSamplers(1, &sampler);
+    glGenSamplers(1, &nearest_sampler);
+    glSamplerParameteri(nearest_sampler, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glSamplerParameteri(nearest_sampler, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glSamplerParameteri(nearest_sampler, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glSamplerParameteri(nearest_sampler, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glSamplerParameteri(nearest_sampler, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    glSamplerParameteri(nearest_sampler, GL_TEXTURE_LOD_BIAS, 0.0f);
 
-    glSamplerParameteri(sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glSamplerParameteri(sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glSamplerParameteri(sampler, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glSamplerParameteri(sampler, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glSamplerParameteri(sampler, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-    glSamplerParameteri(sampler, GL_TEXTURE_LOD_BIAS, 0.0f);
+    glGenSamplers(1, &linear_sampler);
+    glSamplerParameteri(linear_sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glSamplerParameteri(linear_sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glSamplerParameteri(linear_sampler, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glSamplerParameteri(linear_sampler, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glSamplerParameteri(linear_sampler, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    glSamplerParameteri(linear_sampler, GL_TEXTURE_LOD_BIAS, 0.0f);
 
     RecreateResources(width, height);
 
@@ -156,8 +163,10 @@ void MyWindow::Setup()
 
 void MyWindow::Cleanup()
 {
-    if(glIsSampler(sampler))
-        glDeleteSamplers(1, &sampler);
+    if(glIsSampler(nearest_sampler))
+        glDeleteSamplers(1, &nearest_sampler);
+    if(glIsSampler(linear_sampler))
+        glDeleteSamplers(1, &linear_sampler);
 }
 
 void MyWindow::OnKey(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -557,10 +566,11 @@ void MyWindow::DrawFullScreenQuad(GLuint texture)
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture);
-    glBindSampler(0, sampler);
+    glBindSampler(0, linear_sampler);
 
     fs_pass_geom->Draw();
 
+    glBindSampler(0, 0);
     glBindTexture(GL_TEXTURE_2D, 0);
 
     pipeline_fullscreen_quad.Unbind();
@@ -609,10 +619,11 @@ void MyWindow::PassLogLuminance(FrameBuffer* input, FrameBuffer* output)
         {
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, input->GetColorTexture());
-            glBindSampler(0, sampler);
+            glBindSampler(0, linear_sampler);
 
             fs_pass_geom->Draw();
 
+            glBindSampler(0, 0);
             glBindTexture(GL_TEXTURE_2D, 0);
         }
         pipeline_log_luminance.Unbind();
@@ -637,10 +648,11 @@ void MyWindow::PassHighLuminanceRegionExtraction(FrameBuffer* input, FrameBuffer
         {
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, input->GetColorTexture());
-            glBindSampler(0, sampler);
+            glBindSampler(0, linear_sampler);
 
             fs_pass_geom->Draw();
 
+            glBindSampler(0, 0);
             glBindTexture(GL_TEXTURE_2D, 0);
         }
         pipeline_high_luminance_region_extraction.Unbind();
@@ -662,10 +674,11 @@ void MyWindow::PassDownsampling2x2(FrameBuffer* input, FrameBuffer* output)
         {
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, input->GetColorTexture());
-            glBindSampler(0, sampler);
+            glBindSampler(0, linear_sampler);
 
             fs_pass_geom->Draw();
 
+            glBindSampler(0, 0);
             glBindTexture(GL_TEXTURE_2D, 0);
         }
         pipeline_downsampling_2x2.Unbind();
@@ -687,10 +700,11 @@ void MyWindow::PassDownsampling4x4(FrameBuffer* input, FrameBuffer* output)
         {
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, input->GetColorTexture());
-            glBindSampler(0, sampler);
+            glBindSampler(0, linear_sampler);
 
             fs_pass_geom->Draw();
 
+            glBindSampler(0, 0);
             glBindTexture(GL_TEXTURE_2D, 0);
         }
         pipeline_downsampling_4x4.Unbind();
@@ -713,10 +727,11 @@ void MyWindow::PassKawaseBlur(FrameBuffer* input, FrameBuffer* output, int itera
         {
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, input->GetColorTexture());
-            glBindSampler(0, sampler);
+            glBindSampler(0, linear_sampler);
 
             fs_pass_geom->Draw();
 
+            glBindSampler(0, 0);
             glBindTexture(GL_TEXTURE_2D, 0);
         }
         pipeline_kawase_blur.Unbind();
@@ -838,10 +853,11 @@ void MyWindow::PassStreak(FrameBuffer* input, FrameBuffer* output, float dx, flo
         {
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, input->GetColorTexture());
-            glBindSampler(0, sampler);
+            glBindSampler(0, linear_sampler);
 
             fs_pass_geom->Draw();
 
+            glBindSampler(0, 0);
             glBindTexture(GL_TEXTURE_2D, 0);
         }
         pipeline_streak.Unbind();
@@ -865,10 +881,11 @@ void MyWindow::PassTonemapping(FrameBuffer* input, FrameBuffer* output)
     {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, input->GetColorTexture());
-        glBindSampler(0, sampler);
+        glBindSampler(0, linear_sampler);
 
         fs_pass_geom->Draw();
 
+        glBindSampler(0, 0);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
     pipeline_tonemapping.Unbind();
@@ -892,10 +909,11 @@ void MyWindow::PassApply(FrameBuffer* input, FrameBuffer* output)
     {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, input->GetColorTexture());
-        glBindSampler(0, sampler);
+        glBindSampler(0, linear_sampler);
 
         fs_pass_geom->Draw();
 
+        glBindSampler(0, 0);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
     pipeline_apply.Unbind();

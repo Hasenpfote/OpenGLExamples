@@ -51,7 +51,9 @@ private:
 private:
     std::unique_ptr<SDFText> text;
     std::unique_ptr<FullscreenPassGeometry> fs_pass_geom;
-    GLuint sampler;
+    GLuint nearest_sampler;
+    GLuint linear_sampler;
+
     std::vector<std::tuple<GLuint, std::filesystem::path>> selectable_textures;
     int selected_texture_index;
 

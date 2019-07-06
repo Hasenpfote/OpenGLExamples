@@ -89,6 +89,14 @@ Demo1/builds/windows/vc2019/Demo1/Release/
 Demo1/builds/windows/vc2019/Demo1/Demo1/Debug/
 Demo1/builds/windows/vc2019/Demo1/Demo1/Release/
 
+Dithering/*.exe
+Dithering/*.dll
+Dithering/builds/windows/vc2019/Dithering/.vs
+Dithering/builds/windows/vc2019/Dithering/Debug/
+Dithering/builds/windows/vc2019/Dithering/Release/
+Dithering/builds/windows/vc2019/Dithering/Dithering/Debug/
+Dithering/builds/windows/vc2019/Dithering/Dithering/Release/
+
 *.opendb
 
 external/libpng/lpng1622/pnglibconf.h

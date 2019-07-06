@@ -35,16 +35,7 @@ GLuint TextureManager::CreateTexture(const std::string& name, GLsizei levels, GL
 
     glTexParameteri(target, GL_TEXTURE_BASE_LEVEL, 0);
     glTexParameteri(target, GL_TEXTURE_MAX_LEVEL, levels - 1);
-#if 0
-    {
-        int baselevel;
-        int maxlevel;
-        glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, &baselevel);
-        glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, &maxlevel);
-        int a;
-        a = 0;
-    }
-#endif
+
     glBindTexture(GL_TEXTURE_2D, 0);
 
     const auto hash = std::hash<std::string>()(name);

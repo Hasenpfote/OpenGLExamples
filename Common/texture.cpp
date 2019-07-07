@@ -1,7 +1,9 @@
 ﻿#include <functional>
 #include <hasenpfote/assert.h>
+#define STB_IMAGE_STATIC
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
 #include "logger.h"
-#include "png_loader.h"
 #include "exr_loader.h"
 #include "texture.h"
 
@@ -51,36 +53,74 @@ GLuint TextureManager::CreateTexture(const std::string& name, GLenum internalfor
     return CreateTexture(name, 1, internalformat, width, height);
 }
 
-GLuint TextureManager::CreateTextureFromPng(const std::filesystem::path& filepath, bool generates_mipmap)
+GLuint TextureManager::CreateTextureFromFile(const std::filesystem::path& filepath, bool generates_mipmap)
 {
     LOG_I("Creating texture file: " << filepath.string());
+
     auto texture = GetTexture(filepath.string());
     if(glIsTexture(texture)){
         LOG_E(filepath.string() << ": Already exists.");
         return texture;
     }
 
-    PngLoader png;
-    if(!png.Load(filepath)){
+    int width, height, component;
+    unsigned char* pixels = stbi_load(filepath.string().c_str(), &width, &height, &component, STBI_default);
+    if(pixels == nullptr)
+    {
         LOG_E(filepath.string() << ": Failed to load the file.");
         return 0;
     }
 
     GLenum target = GL_TEXTURE_2D;
-    GLenum format = (png.GetColorFormat() == PngLoader::ColorFormat::RGB)? GL_RGB : GL_RGBA;
-    GLint alignment = (png.GetColorFormat() == PngLoader::ColorFormat::RGB)? 1 : 4;
+    GLint internal_format;
+    GLenum format;
+    GLint alignment;
+
+    if(component == STBI_grey)
+    {
+        internal_format = GL_RED;
+        format = GL_RED;
+        alignment = 1;
+    }
+    else
+    if(component == STBI_grey_alpha)
+    {
+        internal_format = GL_RG;
+        format = GL_RG;
+        alignment = 2;
+    }
+    else
+    if(component == STBI_rgb)
+    {
+        internal_format = GL_RGB;
+        format = GL_RGB;
+        alignment = 1;
+    }
+    else
+    if(component == STBI_rgb_alpha)
+    {
+        internal_format = GL_RGBA;
+        format = GL_RGBA;
+        alignment = 4;
+    }
+    else
+    {
+        assert(false);
+    }
 
     glGenTextures(1, &texture);
     glBindTexture(target, texture);
     glPixelStorei(GL_UNPACK_ALIGNMENT, alignment);
-    glTexImage2D(target, 0, format, png.GetWidth(), png.GetHeight(), 0, format, GL_UNSIGNED_BYTE, png.GetData());
+    glTexImage2D(target, 0, internal_format, width, height, 0, format, GL_UNSIGNED_BYTE, pixels);
+
+    stbi_image_free(pixels);
 
     GLsizei levels = 1;
     if(generates_mipmap){
         glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         glGenerateMipmap(target);
-        levels = CalcNumOfMipmapLevels(png.GetWidth(), png.GetHeight());
+        levels = CalcNumOfMipmapLevels(width, height);
     }
     glTexParameteri(target, GL_TEXTURE_BASE_LEVEL, 0);
     glTexParameteri(target, GL_TEXTURE_MAX_LEVEL, levels - 1);
@@ -179,7 +219,7 @@ GLuint TextureManager::CreateTextureFromExr(const std::filesystem::path& filepat
 
 GLuint TextureManager::LoadTexture(const std::filesystem::path& filepath, bool generates_mipmap)
 {
-    return CreateTextureFromPng(filepath, generates_mipmap);
+    return CreateTextureFromFile(filepath, generates_mipmap);
 }
 
 void TextureManager::LoadTextures(const std::filesystem::path& directory, const std::filesystem::path& extension, bool generates_mipmap)
@@ -213,7 +253,7 @@ void TextureManager::LoadTextures(const std::filesystem::path& directory, bool g
     std::for_each(std::filesystem::directory_iterator(directory), std::filesystem::directory_iterator(), func);
     for(const auto& filepath : filepaths){
         if(filepath.extension() == ".png"){
-            CreateTextureFromPng(filepath, generates_mipmap);
+            CreateTextureFromFile(filepath, generates_mipmap);
         }
         else
         if(filepath.extension() == ".exr"){
@@ -261,10 +301,10 @@ GLuint TextureManager::GetTexture(std::size_t hash) const
 
 GLsizei TextureManager::CalcNumOfMipmapLevels(GLsizei width)
 {
-    return std::log2(static_cast<float>(width)) + 1;
+    return static_cast<GLsizei>(std::log2(static_cast<float>(width))) + 1;
 }
 
 GLsizei TextureManager::CalcNumOfMipmapLevels(GLsizei width, GLsizei height)
 {
-    return std::log2(static_cast<float>(std::max(width, height))) + 1;
+    return static_cast<GLsizei>(std::log2(static_cast<float>(std::max(width, height)))) + 1;
 }

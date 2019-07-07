@@ -1,0 +1,59 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros">
+    <STB_ROOT_DIR>..\..\..\..\..\..\external\stb</STB_ROOT_DIR>
+    <STB_INCLUDE_DIR>$(STB_ROOT_DIR)</STB_INCLUDE_DIR>
+    <STB_LIB_DIR></STB_LIB_DIR>
+    <STB_BIN_DIR></STB_BIN_DIR>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemGroup>
+    <BuildMacro Include="STB_ROOT_DIR">
+      <Value>$(STB_ROOT_DIR)</Value>
+    </BuildMacro>
+    <BuildMacro Include="STB_INCLUDE_DIR">
+      <Value>$(STB_INCLUDE_DIR)</Value>
+    </BuildMacro>
+    <BuildMacro Include="STB_LIB_DIR">
+      <Value>$(STB_LIB_DIR)</Value>
+    </BuildMacro>
+    <BuildMacro Include="STB_BIN_DIR">
+      <Value>$(STB_BIN_DIR)</Value>
+    </BuildMacro>
+  </ItemGroup>
+  <!-- Debug|Win32 -->
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(STB_INCLUDE_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>$(STB_LIB_DIR)\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>hasenpfoted.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <!-- Release|Win32 -->
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(STB_INCLUDE_DIR);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>$(STB_LIB_DIR)\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>hasenpfote.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <!-- Debug|x64 -->
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+  </ItemDefinitionGroup>
+  <!-- Release|x64 -->
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+  </ItemDefinitionGroup>
+</Project>

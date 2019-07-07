@@ -42,9 +42,6 @@
     <ClCompile Include="..\..\..\..\..\..\Common\framebuffer.cpp">
       <Filter>Common</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\Common\png_loader.cpp">
-      <Filter>Common</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\..\..\Common\sdf_text.cpp">
       <Filter>Common</Filter>
     </ClCompile>
@@ -102,9 +99,6 @@
       <Filter>Common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\..\..\Common\logger.h">
-      <Filter>Common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\Common\png_loader.h">
       <Filter>Common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\..\..\Common\sdf_text.h">

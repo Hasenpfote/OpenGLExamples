@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include <string>
 #include <unordered_map>
-#include <filesystem>   // std::tr2::sys::path etc.
+#include <filesystem>
 #include <GL/glew.h>
 
 class TextureManager final
@@ -17,6 +17,7 @@ public:
 
     GLuint CreateTexture(const std::string& name, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height);
     GLuint CreateTexture(const std::string& name, GLenum internalformat, GLsizei width, GLsizei height);
+    GLuint CreateTextureFromFile(const std::filesystem::path& filepath, bool generates_mipmap = true);
     GLuint CreateTextureFromPng(const std::filesystem::path& filepath, bool generates_mipmap = true);
     GLuint CreateTextureFromExr(const std::filesystem::path& filepath, bool generates_mipmap = true);
 

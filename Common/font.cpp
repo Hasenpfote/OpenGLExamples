@@ -2,7 +2,9 @@
 #include <stdexcept>
 #include <fstream>
 #include <iostream>
-#include "png_loader.h"
+#define STB_IMAGE_STATIC
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
 #include "fnt_parser.h"
 #include "font.h"
 
@@ -17,13 +19,32 @@ static GLuint Create2DArrayTexture(GLsizei width, GLsizei height, const std::vec
     glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_R8, width, height, filepaths.size());
 
     GLsizei depth = 0;
-    for(auto filepath : filepaths){
-        PngLoader png;
-        if(!png.Load(filepath) || (png.GetColorFormat() != PngLoader::ColorFormat::RGBA)){
+    for(auto filepath : filepaths)
+    {
+        int width, height, component;
+        unsigned char* pixels = stbi_load(filepath.string().c_str(), &width, &height, &component, STBI_default);
+
+        if(pixels == nullptr)
+        {
             glDeleteTextures(1, &texture);
             return 0;
         }
-        glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, depth, png.GetWidth(), png.GetHeight(), 1, GL_RED, GL_UNSIGNED_BYTE, png.ExtractChannel(PngLoader::Channel::Alpha).get());
+        if(component != STBI_rgb_alpha)
+        {
+            stbi_image_free(pixels);
+            glDeleteTextures(1, &texture);
+            return 0;
+        }
+        // Extract alpha channels.
+        auto size = width * height;
+        std::vector<std::uint8_t> alpha_channels(size);
+        for(decltype(size) i = 0; i < size; i++)
+        {
+            auto offset = pixels + (i * component);
+            alpha_channels[i] = offset[3];
+        }
+        stbi_image_free(pixels);
+        glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, depth, width, height, 1, GL_RED, GL_UNSIGNED_BYTE, alpha_channels.data());
         depth++;
     }
 

@@ -1,7 +1,9 @@
 ﻿#include <cassert>
 #include <GL/glew.h>
+#define STB_IMAGE_STATIC
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
 #include "../../Common/system.h"
-#include "../../Common/png_loader.h"
 #include "quad.h"
 
 Quad::Quad()
@@ -94,18 +96,30 @@ void Quad::Initialize()
 #if 0
     texture = System::GetConstInstance().GetTextureManager().GetTexture("assets/textures/rate-star-button.png");
 #else
-    PngLoader png0, png1;
-    png0.Load("assets/textures/rate-star-button.png");
-    png1.Load("assets/textures/plain-heart.png");
-
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D_ARRAY, texture);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
     glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_RGBA8, 128, 128, 2);
     //glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA, 128, 128, 2, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 
-    glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 0, png0.GetWidth(), png0.GetHeight(), 1, GL_RGBA, GL_UNSIGNED_BYTE, png0.GetData());
-    glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 1, png1.GetWidth(), png1.GetHeight(), 1, GL_RGBA, GL_UNSIGNED_BYTE, png1.GetData());
+    {
+        int width, height, component;
+        unsigned char* pixels = stbi_load("assets/textures/rate-star-button.png", &width, &height, &component, STBI_default);
+        if(pixels != nullptr)
+        {
+            glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 0, width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+            stbi_image_free(pixels);
+        }
+    }
+    {
+        int width, height, component;
+        unsigned char* pixels = stbi_load("assets/textures/plain-heart.png", &width, &height, &component, STBI_default);
+        if(pixels != nullptr)
+        {
+            glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 1, width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+            stbi_image_free(pixels);
+        }
+    }
 
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);

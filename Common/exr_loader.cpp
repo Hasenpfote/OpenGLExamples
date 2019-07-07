@@ -135,7 +135,7 @@ bool ExrLoader::Load(const std::filesystem::path& filepath)
 
     std::unique_ptr<std::uint8_t[]> ptr = std::make_unique<std::uint8_t[]>(num_of_channels * num_of_bytes_per_channel * size);
 
-    for(auto i = 0; i < size; i++)
+    for(decltype(size) i = 0; i < size; i++)
     {
         auto src = &exr_image.images[idxR][num_of_bytes_per_channel * i];
         auto dst = &ptr[num_of_bytes_per_channel * (num_of_channels * i + 0)];

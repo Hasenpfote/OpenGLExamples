@@ -42,9 +42,6 @@
     <ClCompile Include="..\..\..\..\..\..\Common\framebuffer.cpp">
       <Filter>Commom</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\Common\png_loader.cpp">
-      <Filter>Commom</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\..\..\Common\sdf_text.cpp">
       <Filter>Commom</Filter>
     </ClCompile>
@@ -102,9 +99,6 @@
       <Filter>Commom</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\..\..\Common\logger.h">
-      <Filter>Commom</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\Common\png_loader.h">
       <Filter>Commom</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\..\..\Common\sdf_text.h">

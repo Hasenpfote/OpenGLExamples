@@ -60,33 +60,33 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\..\..\..\..\..\configurations\windows\vc2019\glew.props" />
     <Import Project="..\..\..\..\..\..\configurations\windows\vc2019\glfw.props" />
-    <Import Project="..\..\..\..\..\..\configurations\windows\vc2019\libpng.props" />
     <Import Project="..\..\..\..\..\..\configurations\windows\vc2019\hasenpfote.props" />
     <Import Project="..\..\..\..\..\..\configurations\windows\vc2019\tinyexr.props" />
+    <Import Project="..\..\..\..\..\..\configurations\windows\vc2019\stb.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\..\..\..\..\..\configurations\windows\vc2019\glew.props" />
     <Import Project="..\..\..\..\..\..\configurations\windows\vc2019\glfw.props" />
-    <Import Project="..\..\..\..\..\..\configurations\windows\vc2019\libpng.props" />
     <Import Project="..\..\..\..\..\..\configurations\windows\vc2019\hasenpfote.props" />
     <Import Project="..\..\..\..\..\..\configurations\windows\vc2019\tinyexr.props" />
+    <Import Project="..\..\..\..\..\..\configurations\windows\vc2019\stb.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\..\..\..\..\..\configurations\windows\vc2019\glew.props" />
     <Import Project="..\..\..\..\..\..\configurations\windows\vc2019\glfw.props" />
-    <Import Project="..\..\..\..\..\..\configurations\windows\vc2019\libpng.props" />
     <Import Project="..\..\..\..\..\..\configurations\windows\vc2019\hasenpfote.props" />
     <Import Project="..\..\..\..\..\..\configurations\windows\vc2019\tinyexr.props" />
+    <Import Project="..\..\..\..\..\..\configurations\windows\vc2019\stb.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\..\..\..\..\..\configurations\windows\vc2019\glew.props" />
     <Import Project="..\..\..\..\..\..\configurations\windows\vc2019\glfw.props" />
-    <Import Project="..\..\..\..\..\..\configurations\windows\vc2019\libpng.props" />
     <Import Project="..\..\..\..\..\..\configurations\windows\vc2019\hasenpfote.props" />
     <Import Project="..\..\..\..\..\..\configurations\windows\vc2019\tinyexr.props" />
+    <Import Project="..\..\..\..\..\..\configurations\windows\vc2019\stb.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup />
@@ -183,7 +183,6 @@ del /Q "$(LocalDebuggerWorkingDirectory)*.dll"
     <ClCompile Include="..\..\..\..\..\..\Common\fnt_parser.cpp" />
     <ClCompile Include="..\..\..\..\..\..\Common\font.cpp" />
     <ClCompile Include="..\..\..\..\..\..\Common\framebuffer.cpp" />
-    <ClCompile Include="..\..\..\..\..\..\Common\png_loader.cpp" />
     <ClCompile Include="..\..\..\..\..\..\Common\sdf_text.cpp" />
     <ClCompile Include="..\..\..\..\..\..\Common\shader.cpp" />
     <ClCompile Include="..\..\..\..\..\..\Common\singleton.cpp" />
@@ -206,7 +205,6 @@ del /Q "$(LocalDebuggerWorkingDirectory)*.dll"
     <ClInclude Include="..\..\..\..\..\..\Common\framebuffer.h" />
     <ClInclude Include="..\..\..\..\..\..\Common\impl\singleton_impl.h" />
     <ClInclude Include="..\..\..\..\..\..\Common\logger.h" />
-    <ClInclude Include="..\..\..\..\..\..\Common\png_loader.h" />
     <ClInclude Include="..\..\..\..\..\..\Common\sdf_text.h" />
     <ClInclude Include="..\..\..\..\..\..\Common\shader.h" />
     <ClInclude Include="..\..\..\..\..\..\Common\singleton.h" />

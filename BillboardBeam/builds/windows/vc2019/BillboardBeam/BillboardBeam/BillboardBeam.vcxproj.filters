@@ -69,7 +69,7 @@
     <ClCompile Include="..\..\..\..\..\..\Common\window.cpp">
       <Filter>Common</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\Common\exr_loader.cpp">
+    <ClCompile Include="..\..\..\..\..\..\Common\image.cpp">
       <Filter>Common</Filter>
     </ClCompile>
   </ItemGroup>
@@ -125,7 +125,7 @@
     <ClInclude Include="..\..\..\..\..\..\Common\window.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\Common\exr_loader.h">
+    <ClInclude Include="..\..\..\..\..\..\Common\image.h">
       <Filter>Common</Filter>
     </ClInclude>
   </ItemGroup>

@@ -72,7 +72,7 @@
     <ClCompile Include="..\..\..\..\..\sources\mywindow.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\Common\exr_loader.cpp">
+    <ClCompile Include="..\..\..\..\..\..\Common\image.cpp">
       <Filter>Common</Filter>
     </ClCompile>
   </ItemGroup>
@@ -131,7 +131,7 @@
     <ClInclude Include="..\..\..\..\..\sources\mywindow.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\Common\exr_loader.h">
+    <ClInclude Include="..\..\..\..\..\..\Common\image.h">
       <Filter>Common</Filter>
     </ClInclude>
   </ItemGroup>

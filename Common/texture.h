@@ -15,15 +15,12 @@ public:
     TextureManager(TextureManager&&) = delete;
     TextureManager& operator = (TextureManager&&) = delete;
 
-    GLuint CreateTexture(const std::string& name, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height);
-    GLuint CreateTexture(const std::string& name, GLenum internalformat, GLsizei width, GLsizei height);
-    GLuint CreateTextureFromFile(const std::filesystem::path& filepath, bool generates_mipmap = true);
-    GLuint CreateTextureFromPng(const std::filesystem::path& filepath, bool generates_mipmap = true);
-    GLuint CreateTextureFromExr(const std::filesystem::path& filepath, bool generates_mipmap = true);
+    GLuint CreateTexture(const std::string& name, GLsizei levels, GLenum internal_format, GLsizei width, GLsizei height);
+    GLuint CreateTexture(const std::string& name, GLenum internal_format, GLsizei width, GLsizei height);
+    GLuint CreateTextureFromFile(const std::filesystem::path& filepath, bool generate_mipmap = true);
 
-    GLuint LoadTexture(const std::filesystem::path& filepath, bool generates_mipmap = true);
-    void LoadTextures(const std::filesystem::path& directory, const std::filesystem::path& extension, bool generates_mipmap = true);
-    void LoadTextures(const std::filesystem::path& directory, bool generates_mipmap = true);
+    GLuint LoadTexture(const std::filesystem::path& filepath, bool generate_mipmap = true);
+    void LoadTextures(const std::filesystem::path& directory, bool generate_mipmap = true);
 
     void DeleteTexture(std::size_t hash);
     void DeleteTexture(const std::filesystem::path& filepath);

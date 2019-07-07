@@ -181,10 +181,10 @@ del /Q "$(LocalDebuggerWorkingDirectory)*.dll"
     <ClCompile Include="..\..\..\..\..\..\Common\camera.cpp" />
     <ClCompile Include="..\..\..\..\..\..\Common\controllable_camera.cpp" />
     <ClCompile Include="..\..\..\..\..\..\Common\custom_camera.cpp" />
-    <ClCompile Include="..\..\..\..\..\..\Common\exr_loader.cpp" />
     <ClCompile Include="..\..\..\..\..\..\Common\fnt_parser.cpp" />
     <ClCompile Include="..\..\..\..\..\..\Common\font.cpp" />
     <ClCompile Include="..\..\..\..\..\..\Common\framebuffer.cpp" />
+    <ClCompile Include="..\..\..\..\..\..\Common\image.cpp" />
     <ClCompile Include="..\..\..\..\..\..\Common\sdf_text.cpp" />
     <ClCompile Include="..\..\..\..\..\..\Common\shader.cpp" />
     <ClCompile Include="..\..\..\..\..\..\Common\singleton.cpp" />
@@ -201,10 +201,10 @@ del /Q "$(LocalDebuggerWorkingDirectory)*.dll"
     <ClInclude Include="..\..\..\..\..\..\Common\camera.h" />
     <ClInclude Include="..\..\..\..\..\..\Common\controllable_camera.h" />
     <ClInclude Include="..\..\..\..\..\..\Common\custom_camera.h" />
-    <ClInclude Include="..\..\..\..\..\..\Common\exr_loader.h" />
     <ClInclude Include="..\..\..\..\..\..\Common\fnt_parser.h" />
     <ClInclude Include="..\..\..\..\..\..\Common\font.h" />
     <ClInclude Include="..\..\..\..\..\..\Common\framebuffer.h" />
+    <ClInclude Include="..\..\..\..\..\..\Common\image.h" />
     <ClInclude Include="..\..\..\..\..\..\Common\impl\singleton_impl.h" />
     <ClInclude Include="..\..\..\..\..\..\Common\logger.h" />
     <ClInclude Include="..\..\..\..\..\..\Common\sdf_text.h" />

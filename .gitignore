@@ -97,6 +97,14 @@ Dithering/builds/windows/vc2019/Dithering/Release/
 Dithering/builds/windows/vc2019/Dithering/Dithering/Debug/
 Dithering/builds/windows/vc2019/Dithering/Dithering/Release/
 
+RadialBlur/*.exe
+RadialBlur/*.dll
+RadialBlur/builds/windows/vc2019/RadialBlur/.vs
+RadialBlur/builds/windows/vc2019/RadialBlur/Debug/
+RadialBlur/builds/windows/vc2019/RadialBlur/Release/
+RadialBlur/builds/windows/vc2019/RadialBlur/RadialBlur/Debug/
+RadialBlur/builds/windows/vc2019/RadialBlur/RadialBlur/Release/
+
 *.opendb
 
 external/libpng/lpng1622/pnglibconf.h

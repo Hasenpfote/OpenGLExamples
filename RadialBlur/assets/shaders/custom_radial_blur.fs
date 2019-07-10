@@ -14,10 +14,11 @@ vec4 radial_blur_filter(sampler2D tex, vec2 tex_coord, vec2 pixel_size, vec2 ori
     const float b = pow(NUM_SAMPLES, pass);
 	const float aspect = pixel_size.y / pixel_size.x;
 
-    vec2 to_origin = (origin - tex_coord) * vec2(aspect, 1.0);
-	vec2 dir = normalize(to_origin) * pixel_size;
+    vec2 to_origin = origin - tex_coord;
+	vec2 dir = normalize(to_origin * vec2(aspect, 1.0)) * pixel_size;
+
 	// Calculate the distance in unnormalized texture space.
-    float dist2 = length(to_origin / pixel_size);
+	float dist2 = length(to_origin / pixel_size);
 
     vec4 color = vec4(0.0);
 
@@ -25,7 +26,7 @@ vec4 radial_blur_filter(sampler2D tex, vec2 tex_coord, vec2 pixel_size, vec2 ori
     {
         float d = b * s;
         float weight = (d <= dist2)? pow(attenuation, d) : 0.0;
-        vec2 tex_coord_sample = tex_coord + (dir * d);
+		vec2 tex_coord_sample = tex_coord + (dir * d);
         vec4 sampling_color = texture(tex, tex_coord_sample);
 
         color.rgba += weight * sampling_color.rgba;

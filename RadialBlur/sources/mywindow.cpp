@@ -139,12 +139,12 @@ void MyWindow::Setup()
     pipeline_apply.SetShaderProgram(man.GetShaderProgram("assets/shaders/apply.vs"));
     pipeline_apply.SetShaderProgram(man.GetShaderProgram("assets/shaders/apply.fs"));
 
-    origin_texcoord = hasenpfote::math::Vector2(0.5f, 0.5f);
-
     is_debug_enabled = false;
     is_filter_enabled = false;
     radial_blur_mode = 0;
     attn_coef = 0.95f;
+
+    mouse_x = mouse_y = 0;
 }
 
 void MyWindow::Cleanup()
@@ -221,7 +221,8 @@ void MyWindow::OnKey(GLFWwindow* window, int key, int scancode, int action, int 
 void MyWindow::OnMouseMove(GLFWwindow* window, double xpos, double ypos)
 {
     System::GetMutableInstance().GetCamera().OnMouseMove(xpos, ypos);
-    mouse_pos = hasenpfote::math::Vector2(static_cast<float>(xpos), static_cast<float>(ypos));
+    mouse_x = static_cast<int>(xpos);
+    mouse_y = static_cast<int>(ypos);
 }
 
 void MyWindow::OnMouseButton(GLFWwindow* window, int button, int action, int mods)
@@ -253,17 +254,6 @@ void MyWindow::OnUpdate(double dt)
 {
     auto& camera = System::GetMutableInstance().GetCamera();
     camera.Update(dt);
-
-    {
-        auto& vp = camera.GetViewport();
-        const auto width = vp.GetWidth();
-        const auto height = vp.GetHeight();
-
-        origin_texcoord = hasenpfote::math::Vector2(
-            (mouse_pos.GetX() + 0.5f) / static_cast<float>(width),
-            (static_cast<float>(height) - mouse_pos.GetY() + 0.5f) / static_cast<float>(height)
-        );
-    }
 }
 
 void MyWindow::OnRender()
@@ -494,8 +484,20 @@ void MyWindow::PassHighLuminanceRegionExtraction(FrameBuffer* input, FrameBuffer
 
 void MyWindow::PassSimpleRadialBlur(FrameBuffer* input, FrameBuffer* output)
 {
-    float ox = origin_texcoord.GetX();
-    float oy = origin_texcoord.GetY();
+    auto texture = radial_blur_rts[0]->GetColorTexture();
+    GLint prev_texture, width, height;
+    glGetIntegerv(GL_TEXTURE_BINDING_2D, &prev_texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width);
+    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &height);
+    glBindTexture(GL_TEXTURE_2D, prev_texture);
+
+    GLint viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
+
+    auto ox = (static_cast<float>(mouse_x * width / viewport[2]) + 0.5f) / static_cast<float>(width);
+    auto oy = (static_cast<float>(mouse_y * height / viewport[3]) + 0.5f) / static_cast<float>(height);
+    oy = 1.0f - oy;
 
     PassSimpleRadialBlur(input, radial_blur_rts[0].get(), ox, oy, attn_coef);
 
@@ -545,8 +547,20 @@ void MyWindow::PassCustomRadialBlur(FrameBuffer* input, FrameBuffer* output)
 {
     const int num_of_passes = 5;
 
-    float ox = origin_texcoord.GetX();
-    float oy = origin_texcoord.GetY();
+    auto texture = radial_blur_rts[0]->GetColorTexture();
+    GLint prev_texture, width, height;
+    glGetIntegerv(GL_TEXTURE_BINDING_2D, &prev_texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width);
+    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &height);
+    glBindTexture(GL_TEXTURE_2D, prev_texture);
+
+    GLint viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
+
+    auto ox = (static_cast<float>(mouse_x * width / viewport[2]) + 0.5f) / static_cast<float>(width);
+    auto oy = (static_cast<float>(mouse_y * height / viewport[3]) + 0.5f) / static_cast<float>(height);
+    oy = 1.0f - oy;
 
     auto last_rt = input;
 

@@ -62,8 +62,7 @@ private:
     std::unique_ptr<FrameBuffer> high_luminance_region_rt;
     std::array<std::unique_ptr<FrameBuffer>, 3> radial_blur_rts;
 
-    hasenpfote::math::Vector2 mouse_pos;
-    hasenpfote::math::Vector2 origin_texcoord;
+    int mouse_x, mouse_y;
 
     bool is_debug_enabled;
     bool is_filter_enabled;

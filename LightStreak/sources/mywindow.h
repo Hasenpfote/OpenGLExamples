@@ -29,11 +29,12 @@ private:
     void RecreateResources(int width, int height);
 
     void DrawFullScreenQuad();
-    void PassHighLuminanceRegionExtraction(GLuint texture, FrameBuffer* fb);
-    void PassDownsampling2x2(GLuint texture, FrameBuffer* fb);
-    void PassDownsampling4x4(GLuint texture, FrameBuffer* fb);
-    void PassStreak(GLuint texture, FrameBuffer* fb, float dx, float dy, float attenuation, int pass);
-    void PassApply(GLuint texture, FrameBuffer* fb = nullptr);
+    void PassHighLuminanceRegionExtraction(FrameBuffer* input, FrameBuffer* output);
+    void PassDownsampling2x2(FrameBuffer* input, FrameBuffer* output);
+    void PassDownsampling4x4(FrameBuffer* input, FrameBuffer* output);
+    void PassStreak(FrameBuffer* input, FrameBuffer* output);
+    void PassStreak(FrameBuffer* input, FrameBuffer* output, float dx, float dy, float attenuation, int pass);
+    void PassApply(FrameBuffer* input, FrameBuffer* output = nullptr);
 
 private:
     std::unique_ptr<SDFText> text;

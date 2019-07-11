@@ -157,7 +157,11 @@ void MyWindow::OnRender()
     const auto height = vp.GetHeight();
     glViewport(0, 0, width, height);
 
-    quad.Draw();
+    glEnable(GL_FRAMEBUFFER_SRGB);
+    {
+        quad.Draw();
+    }
+    glDisable(GL_FRAMEBUFFER_SRGB);
 
     // 情報の表示
     auto metrics = text->GetFont().GetFontMetrics();

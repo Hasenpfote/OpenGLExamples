@@ -248,9 +248,11 @@ void MyWindow::OnRender()
     scene_rt->Bind();
     DrawFullScreenQuad();
     scene_rt->Unbind();
+
     // 2) 1/4 x 1/4 ダウンサンプルを行う
     auto last_blur_rt = ds_rt_0.get();
-    PassDownsampling(scene_rt->GetColorTexture(), last_blur_rt);
+    PassDownsampling(scene_rt.get(), last_blur_rt);
+
     // 3) Kawase blur
     if(is_filter_enabled)
     {
@@ -263,13 +265,15 @@ void MyWindow::OnRender()
             {
                 FrameBuffer* src_blur_rt = last_blur_rt;
                 FrameBuffer* dst_blur_rt = ((i % 2) == 0) ? ds_rt_1.get() : ds_rt_0.get();
-                PassKawaseBlur(src_blur_rt->GetColorTexture(), dst_blur_rt, kernel[i]);
+                PassKawaseBlur(src_blur_rt, dst_blur_rt, kernel[i]);
                 last_blur_rt = dst_blur_rt;
             }
         }
     }
     // 4) 結果を表示
-    PassApply(last_blur_rt->GetColorTexture());
+    glEnable(GL_FRAMEBUFFER_SRGB);
+    PassApply(last_blur_rt);
+    glDisable(GL_FRAMEBUFFER_SRGB);
 
     // 情報の表示
     auto metrics = text->GetFont().GetFontMetrics();
@@ -333,15 +337,15 @@ void MyWindow::RecreateResources(int width, int height)
     GLuint color_texture;
 
     System::GetMutableInstance().GetTextureManager().DeleteTexture("scene_rt_color");
-    color_texture = System::GetMutableInstance().GetTextureManager().CreateTexture("scene_rt_color", GL_RGBA8, width, height);
+    color_texture = System::GetMutableInstance().GetTextureManager().CreateTexture("scene_rt_color", GL_RGBA16F, width, height);
     scene_rt = std::make_unique<FrameBuffer>(color_texture, 0, 0);
 
     System::GetMutableInstance().GetTextureManager().DeleteTexture("ds_rt_0_color");
-    color_texture = System::GetMutableInstance().GetTextureManager().CreateTexture("ds_rt_0_color", GL_RGBA8, width / 4, height / 4);
+    color_texture = System::GetMutableInstance().GetTextureManager().CreateTexture("ds_rt_0_color", GL_RGBA16F, width / 4, height / 4);
     ds_rt_0 = std::make_unique<FrameBuffer>(color_texture, 0, 0);
 
     System::GetMutableInstance().GetTextureManager().DeleteTexture("ds_rt_1_color");
-    color_texture = System::GetMutableInstance().GetTextureManager().CreateTexture("ds_rt_1_color", GL_RGBA8, width / 4, height / 4);
+    color_texture = System::GetMutableInstance().GetTextureManager().CreateTexture("ds_rt_1_color", GL_RGBA16F, width / 4, height / 4);
     ds_rt_1 = std::make_unique<FrameBuffer>(color_texture, 0, 0);
 }
 
@@ -362,58 +366,61 @@ void MyWindow::DrawFullScreenQuad()
     pipeline_fullscreen_quad.Unbind();
 }
 
-void MyWindow::PassDownsampling(GLuint texture, FrameBuffer* fb)
+void MyWindow::PassDownsampling(FrameBuffer* input, FrameBuffer* output)
 {
-    fb->Bind();
+    output->Bind();
+    {
+        GLint viewport[4];
+        glGetIntegerv(GL_VIEWPORT, viewport);
 
-    GLint viewport[4];
-    glGetIntegerv(GL_VIEWPORT, viewport);
+        pipeline_downsampling_4x4.SetUniform1i("texture0", 0);
+        pipeline_downsampling_4x4.SetUniform2f("pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
 
-    pipeline_downsampling_4x4.SetUniform1i("texture0", 0);
-    pipeline_downsampling_4x4.SetUniform2f("pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
+        pipeline_downsampling_4x4.Bind();
 
-    pipeline_downsampling_4x4.Bind();
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, input->GetColorTexture());
+        glBindSampler(0, sampler);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glBindSampler(0, sampler);
+        fs_pass_geom->Draw();
 
-    fs_pass_geom->Draw();
+        glActiveTexture(GL_TEXTURE0);
 
-    glActiveTexture(GL_TEXTURE0);
-
-    pipeline_downsampling_4x4.Unbind();
-
-    fb->Unbind();
+        pipeline_downsampling_4x4.Unbind();
+    }
+    output->Unbind();
 }
 
-void MyWindow::PassKawaseBlur(GLuint texture, FrameBuffer* fb, int iteration)
+void MyWindow::PassKawaseBlur(FrameBuffer* input, FrameBuffer* output, int iteration)
 {
-    fb->Bind();
+    output->Bind();
+    {
+        GLint viewport[4];
+        glGetIntegerv(GL_VIEWPORT, viewport);
 
-    GLint viewport[4];
-    glGetIntegerv(GL_VIEWPORT, viewport);
+        pipeline_kawase_blur.SetUniform1i("texture0", 0);
+        pipeline_kawase_blur.SetUniform3f("params", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]), static_cast<float>(iteration));
 
-    pipeline_kawase_blur.SetUniform1i("texture0", 0);
-    pipeline_kawase_blur.SetUniform3f("params", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]), static_cast<float>(iteration));
+        pipeline_kawase_blur.Bind();
 
-    pipeline_kawase_blur.Bind();
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, input->GetColorTexture());
+        glBindSampler(0, sampler);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glBindSampler(0, sampler);
+        fs_pass_geom->Draw();
 
-    fs_pass_geom->Draw();
+        glActiveTexture(GL_TEXTURE0);
 
-    glActiveTexture(GL_TEXTURE0);
-
-    pipeline_kawase_blur.Unbind();
-
-    fb->Unbind();
+        pipeline_kawase_blur.Unbind();
+    }
+    output->Unbind();
 }
 
-void MyWindow::PassApply(GLuint texture)
+void MyWindow::PassApply(FrameBuffer* input, FrameBuffer* output)
 {
+    if(output)
+        output->Bind();
+
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
 
@@ -423,7 +430,7 @@ void MyWindow::PassApply(GLuint texture)
     pipeline_apply.Bind();
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture);
+    glBindTexture(GL_TEXTURE_2D, input->GetColorTexture());
     glBindSampler(0, sampler);
 
     fs_pass_geom->Draw();
@@ -431,4 +438,7 @@ void MyWindow::PassApply(GLuint texture)
     glActiveTexture(GL_TEXTURE0);
 
     pipeline_apply.Unbind();
+
+    if(output)
+        output->Unbind();
 }

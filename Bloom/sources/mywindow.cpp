@@ -260,59 +260,17 @@ void MyWindow::OnRender()
     scene_rt->Unbind();
 
     // 2) 高輝度領域の抽出(兼ダウンサンプリング)
-    PassHighLuminanceRegionExtraction(scene_rt.get()->GetColorTexture(), high_luminance_region_rt.get());
+    PassHighLuminanceRegionExtraction(scene_rt.get(), high_luminance_region_rt.get());
 
-    // 3) ダウンサンプリング
-    {
-        auto last_rt = high_luminance_region_rt.get();
-        auto size = downsampled_rts.size();
-        for(auto i = 0; i < size; i++)
-        {
-            auto src_rt = last_rt;
-            auto dst_rt = downsampled_rts[i][0].get();
-            PassDownsampling2x2(src_rt->GetColorTexture(), dst_rt);
-            last_rt = dst_rt;
-        }
-    }
-    // 4) 各レベルにピンポンブラー
-    {
-        auto it = shader_kernel.find(shader_kernel_name);
-        assert(it != shader_kernel.cend());
-        auto kernel = it->second;
-        const auto num_of_passes = kernel.size();
+    FrameBuffer* output_rt = scene_rt.get();
 
-        for(auto& downsampled_rt : downsampled_rts)
-        {
-            auto last_rt = downsampled_rt[0].get();
-            for(auto i = 0; i < num_of_passes; i++)
-            {
-                FrameBuffer* src_rt = last_rt;
-                FrameBuffer* dst_rt = ((i % 2) == 0) ? downsampled_rt[1].get() : downsampled_rt[2].get();
-                PassKawaseBlur(src_rt->GetColorTexture(), dst_rt, kernel[i]);
-                last_rt = dst_rt;
-            }
-            PassApply(last_rt->GetColorTexture(), downsampled_rt[0].get());
-        }
-    }
-    // 4) 各フィルタを合成
-    {
-        glDepthMask(GL_FALSE);
-        PassApply(scene_rt->GetColorTexture());
+    // 3) Bloom を適用
+    if(is_filter_enabled)
+        PassBloom(high_luminance_region_rt.get(), output_rt);
 
-        if(is_filter_enabled){
-            glEnable(GL_BLEND);
-            glBlendFunc(GL_ONE, GL_ONE);
-
-            for(auto& downsampled_rt : downsampled_rts)
-            {
-                PassApply(downsampled_rt[0]->GetColorTexture());
-            }
-
-            glDisable(GL_BLEND);
-        }
-
-        glDepthMask(GL_TRUE);
-    }
+    glEnable(GL_FRAMEBUFFER_SRGB);
+    PassApply(output_rt);
+    glDisable(GL_FRAMEBUFFER_SRGB);
 
     // 情報の表示
     auto metrics = text->GetFont().GetFontMetrics();
@@ -376,14 +334,14 @@ void MyWindow::RecreateResources(int width, int height)
     GLuint color_texture;
 
     System::GetMutableInstance().GetTextureManager().DeleteTexture("scene_rt_color");
-    color_texture = System::GetMutableInstance().GetTextureManager().CreateTexture("scene_rt_color", GL_RGBA8, width, height);
+    color_texture = System::GetMutableInstance().GetTextureManager().CreateTexture("scene_rt_color", GL_RGBA16F, width, height);
     scene_rt = std::make_unique<FrameBuffer>(color_texture, 0, 0);
     //
     auto ds_width = width / 2;
     auto ds_height = height / 2;
 
     System::GetMutableInstance().GetTextureManager().DeleteTexture("luminance_rt_color");
-    color_texture = System::GetMutableInstance().GetTextureManager().CreateTexture("luminance_rt_color", GL_RGBA8, ds_width, ds_height);
+    color_texture = System::GetMutableInstance().GetTextureManager().CreateTexture("luminance_rt_color", GL_RGBA16F, ds_width, ds_height);
     high_luminance_region_rt = std::make_unique<FrameBuffer>(color_texture, 0, 0);
     //
     downsampled_rts.clear();
@@ -396,21 +354,21 @@ void MyWindow::RecreateResources(int width, int height)
 
         ss << "downsampled_rt_color_" << i << "_"<< 0;
         System::GetMutableInstance().GetTextureManager().DeleteTexture(ss.str());
-        color_texture = System::GetMutableInstance().GetTextureManager().CreateTexture(ss.str(), GL_RGBA8, ds_width, ds_height);
+        color_texture = System::GetMutableInstance().GetTextureManager().CreateTexture(ss.str(), GL_RGBA16F, ds_width, ds_height);
         auto downsampled_rt_0 = std::make_unique<FrameBuffer>(color_texture, 0, 0);
         ss.str("");
         ss.clear(std::stringstream::goodbit);
 
         ss << "downsampled_rt_color_" << i << "_" << 1;
         System::GetMutableInstance().GetTextureManager().DeleteTexture(ss.str());
-        color_texture = System::GetMutableInstance().GetTextureManager().CreateTexture(ss.str(), GL_RGBA8, ds_width, ds_height);
+        color_texture = System::GetMutableInstance().GetTextureManager().CreateTexture(ss.str(), GL_RGBA16F, ds_width, ds_height);
         auto downsampled_rt_1 = std::make_unique<FrameBuffer>(color_texture, 0, 0);
         ss.str("");
         ss.clear(std::stringstream::goodbit);
 
         ss << "downsampled_rt_color_" << i << "_" << 2;
         System::GetMutableInstance().GetTextureManager().DeleteTexture(ss.str());
-        color_texture = System::GetMutableInstance().GetTextureManager().CreateTexture(ss.str(), GL_RGBA8, ds_width, ds_height);
+        color_texture = System::GetMutableInstance().GetTextureManager().CreateTexture(ss.str(), GL_RGBA16F, ds_width, ds_height);
         auto downsampled_rt_2 = std::make_unique<FrameBuffer>(color_texture, 0, 0);
         ss.str("");
         ss.clear(std::stringstream::goodbit);
@@ -440,110 +398,162 @@ void MyWindow::DrawFullScreenQuad()
     pipeline_fullscreen_quad.Unbind();
 }
 
-void MyWindow::PassHighLuminanceRegionExtraction(GLuint texture, FrameBuffer* fb)
+void MyWindow::PassHighLuminanceRegionExtraction(FrameBuffer* input, FrameBuffer* output)
 {
-    fb->Bind();
+    output->Bind();
+    {
+        GLint viewport[4];
+        glGetIntegerv(GL_VIEWPORT, viewport);
 
-    GLint viewport[4];
-    glGetIntegerv(GL_VIEWPORT, viewport);
+        pipeline_high_luminance_region_extraction.SetUniform1i("texture0", 0);
+        pipeline_high_luminance_region_extraction.SetUniform2f("pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
 
-    pipeline_high_luminance_region_extraction.SetUniform1i("texture0", 0);
-    pipeline_high_luminance_region_extraction.SetUniform2f("pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
+        pipeline_high_luminance_region_extraction.Bind();
 
-    pipeline_high_luminance_region_extraction.Bind();
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, input->GetColorTexture());
+        glBindSampler(0, sampler);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glBindSampler(0, sampler);
+        fs_pass_geom->Draw();
 
-    fs_pass_geom->Draw();
+        glActiveTexture(GL_TEXTURE0);
 
-    glActiveTexture(GL_TEXTURE0);
-
-    pipeline_high_luminance_region_extraction.Unbind();
-
-    fb->Unbind();
+        pipeline_high_luminance_region_extraction.Unbind();
+    }
+    output->Unbind();
 }
 
-void MyWindow::PassDownsampling2x2(GLuint texture, FrameBuffer* fb)
+void MyWindow::PassDownsampling2x2(FrameBuffer* input, FrameBuffer* output)
 {
-    fb->Bind();
+    output->Bind();
+    {
+        GLint viewport[4];
+        glGetIntegerv(GL_VIEWPORT, viewport);
 
-    GLint viewport[4];
-    glGetIntegerv(GL_VIEWPORT, viewport);
+        pipeline_downsampling_2x2.SetUniform1i("texture0", 0);
+        pipeline_downsampling_2x2.SetUniform2f("pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
 
-    pipeline_downsampling_2x2.SetUniform1i("texture0", 0);
-    pipeline_downsampling_2x2.SetUniform2f("pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
+        pipeline_downsampling_2x2.Bind();
 
-    pipeline_downsampling_2x2.Bind();
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, input->GetColorTexture());
+        glBindSampler(0, sampler);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glBindSampler(0, sampler);
+        fs_pass_geom->Draw();
 
-    fs_pass_geom->Draw();
+        glActiveTexture(GL_TEXTURE0);
 
-    glActiveTexture(GL_TEXTURE0);
-
-    pipeline_downsampling_2x2.Unbind();
-
-    fb->Unbind();
+        pipeline_downsampling_2x2.Unbind();
+    }
+    output->Unbind();
 }
 
-void MyWindow::PassDownsampling4x4(GLuint texture, FrameBuffer* fb)
+void MyWindow::PassDownsampling4x4(FrameBuffer* input, FrameBuffer* output)
 {
-    fb->Bind();
+    output->Bind();
+    {
+        GLint viewport[4];
+        glGetIntegerv(GL_VIEWPORT, viewport);
 
-    GLint viewport[4];
-    glGetIntegerv(GL_VIEWPORT, viewport);
+        pipeline_downsampling_4x4.SetUniform1i("texture0", 0);
+        pipeline_downsampling_4x4.SetUniform2f("pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
 
-    pipeline_downsampling_4x4.SetUniform1i("texture0", 0);
-    pipeline_downsampling_4x4.SetUniform2f("pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
+        pipeline_downsampling_4x4.Bind();
 
-    pipeline_downsampling_4x4.Bind();
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, input->GetColorTexture());
+        glBindSampler(0, sampler);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glBindSampler(0, sampler);
+        fs_pass_geom->Draw();
 
-    fs_pass_geom->Draw();
+        glActiveTexture(GL_TEXTURE0);
 
-    glActiveTexture(GL_TEXTURE0);
-
-    pipeline_downsampling_4x4.Unbind();
-
-    fb->Unbind();
+        pipeline_downsampling_4x4.Unbind();
+    }
+    output->Unbind();
 }
 
-void MyWindow::PassKawaseBlur(GLuint texture, FrameBuffer* fb, int iteration)
+void MyWindow::PassKawaseBlur(FrameBuffer* input, FrameBuffer* output, int iteration)
 {
-    fb->Bind();
+    output->Bind();
+    {
+        GLint viewport[4];
+        glGetIntegerv(GL_VIEWPORT, viewport);
 
-    GLint viewport[4];
-    glGetIntegerv(GL_VIEWPORT, viewport);
+        pipeline_kawase_blur.SetUniform1i("texture0", 0);
+        pipeline_kawase_blur.SetUniform3f("params", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]), static_cast<float>(iteration));
 
-    pipeline_kawase_blur.SetUniform1i("texture0", 0);
-    pipeline_kawase_blur.SetUniform3f("params", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]), static_cast<float>(iteration));
+        pipeline_kawase_blur.Bind();
 
-    pipeline_kawase_blur.Bind();
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, input->GetColorTexture());
+        glBindSampler(0, sampler);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glBindSampler(0, sampler);
+        fs_pass_geom->Draw();
 
-    fs_pass_geom->Draw();
+        glActiveTexture(GL_TEXTURE0);
 
-    glActiveTexture(GL_TEXTURE0);
-
-    pipeline_kawase_blur.Unbind();
-
-    fb->Unbind();
+        pipeline_kawase_blur.Unbind();
+    }
+    output->Unbind();
 }
 
-void MyWindow::PassApply(GLuint texture, FrameBuffer* fb)
+void MyWindow::PassBloom(FrameBuffer* input, FrameBuffer* output)
 {
-    if(fb != nullptr)
-        fb->Bind();
+    // 1) ダウンサンプリング
+    {
+        auto last_rt = input;
+        auto size = downsampled_rts.size();
+        for(decltype(size) i = 0; i < size; i++)
+        {
+            auto src_rt = last_rt;
+            auto dst_rt = downsampled_rts[i][0].get();
+            PassDownsampling2x2(src_rt, dst_rt);
+            last_rt = dst_rt;
+        }
+    }
+    // 2) 各レベルにピンポンブラー
+    {
+        auto it = shader_kernel.find(shader_kernel_name);
+        assert(it != shader_kernel.cend());
+        auto kernel = it->second;
+        const auto num_of_passes = kernel.size();
+
+        for(auto& downsampled_rt : downsampled_rts)
+        {
+            auto last_rt = downsampled_rt[0].get();
+            for(std::remove_const<decltype(num_of_passes)>::type i = 0; i < num_of_passes; i++)
+            {
+                FrameBuffer* src_rt = last_rt;
+                FrameBuffer* dst_rt = ((i % 2) == 0) ? downsampled_rt[1].get() : downsampled_rt[2].get();
+                PassKawaseBlur(src_rt, dst_rt, kernel[i]);
+                last_rt = dst_rt;
+            }
+            PassApply(last_rt, downsampled_rt[0].get());
+        }
+    }
+    // 3) 各フィルタを合成
+    {
+        glDepthMask(GL_FALSE);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_ONE, GL_ONE);
+        auto size = downsampled_rts.size();
+
+        for(decltype(size) i = size - 1; i > i - 1; i--)
+        {
+            PassApply(downsampled_rts[i][0].get(), downsampled_rts[i - 1][0].get());
+        }
+        PassApply(downsampled_rts[0][0].get(), output);
+
+        glDisable(GL_BLEND);
+        glDepthMask(GL_TRUE);
+    }
+}
+
+void MyWindow::PassApply(FrameBuffer* input, FrameBuffer* output)
+{
+    if(output != nullptr)
+        output->Bind();
 
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
@@ -554,7 +564,7 @@ void MyWindow::PassApply(GLuint texture, FrameBuffer* fb)
     pipeline_apply.Bind();
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture);
+    glBindTexture(GL_TEXTURE_2D, input->GetColorTexture());
     glBindSampler(0, sampler);
 
     fs_pass_geom->Draw();
@@ -563,6 +573,6 @@ void MyWindow::PassApply(GLuint texture, FrameBuffer* fb)
 
     pipeline_apply.Unbind();
 
-    if(fb != nullptr)
-        fb->Unbind();
+    if(output != nullptr)
+        output->Unbind();
 }

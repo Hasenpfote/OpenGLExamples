@@ -253,67 +253,22 @@ void MyWindow::OnRender()
     scene_rt->Unbind();
 
     // 2) 高輝度領域の抽出(兼ダウンサンプリング)
-    PassHighLuminanceRegionExtraction(scene_rt.get()->GetColorTexture(), high_luminance_region_rt.get());
+    PassHighLuminanceRegionExtraction(scene_rt.get(), high_luminance_region_rt.get());
 
     // 3) ブラーを掛ける前の入力画像
     {
         auto src_rt = high_luminance_region_rt.get();
         auto dst_rt = input_rt.get();
-        PassDownsampling2x2(src_rt->GetColorTexture(), dst_rt);
+        PassDownsampling2x2(src_rt, dst_rt);
     }
 
-    // 4) 方向毎にピンポンブラー
-    {
-        auto it = streak_filter.find(streak_filter_name);
-        assert(it != streak_filter.cend());
-        auto params = it->second;
-        const auto num_of_streaks = params[0];
-        const auto num_of_passes = params[1];
-        const auto additional_angle = 360.0f / static_cast<float>(num_of_streaks);
+    // 4) Streak の適用
+    if(is_filter_enabled)
+        PassStreak(input_rt.get(), scene_rt.get());
 
-        GLfloat clear_color[] = { 0.0f, 0.0, 0.0f, 1.0f };
-        glClearTexImage(output_rt->GetColorTexture(), 0, GL_RGBA, GL_FLOAT, &clear_color);
-
-        float angle = 45.0f;
-        for(auto i = 0; i < num_of_streaks; i++)
-        {
-            auto theta = hasenpfote::math::ConvertDegreesToRadians(angle);
-            auto dx = std::cos(theta);
-            auto dy = std::sin(theta);
-
-            auto last_rt = input_rt.get();
-            for(auto j = 0; j < num_of_passes; j++)
-            {
-                FrameBuffer* src_rt = last_rt;
-                FrameBuffer* dst_rt = ((j % 2) == 0) ? work_rts[0].get() : work_rts[1].get();
-                PassStreak(src_rt->GetColorTexture(), dst_rt, dx, dy, 0.95f, j);
-                last_rt = dst_rt;
-            }
-            glEnable(GL_BLEND);
-            glBlendFunc(GL_ONE, GL_ONE);
-            PassApply(last_rt->GetColorTexture(), output_rt.get());
-            glDisable(GL_BLEND);
-
-            angle += additional_angle;
-        }
-    }
-
-    // 5) 合成
-    {
-        glDepthMask(GL_FALSE);
-        PassApply(scene_rt->GetColorTexture());
-
-        if(is_filter_enabled){
-            glEnable(GL_BLEND);
-            glBlendFunc(GL_ONE, GL_ONE);
-
-            PassApply(output_rt->GetColorTexture());
-
-            glDisable(GL_BLEND);
-        }
-
-        glDepthMask(GL_TRUE);
-    }
+    glEnable(GL_FRAMEBUFFER_SRGB);
+    PassApply(scene_rt.get());
+    glDisable(GL_FRAMEBUFFER_SRGB);
 
     // 情報の表示
     auto metrics = text->GetFont().GetFontMetrics();
@@ -377,33 +332,33 @@ void MyWindow::RecreateResources(int width, int height)
     GLuint color_texture;
 
     System::GetMutableInstance().GetTextureManager().DeleteTexture("scene_rt_color");
-    color_texture = System::GetMutableInstance().GetTextureManager().CreateTexture("scene_rt_color", GL_RGBA8, width, height);
+    color_texture = System::GetMutableInstance().GetTextureManager().CreateTexture("scene_rt_color", GL_RGBA16F, width, height);
     scene_rt = std::make_unique<FrameBuffer>(color_texture, 0, 0);
     //
     auto ds_width = width / 2;
     auto ds_height = height / 2;
 
     System::GetMutableInstance().GetTextureManager().DeleteTexture("luminance_rt_color");
-    color_texture = System::GetMutableInstance().GetTextureManager().CreateTexture("luminance_rt_color", GL_RGBA8, ds_width, ds_height);
+    color_texture = System::GetMutableInstance().GetTextureManager().CreateTexture("luminance_rt_color", GL_RGBA16F, ds_width, ds_height);
     high_luminance_region_rt = std::make_unique<FrameBuffer>(color_texture, 0, 0);
     //
     ds_width /= 2;
     ds_height /= 2;
 
     System::GetMutableInstance().GetTextureManager().DeleteTexture("input_rt_color");
-    color_texture = System::GetMutableInstance().GetTextureManager().CreateTexture("input_rt_color", GL_RGBA8, ds_width, ds_height);
+    color_texture = System::GetMutableInstance().GetTextureManager().CreateTexture("input_rt_color", GL_RGBA16F, ds_width, ds_height);
     input_rt = std::make_unique<FrameBuffer>(color_texture, 0, 0);
 
     System::GetMutableInstance().GetTextureManager().DeleteTexture("output_rt_color");
-    color_texture = System::GetMutableInstance().GetTextureManager().CreateTexture("output_rt_color", GL_RGBA8, ds_width, ds_height);
+    color_texture = System::GetMutableInstance().GetTextureManager().CreateTexture("output_rt_color", GL_RGBA16F, ds_width, ds_height);
     output_rt = std::make_unique<FrameBuffer>(color_texture, 0, 0);
 
     System::GetMutableInstance().GetTextureManager().DeleteTexture("work_rts_color_0");
-    color_texture = System::GetMutableInstance().GetTextureManager().CreateTexture("work_rts_color_0", GL_RGBA8, ds_width, ds_height);
+    color_texture = System::GetMutableInstance().GetTextureManager().CreateTexture("work_rts_color_0", GL_RGBA16F, ds_width, ds_height);
     work_rts[0] = std::make_unique<FrameBuffer>(color_texture, 0, 0);
 
     System::GetMutableInstance().GetTextureManager().DeleteTexture("work_rts_color_1");
-    color_texture = System::GetMutableInstance().GetTextureManager().CreateTexture("work_rts_color_1", GL_RGBA8, ds_width, ds_height);
+    color_texture = System::GetMutableInstance().GetTextureManager().CreateTexture("work_rts_color_1", GL_RGBA16F, ds_width, ds_height);
     work_rts[1] = std::make_unique<FrameBuffer>(color_texture, 0, 0);
 }
 
@@ -424,112 +379,162 @@ void MyWindow::DrawFullScreenQuad()
     pipeline_fullscreen_quad.Unbind();
 }
 
-void MyWindow::PassHighLuminanceRegionExtraction(GLuint texture, FrameBuffer* fb)
+void MyWindow::PassHighLuminanceRegionExtraction(FrameBuffer* input, FrameBuffer* output)
 {
-    fb->Bind();
+    output->Bind();
+    {
+        GLint viewport[4];
+        glGetIntegerv(GL_VIEWPORT, viewport);
 
-    GLint viewport[4];
-    glGetIntegerv(GL_VIEWPORT, viewport);
+        pipeline_high_luminance_region_extraction.SetUniform1i("texture0", 0);
+        pipeline_high_luminance_region_extraction.SetUniform2f("pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
 
-    pipeline_high_luminance_region_extraction.SetUniform1i("texture0", 0);
-    pipeline_high_luminance_region_extraction.SetUniform2f("pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
+        pipeline_high_luminance_region_extraction.Bind();
 
-    pipeline_high_luminance_region_extraction.Bind();
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, input->GetColorTexture());
+        glBindSampler(0, sampler);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glBindSampler(0, sampler);
+        fs_pass_geom->Draw();
 
-    fs_pass_geom->Draw();
+        glActiveTexture(GL_TEXTURE0);
 
-    glActiveTexture(GL_TEXTURE0);
-
-    pipeline_high_luminance_region_extraction.Unbind();
-
-    fb->Unbind();
+        pipeline_high_luminance_region_extraction.Unbind();
+    }
+    output->Unbind();
 }
 
-void MyWindow::PassDownsampling2x2(GLuint texture, FrameBuffer* fb)
+void MyWindow::PassDownsampling2x2(FrameBuffer* input, FrameBuffer* output)
 {
-    fb->Bind();
+    output->Bind();
+    {
+        GLint viewport[4];
+        glGetIntegerv(GL_VIEWPORT, viewport);
 
-    GLint viewport[4];
-    glGetIntegerv(GL_VIEWPORT, viewport);
+        pipeline_downsampling_2x2.SetUniform1i("texture0", 0);
+        pipeline_downsampling_2x2.SetUniform2f("pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
 
-    pipeline_downsampling_2x2.SetUniform1i("texture0", 0);
-    pipeline_downsampling_2x2.SetUniform2f("pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
+        pipeline_downsampling_2x2.Bind();
 
-    pipeline_downsampling_2x2.Bind();
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, input->GetColorTexture());
+        glBindSampler(0, sampler);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glBindSampler(0, sampler);
+        fs_pass_geom->Draw();
 
-    fs_pass_geom->Draw();
+        glActiveTexture(GL_TEXTURE0);
 
-    glActiveTexture(GL_TEXTURE0);
-
-    pipeline_downsampling_2x2.Unbind();
-
-    fb->Unbind();
+        pipeline_downsampling_2x2.Unbind();
+    }
+    output->Unbind();
 }
 
-void MyWindow::PassDownsampling4x4(GLuint texture, FrameBuffer* fb)
+void MyWindow::PassDownsampling4x4(FrameBuffer* input, FrameBuffer* output)
 {
-    fb->Bind();
+    output->Bind();
+    {
+        GLint viewport[4];
+        glGetIntegerv(GL_VIEWPORT, viewport);
 
-    GLint viewport[4];
-    glGetIntegerv(GL_VIEWPORT, viewport);
+        pipeline_downsampling_4x4.SetUniform1i("texture0", 0);
+        pipeline_downsampling_4x4.SetUniform2f("pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
 
-    pipeline_downsampling_4x4.SetUniform1i("texture0", 0);
-    pipeline_downsampling_4x4.SetUniform2f("pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
+        pipeline_downsampling_4x4.Bind();
 
-    pipeline_downsampling_4x4.Bind();
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, input->GetColorTexture());
+        glBindSampler(0, sampler);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glBindSampler(0, sampler);
+        fs_pass_geom->Draw();
 
-    fs_pass_geom->Draw();
+        glActiveTexture(GL_TEXTURE0);
 
-    glActiveTexture(GL_TEXTURE0);
-
-    pipeline_downsampling_4x4.Unbind();
-
-    fb->Unbind();
+        pipeline_downsampling_4x4.Unbind();
+    }
+    output->Unbind();
 }
 
-void MyWindow::PassStreak(GLuint texture, FrameBuffer* fb, float dx, float dy, float attenuation, int pass)
+void MyWindow::PassStreak(FrameBuffer* input, FrameBuffer* output)
 {
-    fb->Bind();
+    // 1) 方向毎にピンポンブラー
+    {
+        auto it = streak_filter.find(streak_filter_name);
+        assert(it != streak_filter.cend());
+        auto params = it->second;
+        const auto num_of_streaks = params[0];
+        const auto num_of_passes = params[1];
+        const auto additional_angle = 360.0f / static_cast<float>(num_of_streaks);
 
-    GLint viewport[4];
-    glGetIntegerv(GL_VIEWPORT, viewport);
+        GLfloat clear_color[] = { 0.0f, 0.0, 0.0f, 1.0f };
+        glClearTexImage(output_rt->GetColorTexture(), 0, GL_RGBA, GL_FLOAT, &clear_color);
 
-    pipeline_streak.SetUniform1i("u_tex0", 0);
-    pipeline_streak.SetUniform2f("u_pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
-    pipeline_streak.SetUniform2f("u_direction", dx, dy);
-    pipeline_streak.SetUniform2f("u_params", attenuation, static_cast<float>(pass));
+        float angle = 45.0f;
+        for(auto i = 0; i < num_of_streaks; i++)
+        {
+            auto theta = hasenpfote::math::ConvertDegreesToRadians(angle);
+            auto dx = std::cos(theta);
+            auto dy = std::sin(theta);
 
-    pipeline_streak.Bind();
+            auto last_rt = input_rt.get();
+            for(auto j = 0; j < num_of_passes; j++)
+            {
+                FrameBuffer* src_rt = last_rt;
+                FrameBuffer* dst_rt = ((j % 2) == 0) ? work_rts[0].get() : work_rts[1].get();
+                PassStreak(src_rt, dst_rt, dx, dy, 0.95f, j);
+                last_rt = dst_rt;
+            }
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_ONE, GL_ONE);
+            PassApply(last_rt, output_rt.get());
+            glDisable(GL_BLEND);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glBindSampler(0, sampler);
+            angle += additional_angle;
+        }
+    }
+    // 2) 合成
+    {
+        glDepthMask(GL_FALSE);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_ONE, GL_ONE);
 
-    fs_pass_geom->Draw();
+        PassApply(output_rt.get(), output);
 
-    glActiveTexture(GL_TEXTURE0);
-
-    pipeline_streak.Unbind();
-
-    fb->Unbind();
+        glDisable(GL_BLEND);
+        glDepthMask(GL_TRUE);
+    }
 }
 
-void MyWindow::PassApply(GLuint texture, FrameBuffer* fb)
+void MyWindow::PassStreak(FrameBuffer* input, FrameBuffer* output, float dx, float dy, float attenuation, int pass)
 {
-    if(fb != nullptr)
-        fb->Bind();
+    output->Bind();
+    {
+        GLint viewport[4];
+        glGetIntegerv(GL_VIEWPORT, viewport);
+
+        pipeline_streak.SetUniform1i("u_tex0", 0);
+        pipeline_streak.SetUniform2f("u_pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
+        pipeline_streak.SetUniform2f("u_direction", dx, dy);
+        pipeline_streak.SetUniform2f("u_params", attenuation, static_cast<float>(pass));
+
+        pipeline_streak.Bind();
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, input->GetColorTexture());
+        glBindSampler(0, sampler);
+
+        fs_pass_geom->Draw();
+
+        glActiveTexture(GL_TEXTURE0);
+
+        pipeline_streak.Unbind();
+    }
+    output->Unbind();
+}
+
+void MyWindow::PassApply(FrameBuffer* input, FrameBuffer* output)
+{
+    if(output != nullptr)
+        output->Bind();
 
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
@@ -540,7 +545,7 @@ void MyWindow::PassApply(GLuint texture, FrameBuffer* fb)
     pipeline_apply.Bind();
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture);
+    glBindTexture(GL_TEXTURE_2D, input->GetColorTexture());
     glBindSampler(0, sampler);
 
     fs_pass_geom->Draw();
@@ -549,6 +554,6 @@ void MyWindow::PassApply(GLuint texture, FrameBuffer* fb)
 
     pipeline_apply.Unbind();
 
-    if(fb != nullptr)
-        fb->Unbind();
+    if(output != nullptr)
+        output->Unbind();
 }

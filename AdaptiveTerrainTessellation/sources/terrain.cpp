@@ -84,7 +84,7 @@ void Terrain::Initialize()
     glSamplerParameteri(sampler, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     diffuse_map = System::GetConstInstance().GetTextureManager().GetTexture("assets/textures/terrain.png");
-    height_map = System::GetConstInstance().GetTextureManager().GetTexture("assets/textures/heightmap.png");
+    height_map = System::GetConstInstance().GetTextureManager().GetTexture("assets/textures/heightmap_linear.png");
 
     auto& man = System::GetConstInstance().GetShaderManager();
     // for solid model

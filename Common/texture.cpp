@@ -4,6 +4,28 @@
 #include "image.h"
 #include "texture.h"
 
+enum class ColorSpace
+{
+    Linear,
+    SRGB
+};
+
+static bool ends_with_ignore_case(const std::string& s, const std::string& suffix)
+{
+    if(s.size() < suffix.size())
+        return false;
+
+    return std::equal(
+        std::rbegin(suffix),
+        std::rend(suffix),
+        std::rbegin(s),
+        [](const char& c1, const char& c2)
+        {
+            return ((c1 == c2) || (std::toupper(c1) == std::toupper(c2)));
+        }
+    );
+}
+
 TextureManager::~TextureManager()
 {
     DeleteTextures();
@@ -68,6 +90,9 @@ GLuint TextureManager::CreateTextureFromFile(const std::filesystem::path& filepa
         return 0;
     }
 
+    ColorSpace color_space =
+        (ends_with_ignore_case(filepath.stem().string(), "_linear"))? ColorSpace::Linear : ColorSpace::SRGB;
+
     GLenum target = GL_TEXTURE_2D;
     GLenum format;
     GLint internal_format;
@@ -91,7 +116,8 @@ GLuint TextureManager::CreateTextureFromFile(const std::filesystem::path& filepa
         format = GL_RGB;
         if(image.GetPixelType() == Image::PixelType::UnsignedByte)
         {
-            internal_format = GL_RGB;
+            internal_format =
+                (color_space == ColorSpace::Linear)? GL_RGB : GL_SRGB8;
             type = GL_UNSIGNED_BYTE;
             alignment = 1;
         }
@@ -117,7 +143,8 @@ GLuint TextureManager::CreateTextureFromFile(const std::filesystem::path& filepa
         format = GL_RGBA;
         if(image.GetPixelType() == Image::PixelType::UnsignedByte)
         {
-            internal_format = GL_RGBA;
+            internal_format =
+                (color_space == ColorSpace::Linear)? GL_RGBA : GL_SRGB8_ALPHA8;
             type = GL_UNSIGNED_BYTE;
             alignment = 4;
         }

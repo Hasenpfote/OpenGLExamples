@@ -219,6 +219,7 @@ void MyWindow::OnRender()
     rot = Quaternion::RotationAxis(axis, aa.angle) * rot;
     matWorld = rot.ToRotationCMatrix() * matWorld;
 #endif
+    glEnable(GL_FRAMEBUFFER_SRGB);
 
     glDisable(GL_BLEND);
     model.DrawOpaqueMeshes(matWorld);
@@ -238,6 +239,8 @@ void MyWindow::OnRender()
         model.DrawSkeleton();
         glPopMatrix();
     }
+
+    glDisable(GL_FRAMEBUFFER_SRGB);
 
     // 情報の表示
     auto metrics = text->GetFont().GetFontMetrics();

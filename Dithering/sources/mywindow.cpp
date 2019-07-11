@@ -291,10 +291,14 @@ void MyWindow::OnRender()
     scene_rt->Unbind();
 
     // 2) Dithering
+    glEnable(GL_FRAMEBUFFER_SRGB);
+
     if(is_dithering_enabled)
         PassDithering(scene_rt.get());
     else
         PassApply(scene_rt.get());
+    
+    glDisable(GL_FRAMEBUFFER_SRGB);
 
     // Display debug information.
     std::vector<std::string> text_lines;

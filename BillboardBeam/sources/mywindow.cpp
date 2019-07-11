@@ -235,6 +235,7 @@ void MyWindow::OnRender()
 
     glEnable(GL_BLEND);
     glDepthMask(GL_FALSE);
+    glEnable(GL_FRAMEBUFFER_SRGB);
 
     glBlendFunc(GL_ONE, GL_ONE);
     DrawCube();
@@ -245,6 +246,7 @@ void MyWindow::OnRender()
 
     DrawCurve();
 
+    glDisable(GL_FRAMEBUFFER_SRGB);
     glDepthMask(GL_TRUE);
     glDisable(GL_BLEND);
 

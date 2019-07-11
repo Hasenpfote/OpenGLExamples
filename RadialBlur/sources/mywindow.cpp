@@ -300,7 +300,9 @@ void MyWindow::OnRender()
             PassCustomRadialBlur(high_luminance_region_rt.get(), output_rt);
     }
 
+    glEnable(GL_FRAMEBUFFER_SRGB);
     PassApply(output_rt); // Render HDR to LDR directly.
+    glDisable(GL_FRAMEBUFFER_SRGB);
 
     // Display debug information.
     std::vector<std::string> text_lines;

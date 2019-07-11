@@ -29,9 +29,9 @@ private:
     void RecreateResources(int width, int height);
 
     void DrawFullScreenQuad();
-    void PassDownsampling(GLuint texture, FrameBuffer* fb);
-    void PassKawaseBlur(GLuint texture, FrameBuffer* fb, int iteration);
-    void PassApply(GLuint texture);
+    void PassDownsampling(FrameBuffer* input, FrameBuffer* output);
+    void PassKawaseBlur(FrameBuffer* input, FrameBuffer* output, int iteration);
+    void PassApply(FrameBuffer* input, FrameBuffer* output = nullptr);
 
 private:
     std::unique_ptr<SDFText> text;

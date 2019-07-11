@@ -336,9 +336,15 @@ void MyWindow::OnRender()
 
     // 6) Render HDR to LDR using tone mapping.
     if(is_tonemapping_enabled)
+    {
         PassTonemapping(output_rt);
+    }
     else
+    {
+        glEnable(GL_FRAMEBUFFER_SRGB);
         PassApply(output_rt);   // Render HDR to LDR directly.
+        glDisable(GL_FRAMEBUFFER_SRGB);
+    }
 
     // Display debug information.
     std::vector<std::string> text_lines;

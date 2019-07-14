@@ -84,26 +84,7 @@ void FrameBuffer::Bind()
 void FrameBuffer::Unbind()
 {
     assert(is_active);
-#if 1
-    // Update all mipmap levels if needed.
-    {
-        GLint texture;
-        glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &texture);
-        if(glIsTexture(texture)){
-            GLint prev_texture;
-            glGetIntegerv(GL_TEXTURE_BINDING_2D, &prev_texture);
-            glBindTexture(GL_TEXTURE_2D, texture);
 
-            GLint base_level, max_level;
-            glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, &base_level);
-            glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, &max_level);
-            if(max_level > 0)
-                glGenerateMipmap(GL_TEXTURE_2D);
-
-            glBindTexture(GL_TEXTURE_2D, prev_texture);
-        }
-    }
-#endif
     is_active = false;
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(prev_viewport[0], prev_viewport[1], prev_viewport[2], prev_viewport[3]);

@@ -159,6 +159,8 @@ public:
     ShaderManager(ShaderManager&&) = delete;
     ShaderManager& operator = (ShaderManager&&) = delete;
 
+    bool CreateShaderProgramFromFile(const std::filesystem::path& filepath);
+
     bool LoadShaderProgram(const std::filesystem::path& filepath);
     void LoadShaderPrograms(const std::filesystem::path& directory);
 

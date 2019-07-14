@@ -29,7 +29,7 @@ bool Image::LoadFromFile(const std::filesystem::path& filepath)
 
     if(!stbi_data)
     {
-        LOG_E("Failed to load image: " << filepath.string());
+        LOG_E("Failed to load image from file `" << filepath.string() << "`.");
         return false;
     }
 

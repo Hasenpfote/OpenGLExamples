@@ -753,29 +753,40 @@ void ShaderPipeline::Cache(const std::string& name)
     HASENPFOTE_ASSERT_MSG(uniform_cache.find(name) != uniform_cache.cend(), "Could not find uniform variable `" << name << "` in shaders.");
 }
 
-bool ShaderManager::LoadShaderProgram(const std::filesystem::path& filepath)
+bool ShaderManager::CreateShaderProgramFromFile(const std::filesystem::path& filepath)
 {
-    LOG_I("Loading shader file: " << filepath.string());
+    LOG_I("Creating shader program from file `" << filepath.string() << "`.");
 
-    if(GetShaderProgram(filepath)){
-        LOG_E(filepath.string() << ": Already exists.");
+    if(GetShaderProgram(filepath))
+    {
+        LOG_E("Shader program with the name `" << filepath.string() << "` already exists.");
         return true;
     }
 
     decltype(ext_type)::const_iterator it = ext_type.find(filepath.extension().string());
-    if(it == ext_type.cend()){
+    if(it == ext_type.cend())
+    {
         return false;
     }
 
-    auto program = std::unique_ptr<ShaderProgram>(new ShaderProgram());
-    if(program->Create(it->second, filepath)){
-        LOG_I(filepath.string() << ": Succeed to load the file. (id=" << program->GetProgram() << ")");
-        const auto hash = std::hash<std::string>()(filepath.string());
-        shader_program.insert(std::make_pair(hash, std::move(program)));
-        return true;
+    auto program = std::make_unique<ShaderProgram>();
+    if(!program->Create(it->second, filepath))
+    {
+        LOG_E("Failed to create shader program.");
+        return false;
     }
-    LOG_E(filepath.string() << ": Failed to load the file.");
-    return false;
+
+    LOG_I("Shader program created successfully. [id=" << program->GetProgram() << "]");
+
+    const auto hash = std::hash<std::string>()(filepath.string());
+    shader_program.insert(std::make_pair(hash, std::move(program)));
+
+    return true;
+}
+
+bool ShaderManager::LoadShaderProgram(const std::filesystem::path& filepath)
+{
+    return CreateShaderProgramFromFile(filepath);
 }
 
 void ShaderManager::LoadShaderPrograms(const std::filesystem::path& directory)

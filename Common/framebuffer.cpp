@@ -40,6 +40,8 @@ static void GetFrameBufferSize(GLuint fbo, GLint* width, GLint* height)
 
 FrameBuffer::FrameBuffer(GLuint color, GLuint depth, GLuint stencil)
 {
+    LOG_I("Creating FBO.");
+
     memset(prev_viewport, 0, sizeof(prev_viewport));
     is_active = false;
 
@@ -47,18 +49,36 @@ FrameBuffer::FrameBuffer(GLuint color, GLuint depth, GLuint stencil)
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
     if(glIsTexture(color))
+    {
+        LOG_I("Attaching color texture to fbo. [id=" << color << "]");
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, color, 0);
 
+        GLint encoding = 0;
+        glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_COLOR_ENCODING, &encoding);
+        if(encoding == GL_LINEAR)
+            LOG_I("Framebuffer attachment color encoding is linear.");
+        else if(encoding == GL_SRGB)
+            LOG_I("Framebuffer attachment color encoding is sRGB.");
+        else
+            assert(false);
+    }
+
     if(glIsTexture(depth))
+    {
+        LOG_I("Attaching depth texture to fbo. [id=" << depth << "]");
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depth, 0);
+    }
 
     GLuint status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    if(status != GL_FRAMEBUFFER_COMPLETE){
-        LOG_E("error creating FBO: " << status);
+    if(status != GL_FRAMEBUFFER_COMPLETE)
+    {
+        LOG_E("framebuffer is not complete: " << status);
+        assert(false);
     }
-    assert(status == GL_FRAMEBUFFER_COMPLETE);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    LOG_I("FBO created successfully. [id=" << fbo << "]");
 }
 
 FrameBuffer::~FrameBuffer()

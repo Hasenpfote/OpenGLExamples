@@ -35,11 +35,11 @@ GLuint TextureManager::CreateTexture(const std::string& name, GLsizei levels, GL
 {
     HASENPFOTE_ASSERT(levels > 0);
 
-    LOG_I("Creating texture file: " << name);
+    LOG_I("Creating texture.");
     auto texture = GetTexture(name);
     if(glIsTexture(texture))
     {
-        LOG_E(name << ": Already exists.");
+        LOG_E("Texture with the name `" << name << "` already exists.");
         return texture;
     }
 
@@ -60,10 +60,10 @@ GLuint TextureManager::CreateTexture(const std::string& name, GLsizei levels, GL
 
     glBindTexture(target, 0);
 
+    LOG_I("Texture created successfully. [id=" << texture << "]");
+
     const auto hash = std::hash<std::string>()(name);
     this->texture.insert(std::make_pair(hash, texture));
-
-    LOG_I(name << ": Succeed to create the texture. (id=" << texture << ")");
 
     return texture;
 }
@@ -75,18 +75,18 @@ GLuint TextureManager::CreateTexture(const std::string& name, GLenum internal_fo
 
 GLuint TextureManager::CreateTextureFromFile(const std::filesystem::path& filepath, bool generate_mipmap)
 {
-    LOG_I("Creating texture file: " << filepath.string());
+    LOG_I("Creating texture from file `" << filepath.string() << "`.");
     auto texture = GetTexture(filepath.string());
     if(glIsTexture(texture))
     {
-        LOG_E(filepath.string() << ": Already exists.");
+        LOG_E("Texture with the name `" << filepath.string() << "` already exists.");
         return texture;
     }
 
     Image image;
     if(!image.LoadFromFile(filepath))
     {
-        LOG_E(filepath.string() << ": Failed to load the file.");
+        LOG_E("Failed to load image from file `" << filepath.string() << "`.");
         return 0;
     }
 
@@ -193,7 +193,7 @@ GLuint TextureManager::CreateTextureFromFile(const std::filesystem::path& filepa
     const auto hash = std::hash<std::string>()(filepath.string());
     this->texture.insert(std::make_pair(hash, texture));
 
-    LOG_I(filepath.string() << ": Succeed to create the file. (id=" << texture << ")");
+    LOG_I("Texture created successfully. [id=" << texture << "]");
 
     return texture;
 }

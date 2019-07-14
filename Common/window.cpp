@@ -35,7 +35,7 @@ bool Window::Initialize(int width, int height)
     // cf. http://www.glfw.org/docs/latest/window_guide.html#window_hints
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
-#if 1   // TODO: font 周りの都合で互換性を維持.
+#if 0   // TODO: font 周りの都合で互換性を維持.
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
 #else

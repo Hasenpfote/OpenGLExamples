@@ -7,15 +7,36 @@ uniform sampler2D u_tex0;
 uniform vec2 u_pixel_size;
 uniform float u_exposure;
 
-
-vec3 degamma_correction(vec3 color)
+float linear_to_srgb(float u)
 {
-    return pow(color, vec3(2.2));
+    if(u <= 0.0031308)
+        return 12.92 * u;
+
+    return 1.055 * pow(u, 1.0 / 2.4) - 0.055;
 }
 
-vec3 gamma_correction(vec3 color)
+vec3 linear_to_srgb(vec3 u)
 {
-    return pow(color, vec3(1.0 / 2.2));
+    vec3 lower = 12.92 * u;
+    vec3 higher = 1.055 * pow(u, vec3(1.0 / 2.4)) - 0.055;
+
+    return mix(higher, lower, step(u, vec3(0.0031308)));
+}
+
+float srgb_to_linear(float u)
+{
+    if(u <= 0.04045)
+        return u / 12.92;
+
+    return pow((u + 0.055) / 1.055, 2.4);
+}
+
+vec3 srgb_to_linear(vec3 u)
+{
+    vec3 lower = u / 12.92;
+    vec3 higher = pow((u + 0.055) / 1.055, vec3(2.4));
+
+    return mix(higher, lower, step(u, vec3(0.04045)));
 }
 
 vec3 ACESFilm(vec3 x)
@@ -32,12 +53,11 @@ void main(void)
 {
     vec2 tex_coord = gl_FragCoord.xy * u_pixel_size;
     vec3 color = texture(u_tex0, tex_coord).rgb;
-    //color = degamma_correction(color);
 
     vec3 mapped = ACESFilm(u_exposure * color);
 
-    // gamma correction
-    mapped = gamma_correction(mapped);
+    // Linear to sRGB.
+    mapped = linear_to_srgb(mapped);
 
     o_color = vec4(mapped, 1.0);
 }

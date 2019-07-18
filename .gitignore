@@ -105,6 +105,14 @@ RadialBlur/builds/windows/vc2019/RadialBlur/Release/
 RadialBlur/builds/windows/vc2019/RadialBlur/RadialBlur/Debug/
 RadialBlur/builds/windows/vc2019/RadialBlur/RadialBlur/Release/
 
+SRGBChecker/*.exe
+SRGBChecker/*.dll
+SRGBChecker/builds/windows/vc2019/SRGBChecker/.vs
+SRGBChecker/builds/windows/vc2019/SRGBChecker/Debug/
+SRGBChecker/builds/windows/vc2019/SRGBChecker/Release/
+SRGBChecker/builds/windows/vc2019/SRGBChecker/SRGBChecker/Debug/
+SRGBChecker/builds/windows/vc2019/SRGBChecker/SRGBChecker/Release/
+
 *.opendb
 
 external/libpng/lpng1622/pnglibconf.h

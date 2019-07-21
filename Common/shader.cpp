@@ -45,7 +45,7 @@ GLuint ShaderProgram::GetUniformBlockIndex(const std::string& name) const
     }
     auto index = glGetUniformBlockIndex(program, name.c_str());
     if(index != GL_INVALID_INDEX){
-        uniform_block_index_cache.insert(std::make_pair(name, index));  // caching 
+        uniform_block_index_cache.insert(std::make_pair(name, index));  // caching
     }
     return index;
 }
@@ -390,7 +390,7 @@ void ShaderPipeline::Unbind()
 void ShaderPipeline::SetShaderProgram(const ShaderProgram* sp)
 {
     HASENPFOTE_ASSERT(sp != nullptr);
-    HASENPFOTE_ASSERT(glIsProgram(pipeline));
+    HASENPFOTE_ASSERT(glIsProgramPipeline(pipeline));
     GLbitfield stage;
     switch(sp->GetType()){
     case GL_VERTEX_SHADER:

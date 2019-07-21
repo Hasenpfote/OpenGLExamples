@@ -24,6 +24,9 @@ else()
     message(FATAL_ERROR "You are on an unsupported platform!")
 endif()
 
+### OpenGL
+find_package(OpenGL REQUIRED)
+
 ### External
 add_subdirectory(external)
 

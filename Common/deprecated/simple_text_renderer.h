@@ -1,4 +1,5 @@
 ﻿#pragma once
+#if 0
 #include "shader.h"
 #include "text.h"
 
@@ -50,3 +51,4 @@ private:
     ShaderProgram fs;
     ShaderPipeline pipeline;
 };
+#endif

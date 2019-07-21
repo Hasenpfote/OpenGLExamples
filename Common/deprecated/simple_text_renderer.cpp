@@ -1,4 +1,5 @@
-﻿#include "simple_text_renderer.h"
+﻿#if 0
+#include "simple_text_renderer.h"
 
 static const std::string vs_source =
 "#version 430\n"
@@ -204,3 +205,4 @@ void SimpleTextRenderer::ClearBuffer()
     vertices.clear();
     indices.clear();
 }
+#endif

@@ -1,4 +1,5 @@
-﻿#include <cassert>
+﻿#if 0
+#include <cassert>
 #include <iostream>
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -341,3 +342,4 @@ void Text::SetColor(const GLfloat* color)
 }
 
 }
+#endif

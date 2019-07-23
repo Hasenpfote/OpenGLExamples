@@ -355,19 +355,19 @@ ShaderPipeline::ShaderPipeline()
 
 ShaderPipeline::~ShaderPipeline()
 {
-    if(glIsProgram(pipeline))
+    if(glIsProgramPipeline(pipeline))
         glDeleteProgramPipelines(1, &pipeline);
 }
 
 void ShaderPipeline::Create()
 {
-    if(!glIsProgram(pipeline))
+    if(!glIsProgramPipeline(pipeline))
         glGenProgramPipelines(1, &pipeline);
 }
 
 void ShaderPipeline::Release()
 {
-    if(glIsProgram(pipeline)){
+    if(glIsProgramPipeline(pipeline)){
         glDeleteProgramPipelines(1, &pipeline);
     }
     pipeline = 0;
@@ -390,7 +390,7 @@ void ShaderPipeline::Unbind()
 void ShaderPipeline::SetShaderProgram(const ShaderProgram* sp)
 {
     HASENPFOTE_ASSERT(sp != nullptr);
-    HASENPFOTE_ASSERT(glIsProgramPipeline(pipeline));
+    //HASENPFOTE_ASSERT(glIsProgramPipeline(pipeline));
     GLbitfield stage;
     switch(sp->GetType()){
     case GL_VERTEX_SHADER:
@@ -437,7 +437,7 @@ const ShaderProgram* ShaderPipeline::GetShaderProgram(GLenum type) const
 
 void ShaderPipeline::ResetShaderPrograms()
 {
-    HASENPFOTE_ASSERT(glIsProgram(pipeline));
+    HASENPFOTE_ASSERT(glIsProgramPipeline(pipeline));
     glUseProgramStages(pipeline, GL_ALL_SHADER_BITS, 0);
     shader_program.clear();
     uniform_cache.clear();

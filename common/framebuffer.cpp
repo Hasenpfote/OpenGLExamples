@@ -99,6 +99,10 @@ void FrameBuffer::Bind()
 
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     glViewport(0, 0, width, height);
+#if 1
+    // for Debug
+    //glViewport(0, 0, width/2, height/2);
+#endif
 }
 
 void FrameBuffer::Unbind()

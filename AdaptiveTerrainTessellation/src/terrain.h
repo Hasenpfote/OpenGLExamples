@@ -2,7 +2,7 @@
 #include <GLFW/glfw3.h>
 #include <hasenpfote/math/cmatrix4.h>
 #include <hasenpfote/math/vector3.h>
-#include "../../Common/shader.h"
+#include "../../common/shader.h"
 
 class Terrain final
 {

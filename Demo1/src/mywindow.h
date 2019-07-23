@@ -6,9 +6,9 @@
 #include <array>
 #include <tuple>
 #include <hasenpfote/math/quaternion.h>
-#include "../../Common/window.h"
-#include "../../Common/sdf_text.h"
-#include "../../Common/framebuffer.h"
+#include "../../common/window.h"
+#include "../../common/sdf_text.h"
+#include "../../common/framebuffer.h"
 #include "fullscreen_pass_geometry.h"
 
 class MyWindow final : public Window

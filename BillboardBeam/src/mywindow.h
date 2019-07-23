@@ -4,8 +4,8 @@
 #include <deque>
 #include <hasenpfote/math/quaternion.h>
 #include <hasenpfote/math/vector3.h>
-#include "../../Common/window.h"
-#include "../../Common/sdf_text.h"
+#include "../../common/window.h"
+#include "../../common/sdf_text.h"
 #include "billboard_beam.h"
 
 class MyWindow final : public Window

@@ -3,7 +3,7 @@
 #include <hasenpfote/math/vector3.h>
 #include <hasenpfote/math/vector4.h>
 #include <hasenpfote/math/cmatrix4.h>
-#include "../../Common/shader.h"
+#include "../../common/shader.h"
 
 class BillboardBeam final
 {

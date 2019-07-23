@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include <string>
 #include <GL/glew.h>
-#include "../../Common/shader.h"
+#include "../../common/shader.h"
 #include "fbx_loader.h"
 
 class Material final

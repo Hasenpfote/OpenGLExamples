@@ -2,8 +2,8 @@
 #include <iostream>
 #include <hasenpfote/math/quaternion.h>
 #include <hasenpfote/math/cmatrix4.h>
-#include "../../Common/window.h"
-#include "../../Common/sdf_text.h"
+#include "../../common/window.h"
+#include "../../common/sdf_text.h"
 #include "model.h"
 //#include "arcball.h"
 

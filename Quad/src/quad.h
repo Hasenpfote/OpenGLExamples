@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include <GLFW/glfw3.h>
 #include <hasenpfote/math/cmatrix4.h>
-#include "../../Common/shader.h"
+#include "../../common/shader.h"
 
 class Quad final
 {

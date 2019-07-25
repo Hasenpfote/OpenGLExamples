@@ -45,6 +45,7 @@ set(examples
     "SRGBChecker"
     "Texture2DArray"
     "ToneMapping"
+    "BitonicSort"
 )
 
 foreach(example IN LISTS examples)

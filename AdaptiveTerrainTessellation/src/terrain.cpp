@@ -1,7 +1,7 @@
 ﻿#include <cassert>
 #include <vector>
 #include <GL/glew.h>
-#include "../../Common/system.h"
+#include "../../common/system.h"
 #include "terrain.h"
 
 Terrain::Terrain()

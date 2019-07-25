@@ -9,8 +9,8 @@
 #include <hasenpfote/math/vector4.h>
 #include <hasenpfote/math/cmatrix4.h>
 #include <hasenpfote/math/axis_angle.h>
-#include "../../Common/system.h"
-#include "../../Common/logger.h"
+#include "../../common/system.h"
+#include "../../common/logger.h"
 #include "bayer.h"
 #include "mywindow.h"
 
@@ -86,7 +86,7 @@ void MyWindow::Setup()
     }
     // generate font.
     {
-        std::filesystem::path fontpath = "../Common/assets/fonts/test.fnt";
+        std::filesystem::path fontpath = "../common/assets/fonts/test.fnt";
         auto font = std::make_shared<text::Font>(fontpath);
         text = std::make_unique<SDFText>(font, std::make_shared<SDFTextRenderer>());
         text->SetSmoothness(1.0f);

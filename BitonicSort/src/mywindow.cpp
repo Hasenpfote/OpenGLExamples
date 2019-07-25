@@ -74,7 +74,7 @@ void MyWindow::Setup()
     }
     // generate font.
     {
-        std::filesystem::path fontpath = "../Common/assets/fonts/test.fnt";
+        std::filesystem::path fontpath = "../common/assets/fonts/test.fnt";
         auto font = std::make_shared<text::Font>(fontpath);
         text = std::make_unique<SDFText>(font, std::make_shared<SDFTextRenderer>());
         text->SetSmoothness(1.0f);

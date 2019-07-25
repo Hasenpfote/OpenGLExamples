@@ -7,8 +7,8 @@
 #include <hasenpfote/math/vector4.h>
 #include <hasenpfote/math/cmatrix4.h>
 #include <hasenpfote/math/axis_angle.h>
-#include "../../Common/system.h"
-#include "../../Common/logger.h"
+#include "../../common/system.h"
+#include "../../common/logger.h"
 #include "mywindow.h"
 
 MyWindow::MyWindow()

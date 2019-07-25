@@ -3,7 +3,7 @@
 #define STB_IMAGE_STATIC
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
-#include "../../Common/system.h"
+#include "../../common/system.h"
 #include "quad.h"
 
 Quad::Quad()

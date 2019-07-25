@@ -3,7 +3,7 @@
 #include <regex>
 #include <hasenpfote/math/utils.h>
 #include <hasenpfote/math/cmatrix4.h>
-#include "../../Common/system.h"
+#include "../../common/system.h"
 #include "model.h"
 
 using namespace hasenpfote::math;

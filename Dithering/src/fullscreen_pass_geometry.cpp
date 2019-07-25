@@ -1,6 +1,6 @@
 #include <cassert>
 #include <GL/glew.h>
-#include "../../Common/system.h"
+#include "../../common/system.h"
 #include "fullscreen_pass_geometry.h"
 
 FullscreenPassGeometry::FullscreenPassGeometry()

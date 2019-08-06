@@ -4,8 +4,11 @@
 #include <stb_image.h>
 #define TINYEXR_IMPLEMENTATION
 #include <tinyexr.h>
-#include "logger.h"
+#include "../logger.h"
 #include "image.h"
+
+namespace common::render
+{
 
 Image::Image()
     : width(0), height(0), color_format(Image::ColorFormat::Unknown), pixel_type(Image::PixelType::Unknown), data()
@@ -276,3 +279,5 @@ std::unique_ptr<std::uint8_t[]> Image::ExtractChannel(Channel channel) const
     }
     return ptr;
 }
+
+}   // namespace common::render

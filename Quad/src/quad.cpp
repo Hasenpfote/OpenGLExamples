@@ -1,6 +1,5 @@
 ﻿#include <cassert>
 #include <GL/glew.h>
-#include "../../common/system.h"
 #include "quad.h"
 
 Quad::Quad()
@@ -82,11 +81,11 @@ void Quad::Initialize()
 
     auto& rm = System::GetConstInstance().GetResourceManager();
 
-    texture = rm.GetResource<common::Texture>("assets/textures/chess_board.png")->GetTexture();
+    texture = rm.GetResource<Texture>("assets/textures/chess_board.png")->GetTexture();
 
     pipeline.Create();
-    pipeline.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/quad.vs"));
-    pipeline.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/quad.fs"));
+    pipeline.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/quad.vs"));
+    pipeline.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/quad.fs"));
 }
 
 void Quad::Draw()

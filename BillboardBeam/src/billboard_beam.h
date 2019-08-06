@@ -3,10 +3,15 @@
 #include <hasenpfote/math/vector3.h>
 #include <hasenpfote/math/vector4.h>
 #include <hasenpfote/math/cmatrix4.h>
-#include "../../common/shader.h"
+#include "../../common/system.h"
 
 class BillboardBeam final
 {
+    using System = common::System;
+    using Texture = common::render::Texture;
+    using ShaderProgram = common::render::ShaderProgram;
+    using ShaderPipeline = common::render::ShaderPipeline;
+
 public:
     BillboardBeam();
     ~BillboardBeam();
@@ -34,5 +39,5 @@ private:
     hasenpfote::math::CMatrix4 mv;
     hasenpfote::math::CMatrix4 mvp;
 
-    common::ShaderPipeline pipeline;
+    ShaderPipeline pipeline;
 };

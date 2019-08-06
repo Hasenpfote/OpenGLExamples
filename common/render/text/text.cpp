@@ -1,7 +1,8 @@
 ﻿#include <hasenpfote/math/cmatrix4.h>
 #include "text.h"
 
-namespace text{
+namespace common::render::text
+{
 
 Text::Text(const std::shared_ptr<Font>& font, const std::shared_ptr<ITextRenderer>& renderer)
     : font(font), renderer(renderer)
@@ -133,4 +134,4 @@ ITextRenderer* Text::GetRenderer()
     return renderer.get();
 }
 
-}
+}   // namespace common::text

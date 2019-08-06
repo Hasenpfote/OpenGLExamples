@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include <string>
 #include <GL/glew.h>
-#include "../../common/shader.h"
+#include "../../common/system.h"
 #include "fbx_loader.h"
 
 class Material final
@@ -67,6 +67,11 @@ public:
 
 class Model final
 {
+    using System = common::System;
+    using Texture = common::render::Texture;
+    using ShaderProgram = common::render::ShaderProgram;
+    using ShaderPipeline = common::render::ShaderPipeline;
+
 public:
     Model();
     ~Model();
@@ -88,6 +93,6 @@ private:
     GLuint pipeline;
     GLuint common_matrices;
 
-    common::ShaderProgram* vs;
-    common::ShaderProgram* fs;
+    ShaderProgram* vs;
+    ShaderProgram* fs;
 };

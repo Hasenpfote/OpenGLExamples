@@ -2,14 +2,17 @@
 #include <stdexcept>
 #include <fstream>
 #include <iostream>
-#include "image.h"
+#include "../image.h"
 #include "fnt_parser.h"
 #include "font.h"
 
-namespace text{
+namespace common::render::text
+{
 
 static GLuint Create2DArrayTexture(GLsizei width, GLsizei height, const std::vector<std::filesystem::path>& filepaths)
 {
+    using namespace common;
+
     GLuint texture = 0;
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D_ARRAY, texture);
@@ -392,4 +395,4 @@ std::int32_t FontMetrics::MeasureWidth(const std::u16string& string) const
     return width + adjust;
 }
 
-}
+}   // namespace common::render::text

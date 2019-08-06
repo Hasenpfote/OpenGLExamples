@@ -1,6 +1,9 @@
 ﻿#include <array>
 #include "sdf_text.h"
 
+namespace common::render::text
+{
+
 static const std::string vs_source =
 "#version 430\n"
 "layout(location = 0) in vec2 vsPosition;\n"
@@ -222,8 +225,8 @@ void SDFTextRenderer::ClearBuffer()
 
 // SDFText
 
-SDFText::SDFText(const std::shared_ptr<text::Font>& font, const std::shared_ptr<SDFTextRenderer>& renderer)
-    : text::Text(font, renderer)
+SDFText::SDFText(const std::shared_ptr<Font>& font, const std::shared_ptr<SDFTextRenderer>& renderer)
+    : Text(font, renderer)
 {
 }
 
@@ -236,3 +239,5 @@ void SDFText::SetOutlineColor(const GLfloat* color)
 {
     static_cast<SDFTextRenderer*>(GetRenderer())->SetOutlineColor(color);
 }
+
+}   // namespace common::render::text

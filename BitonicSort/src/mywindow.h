@@ -7,12 +7,23 @@
 #include <tuple>
 #include <hasenpfote/math/quaternion.h>
 #include "../../common/window.h"
-#include "../../common/sdf_text.h"
-#include "../../common/framebuffer.h"
+#include "../../common/system.h"
+#include "../../common/render/framebuffer.h"
+#include "../../common/render/text/sdf_text.h"
 #include "fullscreen_pass_geometry.h"
 
-class MyWindow final : public Window
+class MyWindow final : public common::Window
 {
+    using System = common::System;
+    using Texture = common::render::Texture;
+    using ShaderProgram = common::render::ShaderProgram;
+    using ShaderPipeline = common::render::ShaderPipeline;
+    using FrameBuffer = common::render::FrameBuffer;
+    using Font = common::render::text::Font;
+    using SDFText = common::render::text::SDFText;
+    using SDFTextRenderer = common::render::text::SDFTextRenderer;
+    using CustomCamera = common::render::CustomCamera;
+
 public:
     MyWindow();
     ~MyWindow();
@@ -47,10 +58,10 @@ private:
     GLuint nearest_sampler;
     GLuint linear_sampler;
 
-    common::ShaderPipeline pipeline_noise;
-    common::ShaderPipeline pipeline_decode;
-    common::ShaderPipeline pipeline_sort;
-    common::ShaderPipeline pipeline_apply;
+    ShaderPipeline pipeline_noise;
+    ShaderPipeline pipeline_decode;
+    ShaderPipeline pipeline_sort;
+    ShaderPipeline pipeline_apply;
 
     std::unique_ptr<FrameBuffer> input_rt;
     std::array<std::unique_ptr<FrameBuffer>, 2> sort_rts;

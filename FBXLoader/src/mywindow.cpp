@@ -7,7 +7,6 @@
 #include <hasenpfote/math/vector4.h>
 #include <hasenpfote/math/cmatrix4.h>
 #include <hasenpfote/math/axis_angle.h>
-#include "../../common/system.h"
 #include "../../common/logger.h"
 #include "mywindow.h"
 
@@ -85,7 +84,7 @@ void MyWindow::Setup()
     {
         std::filesystem::path dirpath("assets/shaders");
         auto& rm = System::GetMutableInstance().GetResourceManager();
-        rm.AddResourcesFromDirectory<common::ShaderProgram>(dirpath, false);
+        rm.AddResourcesFromDirectory<ShaderProgram>(dirpath, false);
     }
 
     // 共通の変換用行列群
@@ -105,12 +104,12 @@ void MyWindow::Setup()
     {
         std::filesystem::path dirpath("assets/textures");
         auto& rm = System::GetMutableInstance().GetResourceManager();
-        rm.AddResourcesFromDirectory<common::Texture>(dirpath, false);
+        rm.AddResourcesFromDirectory<Texture>(dirpath, false);
     }
     // generate font.
     {
         std::filesystem::path fontpath = "../common/assets/fonts/test.fnt";
-        auto font = std::make_shared<text::Font>(fontpath);
+        auto font = std::make_shared<Font>(fontpath);
         text = std::make_unique<SDFText>(font, std::make_shared<SDFTextRenderer>());
         text->SetSmoothness(1.0f);
     }

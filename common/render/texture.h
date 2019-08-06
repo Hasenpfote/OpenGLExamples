@@ -1,14 +1,14 @@
 ﻿#pragma once
 #include <filesystem>
 #include <GL/glew.h>
-#include "resource.h"
+#include "../resource.h"
 
-namespace common
+namespace common::render
 {
 
-class Texture final : public common::Resource<Texture>
+class Texture final : public Resource<Texture>
 {
-    friend common::Resource<Texture>;
+    friend Resource<Texture>;
 public:
     Texture(GLsizei levels, GLenum internal_format, GLsizei width, GLsizei height);
     Texture(GLenum internal_format, GLsizei width, GLsizei height);
@@ -36,4 +36,4 @@ private:
     GLuint texture_;
 };
 
-}   // namespace common
+}   // namespace common::render

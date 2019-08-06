@@ -8,7 +8,6 @@
 #include <hasenpfote/math/vector4.h>
 #include <hasenpfote/math/cmatrix4.h>
 #include <hasenpfote/math/axis_angle.h>
-#include "../../common/system.h"
 #include "../../common/logger.h"
 #include "mywindow.h"
 
@@ -61,18 +60,18 @@ void MyWindow::Setup()
     {
         std::filesystem::path dirpath("assets/shaders");
         auto& rm = System::GetMutableInstance().GetResourceManager();
-        rm.AddResourcesFromDirectory<common::ShaderProgram>(dirpath, false);
+        rm.AddResourcesFromDirectory<ShaderProgram>(dirpath, false);
     }
     // load texture.
     {
         std::filesystem::path dirpath("assets/textures");
         auto& rm = System::GetMutableInstance().GetResourceManager();
-        rm.AddResourcesFromDirectory<common::Texture>(dirpath, false);
+        rm.AddResourcesFromDirectory<Texture>(dirpath, false);
     }
     // generate font.
     {
         std::filesystem::path fontpath = "../common/assets/fonts/test.fnt";
-        auto font = std::make_shared<text::Font>(fontpath);
+        auto font = std::make_shared<Font>(fontpath);
         text = std::make_unique<SDFText>(font, std::make_shared<SDFTextRenderer>());
         text->SetSmoothness(1.0f);
     }
@@ -83,11 +82,11 @@ void MyWindow::Setup()
         auto& rm = System::GetConstInstance().GetResourceManager();
 
         texpath = "assets/textures/street_lamp_1k.exr";
-        texture = rm.GetResource<common::Texture>(texpath.string())->GetTexture();
+        texture = rm.GetResource<Texture>(texpath.string())->GetTexture();
         selectable_textures.push_back(std::make_tuple(texture, texpath));
 
         texpath = "assets/textures/satara_night_no_lamps_1k.exr";
-        texture = rm.GetResource<common::Texture>(texpath.string())->GetTexture();
+        texture = rm.GetResource<Texture>(texpath.string())->GetTexture();
         selectable_textures.push_back(std::make_tuple(texture, texpath));
 
         selected_texture_index = 0;
@@ -116,40 +115,40 @@ void MyWindow::Setup()
     auto& rm = System::GetConstInstance().GetResourceManager();
 
     pipeline_fullscreen_quad.Create();
-    pipeline_fullscreen_quad.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/fullscreen_quad.vs"));
-    pipeline_fullscreen_quad.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/fullscreen_quad.fs"));
+    pipeline_fullscreen_quad.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/fullscreen_quad.vs"));
+    pipeline_fullscreen_quad.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/fullscreen_quad.fs"));
 
     pipeline_log_luminance.Create();
-    pipeline_log_luminance.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/log_luminance.vs"));
-    pipeline_log_luminance.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/log_luminance.fs"));
+    pipeline_log_luminance.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/log_luminance.vs"));
+    pipeline_log_luminance.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/log_luminance.fs"));
 
     pipeline_high_luminance_region_extraction.Create();
-    pipeline_high_luminance_region_extraction.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/high_luminance_region_extraction.vs"));
-    pipeline_high_luminance_region_extraction.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/high_luminance_region_extraction.fs"));
+    pipeline_high_luminance_region_extraction.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/high_luminance_region_extraction.vs"));
+    pipeline_high_luminance_region_extraction.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/high_luminance_region_extraction.fs"));
 
     pipeline_downsampling_2x2.Create();
-    pipeline_downsampling_2x2.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/downsampling.vs"));
-    pipeline_downsampling_2x2.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/downsampling_2x2.fs"));
+    pipeline_downsampling_2x2.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/downsampling.vs"));
+    pipeline_downsampling_2x2.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/downsampling_2x2.fs"));
 
     pipeline_downsampling_4x4.Create();
-    pipeline_downsampling_4x4.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/downsampling.vs"));
-    pipeline_downsampling_4x4.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/downsampling_4x4.fs"));
+    pipeline_downsampling_4x4.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/downsampling.vs"));
+    pipeline_downsampling_4x4.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/downsampling_4x4.fs"));
 
     pipeline_kawase_blur.Create();
-    pipeline_kawase_blur.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/kawase_blur.vs"));
-    pipeline_kawase_blur.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/kawase_blur.fs"));
+    pipeline_kawase_blur.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/kawase_blur.vs"));
+    pipeline_kawase_blur.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/kawase_blur.fs"));
 
     pipeline_streak.Create();
-    pipeline_streak.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/streak.vs"));
-    pipeline_streak.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/streak.fs"));
+    pipeline_streak.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/streak.vs"));
+    pipeline_streak.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/streak.fs"));
 
     pipeline_tonemapping.Create();
-    pipeline_tonemapping.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/tonemapping.vs"));
-    pipeline_tonemapping.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/tonemapping.fs"));
+    pipeline_tonemapping.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/tonemapping.vs"));
+    pipeline_tonemapping.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/tonemapping.fs"));
 
     pipeline_apply.Create();
-    pipeline_apply.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/apply.vs"));
-    pipeline_apply.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/apply.fs"));
+    pipeline_apply.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/apply.vs"));
+    pipeline_apply.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/apply.fs"));
 
     exposure = 2.0f;
     lum_soft_threshold = 0.5f;
@@ -452,15 +451,15 @@ void MyWindow::RecreateResources(int width, int height)
     {
         auto& rm = System::GetMutableInstance().GetResourceManager();
 
-        rm.RemoveResource<common::Texture>(name);
+        rm.RemoveResource<Texture>(name);
 
         if(levels == 0)
-            levels = common::Texture::CalcNumOfMipmapLevels(width, height);
+            levels = Texture::CalcNumOfMipmapLevels(width, height);
 
-        auto p = std::make_unique<common::Texture>(levels, internal_format, width, height);
+        auto p = std::make_unique<Texture>(levels, internal_format, width, height);
         auto texture = p->GetTexture();
 
-        rm.AddResource<common::Texture>(name, std::move(p));
+        rm.AddResource<Texture>(name, std::move(p));
 
         return std::make_unique<FrameBuffer>(texture, 0, 0);
     };

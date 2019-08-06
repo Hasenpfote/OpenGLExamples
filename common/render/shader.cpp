@@ -2,7 +2,7 @@
 #include <fstream>
 #include <functional>
 #include <hasenpfote/assert.h>
-#include "logger.h"
+#include "../logger.h"
 #include "shader.h"
 
 namespace
@@ -71,7 +71,7 @@ GLbitfield shader_type_to_stage(GLenum type)
 
 }
 
-namespace common
+namespace common::render
 {
 
 ShaderProgram::ShaderProgram(const std::string& source, GLenum type)
@@ -374,7 +374,7 @@ void ShaderProgram::SetUniformMatrix4x3fv(const std::string& name, GLsizei count
     glProgramUniformMatrix4x3fv(program_, loc, count, transpose, value);
 }
 
-const common::Resource<ShaderProgram>::string_set_t& ShaderProgram::allowed_extensions_impl()
+const Resource<ShaderProgram>::string_set_t& ShaderProgram::allowed_extensions_impl()
 {
     static string_set_t ss({ ".vs", ".tcs", ".tes", ".gs", ".fs" });
     return ss;
@@ -807,4 +807,4 @@ void ShaderPipeline::Cache(const std::string& name)
     HASENPFOTE_ASSERT_MSG(uniform_cache_.find(name) != uniform_cache_.cend(), "Could not find uniform variable `" << name << "` in shaders.");
 }
 
-}   // namespace common
+}   // namespace common::render

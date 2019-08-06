@@ -1,10 +1,15 @@
 ﻿#pragma once
 #include <GLFW/glfw3.h>
 #include <hasenpfote/math/cmatrix4.h>
-#include "../../common/shader.h"
+#include "../../common/system.h"
 
 class Quad final
 {
+    using System = common::System;
+    using Texture = common::render::Texture;
+    using ShaderProgram = common::render::ShaderProgram;
+    using ShaderPipeline = common::render::ShaderPipeline;
+
 public:
     Quad();
     ~Quad();
@@ -20,5 +25,5 @@ private:
     GLuint sampler;
     GLuint texture;
 
-    common::ShaderPipeline pipeline;
+    ShaderPipeline pipeline;
 };

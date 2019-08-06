@@ -4,13 +4,11 @@
 #include <unordered_map>
 #include <GL/glew.h>
 #include <hasenpfote/assert.h>
-//#include <hasenpfote//math/utility.h>
 #include <hasenpfote//math/utils.h>
 #include <hasenpfote/math/vector3.h>
 #include <hasenpfote/math/vector4.h>
 #include <hasenpfote/math/cmatrix4.h>
 #include <hasenpfote/math/axis_angle.h>
-#include "../../common/system.h"
 #include "../../common/logger.h"
 #include "mywindow.h"
 
@@ -75,26 +73,26 @@ void MyWindow::Setup()
     {
         std::filesystem::path dirpath("assets/shaders");
         auto& rm = System::GetMutableInstance().GetResourceManager();
-        rm.AddResourcesFromDirectory<common::ShaderProgram>(dirpath, false);
+        rm.AddResourcesFromDirectory<ShaderProgram>(dirpath, false);
     }
 
     // load texture.
     {
         std::filesystem::path dirpath("assets/textures");
         auto& rm = System::GetMutableInstance().GetResourceManager();
-        rm.AddResourcesFromDirectory<common::Texture>(dirpath, false);
+        rm.AddResourcesFromDirectory<Texture>(dirpath, false);
     }
     // generate font.
     {
         std::filesystem::path fontpath = "../common/assets/fonts/test.fnt";
-        auto font = std::make_shared<text::Font>(fontpath);
+        auto font = std::make_shared<Font>(fontpath);
         text = std::make_unique<SDFText>(font, std::make_shared<SDFTextRenderer>());
         text->SetSmoothness(1.0f);
     }
     //
     auto& rm = System::GetConstInstance().GetResourceManager();
 
-    texture = rm.GetResource<common::Texture>("assets/textures/testimg_1920x1080.png")->GetTexture();
+    texture = rm.GetResource<Texture>("assets/textures/testimg_1920x1080.png")->GetTexture();
 
     fs_pass_geom = std::make_unique<FullscreenPassGeometry>();
 
@@ -110,28 +108,28 @@ void MyWindow::Setup()
     RecreateResources(width, height);
 
     pipeline_fullscreen_quad.Create();
-    pipeline_fullscreen_quad.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/fullscreen_quad.vs"));
-    pipeline_fullscreen_quad.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/fullscreen_quad.fs"));
+    pipeline_fullscreen_quad.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/fullscreen_quad.vs"));
+    pipeline_fullscreen_quad.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/fullscreen_quad.fs"));
 
     pipeline_apply.Create();
-    pipeline_apply.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/apply.vs"));
-    pipeline_apply.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/apply.fs"));
+    pipeline_apply.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/apply.vs"));
+    pipeline_apply.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/apply.fs"));
 
     pipeline_downsampling_2x2.Create();
-    pipeline_downsampling_2x2.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/downsampling.vs"));
-    pipeline_downsampling_2x2.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/downsampling_2x2.fs"));
+    pipeline_downsampling_2x2.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/downsampling.vs"));
+    pipeline_downsampling_2x2.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/downsampling_2x2.fs"));
 
     pipeline_downsampling_4x4.Create();
-    pipeline_downsampling_4x4.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/downsampling.vs"));
-    pipeline_downsampling_4x4.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/downsampling_4x4.fs"));
+    pipeline_downsampling_4x4.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/downsampling.vs"));
+    pipeline_downsampling_4x4.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/downsampling_4x4.fs"));
 
     pipeline_kawase_blur.Create();
-    pipeline_kawase_blur.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/kawase_blur.vs"));
-    pipeline_kawase_blur.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/kawase_blur.fs"));
+    pipeline_kawase_blur.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/kawase_blur.vs"));
+    pipeline_kawase_blur.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/kawase_blur.fs"));
 
     pipeline_high_luminance_region_extraction.Create();
-    pipeline_high_luminance_region_extraction.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/high_luminance_region_extraction.vs"));
-    pipeline_high_luminance_region_extraction.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/high_luminance_region_extraction.fs"));
+    pipeline_high_luminance_region_extraction.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/high_luminance_region_extraction.vs"));
+    pipeline_high_luminance_region_extraction.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/high_luminance_region_extraction.fs"));
 
     shader_kernel_name = "gaussian_7x7";
 
@@ -336,15 +334,15 @@ void MyWindow::RecreateResources(int width, int height)
     {
         auto& rm = System::GetMutableInstance().GetResourceManager();
 
-        rm.RemoveResource<common::Texture>(name);
+        rm.RemoveResource<Texture>(name);
 
         if(levels == 0)
-            levels = common::Texture::CalcNumOfMipmapLevels(width, height);
+            levels = Texture::CalcNumOfMipmapLevels(width, height);
 
-        auto p = std::make_unique<common::Texture>(levels, internal_format, width, height);
+        auto p = std::make_unique<Texture>(levels, internal_format, width, height);
         auto texture = p->GetTexture();
 
-        rm.AddResource<common::Texture>(name, std::move(p));
+        rm.AddResource<Texture>(name, std::move(p));
 
         return std::make_unique<FrameBuffer>(texture, 0, 0);
     };

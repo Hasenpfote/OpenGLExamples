@@ -9,7 +9,6 @@
 #include <hasenpfote/math/vector4.h>
 #include <hasenpfote/math/cmatrix4.h>
 #include <hasenpfote/math/axis_angle.h>
-#include "../../common/system.h"
 #include "../../common/logger.h"
 #include "bitonic_sort.h"
 #include "mywindow.h"
@@ -63,18 +62,18 @@ void MyWindow::Setup()
     {
         std::filesystem::path dirpath("assets/shaders");
         auto& rm = System::GetMutableInstance().GetResourceManager();
-        rm.AddResourcesFromDirectory<common::ShaderProgram>(dirpath, false);
+        rm.AddResourcesFromDirectory<ShaderProgram>(dirpath, false);
     }
     // load texture.
     {
         std::filesystem::path dirpath("assets/textures");
         auto& rm = System::GetMutableInstance().GetResourceManager();
-        rm.AddResourcesFromDirectory<common::Texture>(dirpath, false);
+        rm.AddResourcesFromDirectory<Texture>(dirpath, false);
     }
     // generate font.
     {
         std::filesystem::path fontpath = "../common/assets/fonts/test.fnt";
-        auto font = std::make_shared<text::Font>(fontpath);
+        auto font = std::make_shared<Font>(fontpath);
         text = std::make_unique<SDFText>(font, std::make_shared<SDFTextRenderer>());
         text->SetSmoothness(1.0f);
     }
@@ -102,20 +101,20 @@ void MyWindow::Setup()
     auto& rm = System::GetConstInstance().GetResourceManager();
 
     pipeline_noise.Create();
-    pipeline_noise.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/noise.vs"));
-    pipeline_noise.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/noise.fs"));
+    pipeline_noise.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/noise.vs"));
+    pipeline_noise.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/noise.fs"));
 
     pipeline_decode.Create();
-    pipeline_decode.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/decode.vs"));
-    pipeline_decode.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/decode.fs"));
+    pipeline_decode.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/decode.vs"));
+    pipeline_decode.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/decode.fs"));
 
     pipeline_sort.Create();
-    pipeline_sort.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/sort.vs"));
-    pipeline_sort.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/sort.fs"));
+    pipeline_sort.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/sort.vs"));
+    pipeline_sort.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/sort.fs"));
 
     pipeline_apply.Create();
-    pipeline_apply.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/apply.vs"));
-    pipeline_apply.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/apply.fs"));
+    pipeline_apply.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/apply.vs"));
+    pipeline_apply.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/apply.fs"));
 
     state = State::Idle;
 }
@@ -288,15 +287,15 @@ void MyWindow::RecreateResources(int width, int height)
     {
         auto& rm = System::GetMutableInstance().GetResourceManager();
 
-        rm.RemoveResource<common::Texture>(name);
+        rm.RemoveResource<Texture>(name);
 
         if(levels == 0)
-            levels = common::Texture::CalcNumOfMipmapLevels(width, height);
+            levels = Texture::CalcNumOfMipmapLevels(width, height);
 
-        auto p = std::make_unique<common::Texture>(levels, internal_format, width, height);
+        auto p = std::make_unique<Texture>(levels, internal_format, width, height);
         auto texture = p->GetTexture();
 
-        rm.AddResource<common::Texture>(name, std::move(p));
+        rm.AddResource<Texture>(name, std::move(p));
 
         return std::make_unique<FrameBuffer>(texture, 0, 0);
     };

@@ -4,14 +4,14 @@
 #include <filesystem>
 #include <memory>
 #include <GL/glew.h>
-#include "resource.h"
+#include "../resource.h"
 
-namespace common
+namespace common::render
 {
 
-class ShaderProgram final : public common::Resource<ShaderProgram>
+class ShaderProgram final : public Resource<ShaderProgram>
 {
-    friend common::Resource<ShaderProgram>;
+    friend Resource<ShaderProgram>;
 public:
     ShaderProgram(const std::string& source, GLenum type);
     ShaderProgram(const std::filesystem::path& filepath, GLenum type);
@@ -72,7 +72,7 @@ public:
     void SetUniformMatrix4x3fv(const std::string& name, GLsizei count, GLboolean transpose, const GLfloat* value);
 
 private:
-    static const common::Resource<ShaderProgram>::string_set_t& allowed_extensions_impl();
+    static const Resource<ShaderProgram>::string_set_t& allowed_extensions_impl();
 
 private:
     GLuint program_;
@@ -155,4 +155,4 @@ private:
     std::unordered_multimap<std::string, ShaderProgram*> uniform_cache_;
 };
 
-}   // namespace common
+}   // namespace common::render

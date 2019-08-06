@@ -8,7 +8,6 @@
 #include <hasenpfote/math/vector4.h>
 #include <hasenpfote/math/cmatrix4.h>
 #include <hasenpfote/math/axis_angle.h>
-#include "../../common/system.h"
 #include "../../common/logger.h"
 #include "debug_utils.h"
 #include "mywindow.h"
@@ -72,18 +71,18 @@ void MyWindow::Setup()
     {
         std::filesystem::path dirpath("assets/shaders");
         auto& rm = System::GetMutableInstance().GetResourceManager();
-        rm.AddResourcesFromDirectory<common::ShaderProgram>(dirpath, false);
+        rm.AddResourcesFromDirectory<ShaderProgram>(dirpath, false);
     }
     // load texture.
     {
         std::filesystem::path dirpath("assets/textures");
         auto& rm = System::GetMutableInstance().GetResourceManager();
-        rm.AddResourcesFromDirectory<common::Texture>(dirpath, false);
+        rm.AddResourcesFromDirectory<Texture>(dirpath, false);
     }
     // generate font.
     {
         std::filesystem::path fontpath = "../common/assets/fonts/test.fnt";
-        auto font = std::make_shared<text::Font>(fontpath);
+        auto font = std::make_shared<Font>(fontpath);
         text = std::make_unique<SDFText>(font, std::make_shared<SDFTextRenderer>());
         text->SetSmoothness(1.0f);
     }
@@ -95,7 +94,7 @@ void MyWindow::Setup()
         GLuint texture;
 
         texpath = "assets/textures/testimg_1920x1080.png";
-        texture = rm.GetResource<common::Texture>(texpath.string())->GetTexture();
+        texture = rm.GetResource<Texture>(texpath.string())->GetTexture();
         selectable_textures.push_back(std::make_tuple(texture, texpath));
 
         selected_texture_index = 0;
@@ -122,16 +121,16 @@ void MyWindow::Setup()
     RecreateResources(width, height);
 
     pipeline_fullscreen_quad.Create();
-    pipeline_fullscreen_quad.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/fullscreen_quad.vs"));
-    pipeline_fullscreen_quad.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/fullscreen_quad.fs"));
+    pipeline_fullscreen_quad.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/fullscreen_quad.vs"));
+    pipeline_fullscreen_quad.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/fullscreen_quad.fs"));
 
     pipeline_linear_to_linear.Create();
-    pipeline_linear_to_linear.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/linear_to_linear.vs"));
-    pipeline_linear_to_linear.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/linear_to_linear.fs"));
+    pipeline_linear_to_linear.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/linear_to_linear.vs"));
+    pipeline_linear_to_linear.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/linear_to_linear.fs"));
 
     pipeline_linear_to_srgb.Create();
-    pipeline_linear_to_srgb.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/linear_to_srgb.vs"));
-    pipeline_linear_to_srgb.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/linear_to_srgb.fs"));
+    pipeline_linear_to_srgb.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/linear_to_srgb.vs"));
+    pipeline_linear_to_srgb.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/linear_to_srgb.fs"));
 
     conversion_mode = 0;
 }
@@ -334,15 +333,15 @@ void MyWindow::RecreateResources(int width, int height)
     {
         auto& rm = System::GetMutableInstance().GetResourceManager();
 
-        rm.RemoveResource<common::Texture>(name);
+        rm.RemoveResource<Texture>(name);
 
         if(levels == 0)
-            levels = common::Texture::CalcNumOfMipmapLevels(width, height);
+            levels = Texture::CalcNumOfMipmapLevels(width, height);
 
-        auto p = std::make_unique<common::Texture>(levels, internal_format, width, height);
+        auto p = std::make_unique<Texture>(levels, internal_format, width, height);
         auto texture = p->GetTexture();
 
-        rm.AddResource<common::Texture>(name, std::move(p));
+        rm.AddResource<Texture>(name, std::move(p));
 
         return std::make_unique<FrameBuffer>(texture, 0, 0);
     };

@@ -5,6 +5,9 @@
 
 #define ENABLE_OGL_DEBUG_OUTPUT
 
+namespace common
+{
+
 class Window
 {
 public:
@@ -59,3 +62,5 @@ private:
 
     bool has_iconified;
 };
+
+}   // namespace common

@@ -3,7 +3,6 @@
 #include <regex>
 #include <hasenpfote/math/utils.h>
 #include <hasenpfote/math/cmatrix4.h>
-#include "../../common/system.h"
 #include "model.h"
 
 using namespace hasenpfote::math;
@@ -170,9 +169,9 @@ void Model::Setup(fbxloader::Model& model, GLuint common_matrices)
 
     auto& rm = System::GetMutableInstance().GetResourceManager();
 
-    vs = rm.GetResource<common::ShaderProgram>("assets/shaders/simple.vs");
+    vs = rm.GetResource<ShaderProgram>("assets/shaders/simple.vs");
     assert(vs);
-    fs = rm.GetResource<common::ShaderProgram>("assets/shaders/simple.fs");
+    fs = rm.GetResource<ShaderProgram>("assets/shaders/simple.fs");
     assert(fs);
 
     glGenProgramPipelines(1, &pipeline);
@@ -234,7 +233,7 @@ void Model::DrawOpaqueMeshes(const hasenpfote::math::CMatrix4& model)
             if(!difuse_texture_name.empty())
             {
                 GLuint texture = 0;
-                auto resource = rm.GetResource<common::Texture>(difuse_texture_name);
+                auto resource = rm.GetResource<Texture>(difuse_texture_name);
                 if(resource != nullptr)
                     texture = resource->GetTexture();
 
@@ -347,7 +346,7 @@ void Model::DrawTransparentMeshes(const hasenpfote::math::CMatrix4& model)
             if(!difuse_texture_name.empty())
             {
                 GLuint texture = 0;
-                auto resource = rm.GetResource<common::Texture>(difuse_texture_name);
+                auto resource = rm.GetResource<Texture>(difuse_texture_name);
                 if (resource != nullptr)
                     texture = resource->GetTexture();
 

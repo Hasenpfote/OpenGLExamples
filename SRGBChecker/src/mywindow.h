@@ -7,12 +7,23 @@
 #include <tuple>
 #include <hasenpfote/math/quaternion.h>
 #include "../../common/window.h"
-#include "../../common/sdf_text.h"
-#include "../../common/framebuffer.h"
+#include "../../common/system.h"
+#include "../../common/render/framebuffer.h"
+#include "../../common/render/text/sdf_text.h"
 #include "fullscreen_pass_geometry.h"
 
-class MyWindow final : public Window
+class MyWindow final : public common::Window
 {
+    using System = common::System;
+    using Texture = common::render::Texture;
+    using ShaderProgram = common::render::ShaderProgram;
+    using ShaderPipeline = common::render::ShaderPipeline;
+    using FrameBuffer = common::render::FrameBuffer;
+    using Font = common::render::text::Font;
+    using SDFText = common::render::text::SDFText;
+    using SDFTextRenderer = common::render::text::SDFTextRenderer;
+    using CustomCamera = common::render::CustomCamera;
+
 public:
     MyWindow();
     ~MyWindow();
@@ -47,9 +58,9 @@ private:
     std::vector<std::tuple<GLuint, std::filesystem::path>> selectable_textures;
     int selected_texture_index;
 
-    common::ShaderPipeline pipeline_fullscreen_quad;
-    common::ShaderPipeline pipeline_linear_to_linear;
-    common::ShaderPipeline pipeline_linear_to_srgb;
+    ShaderPipeline pipeline_fullscreen_quad;
+    ShaderPipeline pipeline_linear_to_linear;
+    ShaderPipeline pipeline_linear_to_srgb;
 
     std::unique_ptr<FrameBuffer> scene_rt;
 

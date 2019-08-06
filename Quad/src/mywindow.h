@@ -2,11 +2,21 @@
 #include <iostream>
 #include <hasenpfote/math/quaternion.h>
 #include "../../common/window.h"
-#include "../../common/sdf_text.h"
+#include "../../common/system.h"
+#include "../../common/render/text/sdf_text.h"
 #include "quad.h"
 
-class MyWindow final : public Window
+class MyWindow final : public common::Window
 {
+    using System = common::System;
+    using Texture = common::render::Texture;
+    using ShaderProgram = common::render::ShaderProgram;
+    using ShaderPipeline = common::render::ShaderPipeline;
+    using Font = common::render::text::Font;
+    using SDFText = common::render::text::SDFText;
+    using SDFTextRenderer = common::render::text::SDFTextRenderer;
+    using CustomCamera = common::render::CustomCamera;
+
 public:
     MyWindow();
     ~MyWindow();

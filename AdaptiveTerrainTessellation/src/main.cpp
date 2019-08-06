@@ -1,14 +1,14 @@
-﻿#include <hasenpfote\log\console_appender.h>
-#include <hasenpfote\log\rolling_file_appender.h>
+﻿#include <hasenpfote/log/console_appender.h>
+#include <hasenpfote/log/rolling_file_appender.h>
 #include "../../common/logger.h"
 #include "mywindow.h"
 
 int main(void)
 {
     using namespace hasenpfote::log;
-    ::Logger::GetMutableInstance().AddAppender<ConsoleAppender>(std::make_shared<ConsoleAppender>());
-    //::Logger::GetMutableInstance().AddAppender<RollingFileAppender>(std::make_shared<RollingFileAppender>("Logs/log.log", 3, 1024 * 1024));
-    //::Logger::GetMutableInstance().RemoveAppender<RollingFileAppender>();
+    common::Logger::GetMutableInstance().AddAppender<ConsoleAppender>(std::make_shared<ConsoleAppender>());
+    //common::Logger::GetMutableInstance().AddAppender<RollingFileAppender>(std::make_shared<RollingFileAppender>("Logs/log.log", 3, 1024 * 1024));
+    //common::Logger::GetMutableInstance().RemoveAppender<RollingFileAppender>();
 
     try{
         MyWindow w;

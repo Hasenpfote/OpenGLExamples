@@ -2,12 +2,23 @@
 #include <iostream>
 #include <hasenpfote/math/quaternion.h>
 #include "../../common/window.h"
-#include "../../common/sdf_text.h"
-#include "../../common/framebuffer.h"
+#include "../../common/system.h"
+#include "../../common/render/framebuffer.h"
+#include "../../common/render/text/sdf_text.h"
 #include "fullscreen_pass_geometry.h"
 
-class MyWindow final : public Window
+class MyWindow final : public common::Window
 {
+    using System = common::System;
+    using Texture = common::render::Texture;
+    using ShaderProgram = common::render::ShaderProgram;
+    using ShaderPipeline = common::render::ShaderPipeline;
+    using FrameBuffer = common::render::FrameBuffer;
+    using Font = common::render::text::Font;
+    using SDFText = common::render::text::SDFText;
+    using SDFTextRenderer = common::render::text::SDFTextRenderer;
+    using CustomCamera = common::render::CustomCamera;
+
 public:
     MyWindow();
     ~MyWindow();
@@ -36,8 +47,8 @@ private:
     std::unique_ptr<FullscreenPassGeometry> fs_pass_geom;
     GLuint sampler;
     GLuint texture;
-    common::ShaderPipeline pipeline_fullscreen_quad;
-    common::ShaderPipeline pipeline_tonemapping;
+    ShaderPipeline pipeline_fullscreen_quad;
+    ShaderPipeline pipeline_tonemapping;
     float exposure;
     bool is_tonemapping_enabled;
 };

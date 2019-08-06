@@ -9,7 +9,6 @@
 #include <hasenpfote/math/vector4.h>
 #include <hasenpfote/math/cmatrix4.h>
 #include <hasenpfote/math/axis_angle.h>
-#include "../../common/system.h"
 #include "../../common/logger.h"
 #include "bayer.h"
 #include "mywindow.h"
@@ -75,18 +74,18 @@ void MyWindow::Setup()
     {
         std::filesystem::path dirpath("assets/shaders");
         auto& rm = System::GetMutableInstance().GetResourceManager();
-        rm.AddResourcesFromDirectory<common::ShaderProgram>(dirpath, false);
+        rm.AddResourcesFromDirectory<ShaderProgram>(dirpath, false);
     }
     // load texture.
     {
         std::filesystem::path dirpath("assets/textures");
         auto& rm = System::GetMutableInstance().GetResourceManager();
-        rm.AddResourcesFromDirectory<common::Texture>(dirpath, false);
+        rm.AddResourcesFromDirectory<Texture>(dirpath, false);
     }
     // generate font.
     {
         std::filesystem::path fontpath = "../common/assets/fonts/test.fnt";
-        auto font = std::make_shared<text::Font>(fontpath);
+        auto font = std::make_shared<Font>(fontpath);
         text = std::make_unique<SDFText>(font, std::make_shared<SDFTextRenderer>());
         text->SetSmoothness(1.0f);
     }
@@ -98,7 +97,7 @@ void MyWindow::Setup()
         GLuint texture;
 
         texpath = "assets/textures/testimg_1920x1080.png";
-        texture = rm.GetResource<common::Texture>(texpath.string())->GetTexture();
+        texture = rm.GetResource<Texture>(texpath.string())->GetTexture();
         selectable_textures.push_back(std::make_tuple(texture, texpath));
 
         selected_texture_index = 0;
@@ -122,9 +121,9 @@ void MyWindow::Setup()
                 temp[i] = static_cast<std::uint8_t>(bayer_matrix[i] * 255.0f);
             }
 
-            auto p = std::make_unique<common::Texture>(GL_R8, dim, dim);
+            auto p = std::make_unique<Texture>(GL_R8, dim, dim);
             auto texture = p->GetTexture();
-            rm.AddResource<common::Texture>(name, std::move(p));
+            rm.AddResource<Texture>(name, std::move(p));
 
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, texture);
@@ -157,16 +156,16 @@ void MyWindow::Setup()
     auto& rm = System::GetConstInstance().GetResourceManager();
 
     pipeline_fullscreen_quad.Create();
-    pipeline_fullscreen_quad.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/fullscreen_quad.vs"));
-    pipeline_fullscreen_quad.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/fullscreen_quad.fs"));
+    pipeline_fullscreen_quad.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/fullscreen_quad.vs"));
+    pipeline_fullscreen_quad.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/fullscreen_quad.fs"));
 
     pipeline_dithering.Create();
-    pipeline_dithering.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/dithering.vs"));
-    pipeline_dithering.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/dithering.fs"));
+    pipeline_dithering.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/dithering.vs"));
+    pipeline_dithering.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/dithering.fs"));
 
     pipeline_apply.Create();
-    pipeline_apply.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/apply.vs"));
-    pipeline_apply.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/apply.fs"));
+    pipeline_apply.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/apply.vs"));
+    pipeline_apply.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/apply.fs"));
 
     is_dithering_enabled = false;
     dithering_mode = 0;
@@ -382,15 +381,15 @@ void MyWindow::RecreateResources(int width, int height)
     {
         auto& rm = System::GetMutableInstance().GetResourceManager();
 
-        rm.RemoveResource<common::Texture>(name);
+        rm.RemoveResource<Texture>(name);
 
         if(levels == 0)
-            levels = common::Texture::CalcNumOfMipmapLevels(width, height);
+            levels = Texture::CalcNumOfMipmapLevels(width, height);
 
-        auto p = std::make_unique<common::Texture>(levels, internal_format, width, height);
+        auto p = std::make_unique<Texture>(levels, internal_format, width, height);
         auto texture = p->GetTexture();
 
-        rm.AddResource<common::Texture>(name, std::move(p));
+        rm.AddResource<Texture>(name, std::move(p));
 
         return std::make_unique<FrameBuffer>(texture, 0, 0);
     };
@@ -462,7 +461,7 @@ void MyWindow::PassDithering(FrameBuffer* input, FrameBuffer* output)
     const auto dim = static_cast<std::size_t>(std::pow(2.0f, level));
 
     auto& rm = System::GetConstInstance().GetResourceManager();
-    const auto dither_texture = rm.GetResource<common::Texture>(name)->GetTexture();
+    const auto dither_texture = rm.GetResource<Texture>(name)->GetTexture();
 
     pipeline_dithering.SetUniform1i("u_tex0", 0);
     pipeline_dithering.SetUniform1i("u_tex1", 1);

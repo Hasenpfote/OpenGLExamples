@@ -1,8 +1,16 @@
 ﻿#include <stack>
 #include "singleton.h"
 
-static std::stack<SingletonFinalizer::Callback> cbs;
-static std::once_flag once;
+namespace
+{
+
+std::stack<common::SingletonFinalizer::Callback> cbs;
+std::once_flag once;
+
+}
+
+namespace common
+{
 
 void SingletonFinalizer::Register(const Callback& cb)
 {
@@ -22,3 +30,5 @@ void SingletonFinalizer::Finalize()
         cbs.pop();
     }
 }
+
+}   // namespace common

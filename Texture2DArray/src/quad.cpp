@@ -3,7 +3,6 @@
 #define STB_IMAGE_STATIC
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
-#include "../../common/system.h"
 #include "quad.h"
 
 Quad::Quad()
@@ -131,8 +130,8 @@ void Quad::Initialize()
     auto& rm = System::GetConstInstance().GetResourceManager();
 
     pipeline.Create();
-    pipeline.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/quad.vs"));
-    pipeline.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/quad.fs"));
+    pipeline.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/quad.vs"));
+    pipeline.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/quad.fs"));
 }
 
 void Quad::Draw()

@@ -1,7 +1,7 @@
 ﻿#include <stdexcept>
 #include <functional>
 #include <hasenpfote/assert.h>
-#include "logger.h"
+#include "../logger.h"
 #include "image.h"
 #include "texture.h"
 
@@ -32,7 +32,7 @@ bool ends_with_ignore_case(const std::string& s, const std::string& suffix)
 
 }
 
-namespace common
+namespace common::render
 {
 
 Texture::Texture(GLsizei levels, GLenum internal_format, GLsizei width, GLsizei height)
@@ -204,4 +204,4 @@ GLsizei Texture::CalcNumOfMipmapLevels(GLsizei width, GLsizei height)
     return static_cast<GLsizei>(std::log2(static_cast<float>(std::max(width, height)))) + 1;
 }
 
-}   // namespace common
+}   // namespace common::render

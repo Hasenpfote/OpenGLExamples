@@ -2,6 +2,9 @@
 #include <filesystem>
 #include <memory>
 
+namespace common::render
+{
+
 class Image final
 {
 public:
@@ -57,3 +60,5 @@ private:
     PixelType pixel_type;
     std::unique_ptr<std::uint8_t[]> data;
 };
+
+}   // namespace common::render

@@ -9,6 +9,9 @@
 #include <functional>
 #include <mutex>
 
+namespace common
+{
+
 template<typename T>
 class Singleton
 {
@@ -59,5 +62,7 @@ private:
     static void Register(const Callback& cb);
     static void Finalize();
 };
+
+}   // namespace common
 
 #include "impl/singleton_impl.h"

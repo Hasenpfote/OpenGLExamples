@@ -4,14 +4,19 @@
 #include "logger.h"
 #include "system.h"
 
+namespace common
+{
+
 System::System()
 {
     LOG_D(__func__);
     rm_ = std::make_unique<common::DefaultResourceManager>();
-    camera_ = std::make_unique<CustomCamera>();
+    camera_ = std::make_unique<common::render::CustomCamera>();
 }
 
 System::~System()
 {
     LOG_D(__func__);
 }
+
+}   // namespace common

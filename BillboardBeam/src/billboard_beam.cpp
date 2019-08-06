@@ -1,6 +1,5 @@
 ﻿#include <cassert>
 #include <GL/glew.h>
-#include "../../common/system.h"
 #include "billboard_beam.h"
 
 float BillboardBeam::vertices[] =
@@ -66,12 +65,12 @@ void BillboardBeam::Initialize()
 
     auto& rm = System::GetConstInstance().GetResourceManager();
 
-    texture = rm.GetResource<common::Texture>("assets/textures/beam.png")->GetTexture();
-    texture = rm.GetResource<common::Texture>("assets/textures/beam_a.png")->GetTexture();
+    texture = rm.GetResource<Texture>("assets/textures/beam.png")->GetTexture();
+    texture = rm.GetResource<Texture>("assets/textures/beam_a.png")->GetTexture();
 
     pipeline.Create();
-    pipeline.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/billboard_beam.vs"));
-    pipeline.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/billboard_beam.fs"));
+    pipeline.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/billboard_beam.vs"));
+    pipeline.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/billboard_beam.fs"));
 }
 
 void BillboardBeam::UpdateMatrices(const hasenpfote::math::CMatrix4& model)

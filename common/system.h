@@ -2,13 +2,16 @@
 #include <memory>
 #include "singleton.h"
 #include "resource.h"
-#include "texture.h"
-#include "shader.h"
-#include "custom_camera.h"
+#include "render/texture.h"
+#include "render/shader.h"
+#include "render/custom_camera.h"
 
-class System final : public Singleton<System>
+namespace common
 {
-    friend class Singleton<System>;
+
+class System final : public common::Singleton<System>
+{
+    friend class common::Singleton<System>;
 private:
     System();
 
@@ -19,10 +22,12 @@ public:
     common::DefaultResourceManager& GetResourceManager() { return *rm_; }
     const common::DefaultResourceManager& GetResourceManager() const { return *rm_; }
 
-    CustomCamera& GetCamera(){ return *camera_; }
-    const CustomCamera& GetCamera() const { return *camera_; }
+    common::render::CustomCamera& GetCamera(){ return *camera_; }
+    const common::render::CustomCamera& GetCamera() const { return *camera_; }
 
 private:
     std::unique_ptr<common::DefaultResourceManager> rm_;
-    std::unique_ptr<CustomCamera> camera_;
+    std::unique_ptr<common::render::CustomCamera> camera_;
 };
+
+}   // namespace common

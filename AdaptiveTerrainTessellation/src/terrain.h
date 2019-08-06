@@ -2,10 +2,15 @@
 #include <GLFW/glfw3.h>
 #include <hasenpfote/math/cmatrix4.h>
 #include <hasenpfote/math/vector3.h>
-#include "../../common/shader.h"
+#include "../../common/system.h"
 
 class Terrain final
 {
+    using System = common::System;
+    using Texture = common::render::Texture;
+    using ShaderProgram = common::render::ShaderProgram;
+    using ShaderPipeline = common::render::ShaderPipeline;
+
 public:
     enum class DrawMode
     {
@@ -47,6 +52,6 @@ private:
 
     hasenpfote::math::Vector3 light_direction;
 
-    common::ShaderPipeline pipeline1;
-    common::ShaderPipeline pipeline2;
+    ShaderPipeline pipeline1;
+    ShaderPipeline pipeline2;
 };

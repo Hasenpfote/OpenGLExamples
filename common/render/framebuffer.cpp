@@ -1,10 +1,13 @@
 #include <cassert>
 #include <memory>
 #include <GL/glew.h>
-#include "logger.h"
+#include "../logger.h"
 #include "framebuffer.h"
 
-static void GetFrameBufferSize(GLuint fbo, GLint* width, GLint* height)
+namespace
+{
+
+void GetFrameBufferSize(GLuint fbo, GLint* width, GLint* height)
 {
     assert(glIsFramebuffer(fbo));
 
@@ -37,6 +40,11 @@ static void GetFrameBufferSize(GLuint fbo, GLint* width, GLint* height)
     }
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
+
+}
+
+namespace common::render
+{
 
 FrameBuffer::FrameBuffer(GLuint color, GLuint depth, GLuint stencil)
 {
@@ -154,3 +162,5 @@ GLuint FrameBuffer::GetDepthTexture()
 
     return texture;
 }
+
+}   // namespace common::render

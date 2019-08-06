@@ -1,12 +1,15 @@
 ﻿#pragma once
-#include "shader.h"
+#include "../shader.h"
 #include "text.h"
+
+namespace common::render::text
+{
 
 /*!
  * @class SDFTextRenderer
  * @brief Signed distance field font rendering.
  */
-class SDFTextRenderer final : public text::ITextRenderer
+class SDFTextRenderer final : public ITextRenderer
 {
     friend class SDFText;
 
@@ -53,21 +56,23 @@ private:
     };
     std::vector<Vertex> vertices;
     std::vector<std::uint32_t> indices;
-    common::ShaderProgram vs;
-    common::ShaderProgram fs;
-    common::ShaderPipeline pipeline;
+    ShaderProgram vs;
+    ShaderProgram fs;
+    ShaderPipeline pipeline;
 };
 
 /*!
  * @class SDFText
  * @brief Signed distance field font.
  */
-class SDFText final : public text::Text
+class SDFText final : public Text
 {
 public:
-    SDFText(const std::shared_ptr<text::Font>& font, const std::shared_ptr<SDFTextRenderer>& renderer);
+    SDFText(const std::shared_ptr<Font>& font, const std::shared_ptr<SDFTextRenderer>& renderer);
     ~SDFText() = default;
 
     void SetSmoothness(GLfloat smoothness);
     void SetOutlineColor(const GLfloat* color);
 };
+
+}   // namespace common::render::text

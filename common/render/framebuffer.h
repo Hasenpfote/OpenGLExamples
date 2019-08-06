@@ -1,6 +1,9 @@
 #pragma once
 #include <GLFW/glfw3.h>
 
+namespace common::render
+{
+
 class FrameBuffer final
 {
 public:
@@ -24,3 +27,5 @@ private:
     bool    is_active;
     GLint   prev_viewport[4];
 };
+
+}   // namespace common::render

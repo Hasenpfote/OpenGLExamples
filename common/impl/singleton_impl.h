@@ -1,6 +1,9 @@
 ﻿#pragma once
 #include <cassert>
 
+namespace common
+{
+
 template<typename T> std::unique_ptr<T> Singleton<T>::instance = nullptr;
 
 template<typename T>
@@ -47,3 +50,5 @@ std::once_flag& Singleton<T>::GetOnceFlag()
     static std::once_flag once;
     return once;
 }
+
+}   // namespace common

@@ -1,8 +1,9 @@
 ﻿#pragma once
 #include <memory>
 #include "singleton.h"
-#include "shader.h"
+#include "resource.h"
 #include "texture.h"
+#include "shader.h"
 #include "custom_camera.h"
 
 class System final : public Singleton<System>
@@ -15,15 +16,13 @@ public:
     ~System();
 
 public:
-    ShaderManager& GetShaderManager(){ return *shader_man; }
-    const ShaderManager& GetShaderManager() const { return *shader_man; }
-    TextureManager& GetTextureManager(){ return *texture_man; }
-    const TextureManager& GetTextureManager() const { return *texture_man; }
-    CustomCamera& GetCamera(){ return *camera; }
-    const CustomCamera& GetCamera() const { return *camera; }
+    common::DefaultResourceManager& GetResourceManager() { return *rm_; }
+    const common::DefaultResourceManager& GetResourceManager() const { return *rm_; }
+
+    CustomCamera& GetCamera(){ return *camera_; }
+    const CustomCamera& GetCamera() const { return *camera_; }
 
 private:
-    std::unique_ptr<ShaderManager> shader_man;
-    std::unique_ptr<TextureManager> texture_man;
-    std::unique_ptr<CustomCamera> camera;
+    std::unique_ptr<common::DefaultResourceManager> rm_;
+    std::unique_ptr<CustomCamera> camera_;
 };

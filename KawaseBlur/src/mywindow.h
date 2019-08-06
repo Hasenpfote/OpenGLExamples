@@ -38,11 +38,11 @@ private:
     std::unique_ptr<FullscreenPassGeometry> fs_pass_geom;
     GLuint sampler;
     GLuint texture;
-    ShaderPipeline pipeline_fullscreen_quad;
-    ShaderPipeline pipeline_downsampling_2x2;
-    ShaderPipeline pipeline_downsampling_4x4;
-    ShaderPipeline pipeline_kawase_blur;
-    ShaderPipeline pipeline_apply;
+    common::ShaderPipeline pipeline_fullscreen_quad;
+    common::ShaderPipeline pipeline_downsampling_2x2;
+    common::ShaderPipeline pipeline_downsampling_4x4;
+    common::ShaderPipeline pipeline_kawase_blur;
+    common::ShaderPipeline pipeline_apply;
 
     std::unique_ptr<FrameBuffer> scene_rt;
     std::unique_ptr<FrameBuffer> ds_rt_0;

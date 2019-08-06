@@ -36,8 +36,8 @@ private:
     std::unique_ptr<FullscreenPassGeometry> fs_pass_geom;
     GLuint sampler;
     GLuint texture;
-    ShaderPipeline pipeline_fullscreen_quad;
-    ShaderPipeline pipeline_tonemapping;
+    common::ShaderPipeline pipeline_fullscreen_quad;
+    common::ShaderPipeline pipeline_tonemapping;
     float exposure;
     bool is_tonemapping_enabled;
 };

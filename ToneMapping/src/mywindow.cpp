@@ -61,16 +61,15 @@ void MyWindow::Setup()
 
     // load shader.
     {
-        auto& man = System::GetMutableInstance().GetShaderManager();
-        std::filesystem::path directory("assets/shaders");
-        man.LoadShaderPrograms(directory);
+        std::filesystem::path dirpath("assets/shaders");
+        auto& rm = System::GetMutableInstance().GetResourceManager();
+        rm.AddResourcesFromDirectory<common::ShaderProgram>(dirpath, false);
     }
-
     // load texture.
     {
-        std::filesystem::path directory("assets/textures");
-        auto& man = System::GetMutableInstance().GetTextureManager();
-        man.LoadTextures(directory);
+        std::filesystem::path dirpath("assets/textures");
+        auto& rm = System::GetMutableInstance().GetResourceManager();
+        rm.AddResourcesFromDirectory<common::Texture>(dirpath, false);
     }
     // generate font.
     {
@@ -79,8 +78,10 @@ void MyWindow::Setup()
         text = std::make_unique<SDFText>(font, std::make_shared<SDFTextRenderer>());
         text->SetSmoothness(1.0f);
     }
+
+    auto& rm = System::GetConstInstance().GetResourceManager();
     //
-    texture = System::GetConstInstance().GetTextureManager().GetTexture("assets/textures/kloofendal_48d_partly_cloudy_1k.exr");
+    texture = rm.GetResource<common::Texture>("assets/textures/kloofendal_48d_partly_cloudy_1k.exr")->GetTexture();
 
     fs_pass_geom = std::make_unique<FullscreenPassGeometry>();
 
@@ -95,14 +96,13 @@ void MyWindow::Setup()
 
     RecreateResources(width, height);
 
-    auto& man = System::GetConstInstance().GetShaderManager();
     pipeline_fullscreen_quad.Create();
-    pipeline_fullscreen_quad.SetShaderProgram(man.GetShaderProgram("assets/shaders/fullscreen_quad.vs"));
-    pipeline_fullscreen_quad.SetShaderProgram(man.GetShaderProgram("assets/shaders/fullscreen_quad.fs"));
+    pipeline_fullscreen_quad.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/fullscreen_quad.vs"));
+    pipeline_fullscreen_quad.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/fullscreen_quad.fs"));
 
     pipeline_tonemapping.Create();
-    pipeline_tonemapping.SetShaderProgram(man.GetShaderProgram("assets/shaders/tonemapping.vs"));
-    pipeline_tonemapping.SetShaderProgram(man.GetShaderProgram("assets/shaders/tonemapping.fs"));
+    pipeline_tonemapping.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/tonemapping.vs"));
+    pipeline_tonemapping.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/tonemapping.fs"));
 
     is_tonemapping_enabled = false;
     exposure = 2.0f;
@@ -215,7 +215,7 @@ void MyWindow::OnRender()
 
     // 情報の表示
     auto metrics = text->GetFont().GetFontMetrics();
-    auto line_height = static_cast<float>(metrics.GetLineHeight()); 
+    auto line_height = static_cast<float>(metrics.GetLineHeight());
     const float scale = 1.0f;
     const float fh = line_height * scale;
 

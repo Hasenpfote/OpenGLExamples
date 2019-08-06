@@ -61,16 +61,15 @@ void MyWindow::Setup()
 
     // load shader.
     {
-        auto& man = System::GetMutableInstance().GetShaderManager();
-        std::filesystem::path directory("assets/shaders");
-        man.LoadShaderPrograms(directory);
+        std::filesystem::path dirpath("assets/shaders");
+        auto& rm = System::GetMutableInstance().GetResourceManager();
+        rm.AddResourcesFromDirectory<common::ShaderProgram>(dirpath, false);
     }
-
     // load texture.
     {
-        std::filesystem::path directory("assets/textures");
-        auto& man = System::GetMutableInstance().GetTextureManager();
-        man.LoadTextures(directory);
+        std::filesystem::path dirpath("assets/textures");
+        auto& rm = System::GetMutableInstance().GetResourceManager();
+        rm.AddResourcesFromDirectory<common::Texture>(dirpath, false);
     }
     // generate font.
     {
@@ -100,23 +99,23 @@ void MyWindow::Setup()
 
     RecreateResources(width, height);
 
-    auto& man = System::GetConstInstance().GetShaderManager();
+    auto& rm = System::GetConstInstance().GetResourceManager();
 
     pipeline_noise.Create();
-    pipeline_noise.SetShaderProgram(man.GetShaderProgram("assets/shaders/noise.vs"));
-    pipeline_noise.SetShaderProgram(man.GetShaderProgram("assets/shaders/noise.fs"));
+    pipeline_noise.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/noise.vs"));
+    pipeline_noise.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/noise.fs"));
 
     pipeline_decode.Create();
-    pipeline_decode.SetShaderProgram(man.GetShaderProgram("assets/shaders/decode.vs"));
-    pipeline_decode.SetShaderProgram(man.GetShaderProgram("assets/shaders/decode.fs"));
+    pipeline_decode.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/decode.vs"));
+    pipeline_decode.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/decode.fs"));
 
     pipeline_sort.Create();
-    pipeline_sort.SetShaderProgram(man.GetShaderProgram("assets/shaders/sort.vs"));
-    pipeline_sort.SetShaderProgram(man.GetShaderProgram("assets/shaders/sort.fs"));
+    pipeline_sort.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/sort.vs"));
+    pipeline_sort.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/sort.fs"));
 
     pipeline_apply.Create();
-    pipeline_apply.SetShaderProgram(man.GetShaderProgram("assets/shaders/apply.vs"));
-    pipeline_apply.SetShaderProgram(man.GetShaderProgram("assets/shaders/apply.fs"));
+    pipeline_apply.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/apply.vs"));
+    pipeline_apply.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/apply.fs"));
 
     state = State::Idle;
 }
@@ -285,37 +284,49 @@ void MyWindow::OnRender()
 
 void MyWindow::RecreateResources(int width, int height)
 {
-    GLuint color_texture;
-
-    System::GetMutableInstance().GetTextureManager().DeleteTexture("input_rt_color");
-    color_texture = System::GetMutableInstance().GetTextureManager().CreateTexture("input_rt_color", GL_RGBA16F, width, height);
-    input_rt = std::make_unique<FrameBuffer>(color_texture, 0, 0);
-
-    auto width2 = static_cast<decltype(width)>(bitonic_sort::next_higher_power_of_two(width));
-    auto height2 = static_cast<decltype(height)>(bitonic_sort::next_higher_power_of_two(height));
-
-    std::stringstream ss;
+    auto recreate_fb = [](const std::string& name, GLsizei levels, GLenum internal_format, GLsizei width, GLsizei height)
     {
+        auto& rm = System::GetMutableInstance().GetResourceManager();
+
+        rm.RemoveResource<common::Texture>(name);
+
+        if(levels == 0)
+            levels = common::Texture::CalcNumOfMipmapLevels(width, height);
+
+        auto p = std::make_unique<common::Texture>(levels, internal_format, width, height);
+        auto texture = p->GetTexture();
+
+        rm.AddResource<common::Texture>(name, std::move(p));
+
+        return std::make_unique<FrameBuffer>(texture, 0, 0);
+    };
+
+    {
+        const auto name = std::string("input_rt_color");
+        input_rt = recreate_fb(name, 1, GL_RGBA16F, width, height);
+    }
+    {
+        auto width2 = static_cast<decltype(width)>(bitonic_sort::next_higher_power_of_two(width));
+        auto height2 = static_cast<decltype(height)>(bitonic_sort::next_higher_power_of_two(height));
+
+        std::stringstream ss;
+
         ss << "sort_rt_color_" << 0;
-        System::GetMutableInstance().GetTextureManager().DeleteTexture(ss.str());
-        color_texture = System::GetMutableInstance().GetTextureManager().CreateTexture(ss.str(), GL_RGBA16F, width2, height2);
-        auto sort_rt_0 = std::make_unique<FrameBuffer>(color_texture, 0, 0);
+        auto sort_rt_0 = recreate_fb(ss.str(), 1, GL_RGBA16F, width2, height2);
         ss.str("");
         ss.clear(std::stringstream::goodbit);
 
         ss << "sort_rt_color_" << 1;
-        System::GetMutableInstance().GetTextureManager().DeleteTexture(ss.str());
-        color_texture = System::GetMutableInstance().GetTextureManager().CreateTexture(ss.str(), GL_RGBA16F, width2, height2);
-        auto sort_rt_1 = std::make_unique<FrameBuffer>(color_texture, 0, 0);
+        auto sort_rt_1 = recreate_fb(ss.str(), 1, GL_RGBA16F, width2, height2);
         ss.str("");
         ss.clear(std::stringstream::goodbit);
 
         sort_rts = { std::move(sort_rt_0), std::move(sort_rt_1) };
     }
-
-    System::GetMutableInstance().GetTextureManager().DeleteTexture("output_rt_color");
-    color_texture = System::GetMutableInstance().GetTextureManager().CreateTexture("output_rt_color", GL_RGBA16F, width, height);
-    output_rt = std::make_unique<FrameBuffer>(color_texture, 0, 0);
+    {
+        const auto name = std::string("output_rt_color");
+        output_rt = recreate_fb(name, 1, GL_RGBA16F, width, height);
+    }
 }
 
 void MyWindow::DrawTextLines(std::vector<std::string> text_lines)

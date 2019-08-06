@@ -47,6 +47,6 @@ private:
 
     hasenpfote::math::Vector3 light_direction;
 
-    ShaderPipeline pipeline1;
-    ShaderPipeline pipeline2;
+    common::ShaderPipeline pipeline1;
+    common::ShaderPipeline pipeline2;
 };

@@ -60,16 +60,15 @@ void MyWindow::Setup()
 
     // load shader.
     {
-        auto& man = System::GetMutableInstance().GetShaderManager();
-        std::filesystem::path directory("assets/shaders");
-        man.LoadShaderPrograms(directory);
+        std::filesystem::path dirpath("assets/shaders");
+        auto& rm = System::GetMutableInstance().GetResourceManager();
+        rm.AddResourcesFromDirectory<common::ShaderProgram>(dirpath, false);
     }
-
     // load texture.
     {
-        std::filesystem::path directory("assets/textures");
-        auto& man = System::GetMutableInstance().GetTextureManager();
-        man.LoadTextures(directory);
+        std::filesystem::path dirpath("assets/textures");
+        auto& rm = System::GetMutableInstance().GetResourceManager();
+        rm.AddResourcesFromDirectory<common::Texture>(dirpath, false);
     }
     // generate font.
     {
@@ -78,21 +77,23 @@ void MyWindow::Setup()
         text = std::make_unique<SDFText>(font, std::make_shared<SDFTextRenderer>());
         text->SetSmoothness(1.0f);
     }
+
+    auto& rm = System::GetConstInstance().GetResourceManager();
     //
     {
         std::filesystem::path texpath;
         GLuint texture;
 
         texpath = "assets/textures/test_image_1.png";
-        texture = System::GetConstInstance().GetTextureManager().GetTexture(texpath);
+        texture = rm.GetResource<common::Texture>(texpath.string())->GetTexture();
         selectable_textures.push_back(std::make_tuple(texture, texpath));
 
         texpath = "assets/textures/test_image_2.png";
-        texture = System::GetConstInstance().GetTextureManager().GetTexture(texpath);
+        texture = rm.GetResource<common::Texture>(texpath.string())->GetTexture();
         selectable_textures.push_back(std::make_tuple(texture, texpath));
 
         texpath = "assets/textures/test_image_3.png";
-        texture = System::GetConstInstance().GetTextureManager().GetTexture(texpath);
+        texture = rm.GetResource<common::Texture>(texpath.string())->GetTexture();
         selectable_textures.push_back(std::make_tuple(texture, texpath));
 
         selected_texture_index = 0;
@@ -118,26 +119,25 @@ void MyWindow::Setup()
 
     RecreateResources(width, height);
 
-    auto& man = System::GetConstInstance().GetShaderManager();
     pipeline_fullscreen_quad.Create();
-    pipeline_fullscreen_quad.SetShaderProgram(man.GetShaderProgram("assets/shaders/fullscreen_quad.vs"));
-    pipeline_fullscreen_quad.SetShaderProgram(man.GetShaderProgram("assets/shaders/fullscreen_quad.fs"));
+    pipeline_fullscreen_quad.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/fullscreen_quad.vs"));
+    pipeline_fullscreen_quad.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/fullscreen_quad.fs"));
 
     pipeline_high_luminance_region_extraction.Create();
-    pipeline_high_luminance_region_extraction.SetShaderProgram(man.GetShaderProgram("assets/shaders/high_luminance_region_extraction.vs"));
-    pipeline_high_luminance_region_extraction.SetShaderProgram(man.GetShaderProgram("assets/shaders/high_luminance_region_extraction.fs"));
+    pipeline_high_luminance_region_extraction.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/high_luminance_region_extraction.vs"));
+    pipeline_high_luminance_region_extraction.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/high_luminance_region_extraction.fs"));
 
     pipeline_simple_radial_blur.Create();
-    pipeline_simple_radial_blur.SetShaderProgram(man.GetShaderProgram("assets/shaders/simple_radial_blur.vs"));
-    pipeline_simple_radial_blur.SetShaderProgram(man.GetShaderProgram("assets/shaders/simple_radial_blur.fs"));
+    pipeline_simple_radial_blur.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/simple_radial_blur.vs"));
+    pipeline_simple_radial_blur.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/simple_radial_blur.fs"));
 
     pipeline_custom_radial_blur.Create();
-    pipeline_custom_radial_blur.SetShaderProgram(man.GetShaderProgram("assets/shaders/custom_radial_blur.vs"));
-    pipeline_custom_radial_blur.SetShaderProgram(man.GetShaderProgram("assets/shaders/custom_radial_blur.fs"));
+    pipeline_custom_radial_blur.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/custom_radial_blur.vs"));
+    pipeline_custom_radial_blur.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/custom_radial_blur.fs"));
 
     pipeline_apply.Create();
-    pipeline_apply.SetShaderProgram(man.GetShaderProgram("assets/shaders/apply.vs"));
-    pipeline_apply.SetShaderProgram(man.GetShaderProgram("assets/shaders/apply.fs"));
+    pipeline_apply.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/apply.vs"));
+    pipeline_apply.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/apply.fs"));
 
     is_debug_enabled = false;
     is_filter_enabled = false;
@@ -378,37 +378,43 @@ void MyWindow::OnRender()
 
 void MyWindow::RecreateResources(int width, int height)
 {
-    GLuint color_texture;
+    auto recreate_fb = [](const std::string& name, GLsizei levels, GLenum internal_format, GLsizei width, GLsizei height)
+    {
+        auto& rm = System::GetMutableInstance().GetResourceManager();
+
+        rm.RemoveResource<common::Texture>(name);
+
+        if(levels == 0)
+            levels = common::Texture::CalcNumOfMipmapLevels(width, height);
+
+        auto p = std::make_unique<common::Texture>(levels, internal_format, width, height);
+        auto texture = p->GetTexture();
+
+        rm.AddResource<common::Texture>(name, std::move(p));
+
+        return std::make_unique<FrameBuffer>(texture, 0, 0);
+    };
 
     // for scene.
-    System::GetMutableInstance().GetTextureManager().DeleteTexture("scene_rt_color");
-    color_texture = System::GetMutableInstance().GetTextureManager().CreateTexture("scene_rt_color", GL_RGBA16F, width, height);
-    scene_rt = std::make_unique<FrameBuffer>(color_texture, 0, 0);
-
+    {
+        const auto name = std::string("scene_rt_color");
+        scene_rt = recreate_fb(name, 1, GL_RGBA16F, width, height);
+    }
     // for debug.
-    System::GetMutableInstance().GetTextureManager().DeleteTexture("debug_rt_color");
-    color_texture = System::GetMutableInstance().GetTextureManager().CreateTexture("debug_rt_color", GL_RGBA16F, width, height);
-    debug_rt = std::make_unique<FrameBuffer>(color_texture, 0, 0);
-
+    {
+        const auto name = std::string("debug_rt_color");
+        debug_rt = recreate_fb(name, 1, GL_RGBA16F, width, height);
+    }
     //
-    auto ds_width = width / 4;
-    auto ds_height = height / 4;
+    {
+        auto ds_width = width / 4;
+        auto ds_height = height / 4;
 
-    System::GetMutableInstance().GetTextureManager().DeleteTexture("high_luminance_region_rt_color");
-    color_texture = System::GetMutableInstance().GetTextureManager().CreateTexture("high_luminance_region_rt_color", GL_RGBA16F, ds_width, ds_height);
-    high_luminance_region_rt = std::make_unique<FrameBuffer>(color_texture, 0, 0);
-
-    System::GetMutableInstance().GetTextureManager().DeleteTexture("radial_blur_color_0");
-    color_texture = System::GetMutableInstance().GetTextureManager().CreateTexture("radial_blur_color_0", GL_RGBA16F, ds_width, ds_height);
-    radial_blur_rts[0] = std::make_unique<FrameBuffer>(color_texture, 0, 0);
-
-    System::GetMutableInstance().GetTextureManager().DeleteTexture("radial_blur_color_1");
-    color_texture = System::GetMutableInstance().GetTextureManager().CreateTexture("radial_blur_color_1", GL_RGBA16F, ds_width, ds_height);
-    radial_blur_rts[1] = std::make_unique<FrameBuffer>(color_texture, 0, 0);
-
-    System::GetMutableInstance().GetTextureManager().DeleteTexture("radial_blur_color_2");
-    color_texture = System::GetMutableInstance().GetTextureManager().CreateTexture("radial_blur_color_2", GL_RGBA16F, ds_width, ds_height);
-    radial_blur_rts[2] = std::make_unique<FrameBuffer>(color_texture, 0, 0);
+        high_luminance_region_rt = recreate_fb("high_luminance_region_rt_color", 1, GL_RGBA16F, ds_width, ds_height);
+        radial_blur_rts[0] = recreate_fb("radial_blur_color_0", 1, GL_RGBA16F, ds_width, ds_height);
+        radial_blur_rts[1] = recreate_fb("radial_blur_color_1", 1, GL_RGBA16F, ds_width, ds_height);
+        radial_blur_rts[2] = recreate_fb("radial_blur_color_2", 1, GL_RGBA16F, ds_width, ds_height);
+    }
 }
 
 void MyWindow::DrawTextLines(std::vector<std::string> text_lines)

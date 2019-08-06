@@ -23,10 +23,10 @@ Quad::~Quad()
 
 void Quad::Initialize()
 {
-    static float vertices[] = 
+    static float vertices[] =
     {
         -10.0f, -10.0f, 0.0f, // left bottom
-         10.0f, -10.0f, 0.0f, // right bottom  
+         10.0f, -10.0f, 0.0f, // right bottom
          10.0f,  10.0f, 0.0f, // right top
         -10.0f,  10.0f, 0.0f  // left top
     };
@@ -80,12 +80,13 @@ void Quad::Initialize()
     glSamplerParameteri(sampler, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glSamplerParameteri(sampler, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-    texture = System::GetConstInstance().GetTextureManager().GetTexture("assets/textures/chess_board.png");
+    auto& rm = System::GetConstInstance().GetResourceManager();
 
-    auto& man = System::GetConstInstance().GetShaderManager();
+    texture = rm.GetResource<common::Texture>("assets/textures/chess_board.png")->GetTexture();
+
     pipeline.Create();
-    pipeline.SetShaderProgram(man.GetShaderProgram("assets/shaders/quad.vs"));
-    pipeline.SetShaderProgram(man.GetShaderProgram("assets/shaders/quad.fs"));
+    pipeline.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/quad.vs"));
+    pipeline.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/quad.fs"));
 }
 
 void Quad::Draw()

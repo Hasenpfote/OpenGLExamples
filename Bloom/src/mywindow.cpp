@@ -73,16 +73,16 @@ void MyWindow::Setup()
 
     // load shader.
     {
-        auto& man = System::GetMutableInstance().GetShaderManager();
-        std::filesystem::path directory("assets/shaders");
-        man.LoadShaderPrograms(directory);
+        std::filesystem::path dirpath("assets/shaders");
+        auto& rm = System::GetMutableInstance().GetResourceManager();
+        rm.AddResourcesFromDirectory<common::ShaderProgram>(dirpath, false);
     }
 
     // load texture.
     {
-        std::filesystem::path directory("assets/textures");
-        auto& man = System::GetMutableInstance().GetTextureManager();
-        man.LoadTextures(directory);
+        std::filesystem::path dirpath("assets/textures");
+        auto& rm = System::GetMutableInstance().GetResourceManager();
+        rm.AddResourcesFromDirectory<common::Texture>(dirpath, false);
     }
     // generate font.
     {
@@ -92,7 +92,9 @@ void MyWindow::Setup()
         text->SetSmoothness(1.0f);
     }
     //
-    texture = System::GetConstInstance().GetTextureManager().GetTexture("assets/textures/testimg_1920x1080.png");
+    auto& rm = System::GetConstInstance().GetResourceManager();
+
+    texture = rm.GetResource<common::Texture>("assets/textures/testimg_1920x1080.png")->GetTexture();
 
     fs_pass_geom = std::make_unique<FullscreenPassGeometry>();
 
@@ -107,30 +109,29 @@ void MyWindow::Setup()
 
     RecreateResources(width, height);
 
-    auto& man = System::GetConstInstance().GetShaderManager();
     pipeline_fullscreen_quad.Create();
-    pipeline_fullscreen_quad.SetShaderProgram(man.GetShaderProgram("assets/shaders/fullscreen_quad.vs"));
-    pipeline_fullscreen_quad.SetShaderProgram(man.GetShaderProgram("assets/shaders/fullscreen_quad.fs"));
+    pipeline_fullscreen_quad.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/fullscreen_quad.vs"));
+    pipeline_fullscreen_quad.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/fullscreen_quad.fs"));
 
     pipeline_apply.Create();
-    pipeline_apply.SetShaderProgram(man.GetShaderProgram("assets/shaders/apply.vs"));
-    pipeline_apply.SetShaderProgram(man.GetShaderProgram("assets/shaders/apply.fs"));
+    pipeline_apply.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/apply.vs"));
+    pipeline_apply.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/apply.fs"));
 
     pipeline_downsampling_2x2.Create();
-    pipeline_downsampling_2x2.SetShaderProgram(man.GetShaderProgram("assets/shaders/downsampling.vs"));
-    pipeline_downsampling_2x2.SetShaderProgram(man.GetShaderProgram("assets/shaders/downsampling_2x2.fs"));
+    pipeline_downsampling_2x2.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/downsampling.vs"));
+    pipeline_downsampling_2x2.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/downsampling_2x2.fs"));
 
     pipeline_downsampling_4x4.Create();
-    pipeline_downsampling_4x4.SetShaderProgram(man.GetShaderProgram("assets/shaders/downsampling.vs"));
-    pipeline_downsampling_4x4.SetShaderProgram(man.GetShaderProgram("assets/shaders/downsampling_4x4.fs"));
+    pipeline_downsampling_4x4.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/downsampling.vs"));
+    pipeline_downsampling_4x4.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/downsampling_4x4.fs"));
 
     pipeline_kawase_blur.Create();
-    pipeline_kawase_blur.SetShaderProgram(man.GetShaderProgram("assets/shaders/kawase_blur.vs"));
-    pipeline_kawase_blur.SetShaderProgram(man.GetShaderProgram("assets/shaders/kawase_blur.fs"));
+    pipeline_kawase_blur.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/kawase_blur.vs"));
+    pipeline_kawase_blur.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/kawase_blur.fs"));
 
     pipeline_high_luminance_region_extraction.Create();
-    pipeline_high_luminance_region_extraction.SetShaderProgram(man.GetShaderProgram("assets/shaders/high_luminance_region_extraction.vs"));
-    pipeline_high_luminance_region_extraction.SetShaderProgram(man.GetShaderProgram("assets/shaders/high_luminance_region_extraction.fs"));
+    pipeline_high_luminance_region_extraction.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/high_luminance_region_extraction.vs"));
+    pipeline_high_luminance_region_extraction.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/high_luminance_region_extraction.fs"));
 
     shader_kernel_name = "gaussian_7x7";
 
@@ -274,7 +275,7 @@ void MyWindow::OnRender()
 
     // 情報の表示
     auto metrics = text->GetFont().GetFontMetrics();
-    auto line_height = static_cast<float>(metrics.GetLineHeight()); 
+    auto line_height = static_cast<float>(metrics.GetLineHeight());
     const float scale = 1.0f;
     const float fh = line_height * scale;
 
@@ -331,53 +332,69 @@ void MyWindow::OnRender()
 
 void MyWindow::RecreateResources(int width, int height)
 {
-    GLuint color_texture;
-
-    System::GetMutableInstance().GetTextureManager().DeleteTexture("scene_rt_color");
-    color_texture = System::GetMutableInstance().GetTextureManager().CreateTexture("scene_rt_color", GL_RGBA16F, width, height);
-    scene_rt = std::make_unique<FrameBuffer>(color_texture, 0, 0);
-    //
-    auto ds_width = width / 2;
-    auto ds_height = height / 2;
-
-    System::GetMutableInstance().GetTextureManager().DeleteTexture("luminance_rt_color");
-    color_texture = System::GetMutableInstance().GetTextureManager().CreateTexture("luminance_rt_color", GL_RGBA16F, ds_width, ds_height);
-    high_luminance_region_rt = std::make_unique<FrameBuffer>(color_texture, 0, 0);
-    //
-    downsampled_rts.clear();
-
-    std::stringstream ss;
-    for(auto i = 0; i < 5; i++)
+    auto recreate_fb = [](const std::string& name, GLsizei levels, GLenum internal_format, GLsizei width, GLsizei height)
     {
-        ds_width /= 2;
-        ds_height /= 2;
+        auto& rm = System::GetMutableInstance().GetResourceManager();
 
-        ss << "downsampled_rt_color_" << i << "_"<< 0;
-        System::GetMutableInstance().GetTextureManager().DeleteTexture(ss.str());
-        color_texture = System::GetMutableInstance().GetTextureManager().CreateTexture(ss.str(), GL_RGBA16F, ds_width, ds_height);
-        auto downsampled_rt_0 = std::make_unique<FrameBuffer>(color_texture, 0, 0);
-        ss.str("");
-        ss.clear(std::stringstream::goodbit);
+        rm.RemoveResource<common::Texture>(name);
 
-        ss << "downsampled_rt_color_" << i << "_" << 1;
-        System::GetMutableInstance().GetTextureManager().DeleteTexture(ss.str());
-        color_texture = System::GetMutableInstance().GetTextureManager().CreateTexture(ss.str(), GL_RGBA16F, ds_width, ds_height);
-        auto downsampled_rt_1 = std::make_unique<FrameBuffer>(color_texture, 0, 0);
-        ss.str("");
-        ss.clear(std::stringstream::goodbit);
+        if(levels == 0)
+            levels = common::Texture::CalcNumOfMipmapLevels(width, height);
 
-        ss << "downsampled_rt_color_" << i << "_" << 2;
-        System::GetMutableInstance().GetTextureManager().DeleteTexture(ss.str());
-        color_texture = System::GetMutableInstance().GetTextureManager().CreateTexture(ss.str(), GL_RGBA16F, ds_width, ds_height);
-        auto downsampled_rt_2 = std::make_unique<FrameBuffer>(color_texture, 0, 0);
-        ss.str("");
-        ss.clear(std::stringstream::goodbit);
+        auto p = std::make_unique<common::Texture>(levels, internal_format, width, height);
+        auto texture = p->GetTexture();
 
-        downsampled_rts.push_back({
-            std::move(downsampled_rt_0),
-            std::move(downsampled_rt_1),
-            std::move(downsampled_rt_2)
-        });
+        rm.AddResource<common::Texture>(name, std::move(p));
+
+        return std::make_unique<FrameBuffer>(texture, 0, 0);
+    };
+
+    // for scene.
+    {
+        const auto name = std::string("scene_rt_color");
+        scene_rt = recreate_fb(name, 1, GL_RGBA16F, width, height);
+    }
+    // for high luminance region.
+    {
+        auto ds_width = width / 2;
+        auto ds_height = height / 2;
+        const auto name = std::string("luminance_rt_color");
+        high_luminance_region_rt = recreate_fb(name, 1, GL_RGBA16F, ds_width, ds_height);
+    }
+    {
+        std::stringstream ss;
+
+        auto ds_width = width / 4;
+        auto ds_height = height / 4;
+
+        downsampled_rts.clear();
+
+        for(auto i = 0; i < 5; i++)
+        {
+            ds_width /= 2;
+            ds_height /= 2;
+
+            ss << "downsampled_rt_color_" << i << "_" << 0;
+            auto downsampled_rt_0 = recreate_fb(ss.str(), 1, GL_RGBA16F, ds_width, ds_height);
+            ss.str("");
+            ss.clear(std::stringstream::goodbit);
+
+            ss << "downsampled_rt_color_" << i << "_" << 1;
+            auto downsampled_rt_1 = recreate_fb(ss.str(), 1, GL_RGBA16F, ds_width, ds_height);
+            ss.str("");
+            ss.clear(std::stringstream::goodbit);
+
+            ss << "downsampled_rt_color_" << i << "_" << 2;
+            auto downsampled_rt_2 = recreate_fb(ss.str(), 1, GL_RGBA16F, ds_width, ds_height);
+            ss.str("");
+            ss.clear(std::stringstream::goodbit);
+
+            downsampled_rts.push_back({
+                std::move(downsampled_rt_0),
+                std::move(downsampled_rt_1),
+                std::move(downsampled_rt_2)
+                });
+        }
     }
 }
 

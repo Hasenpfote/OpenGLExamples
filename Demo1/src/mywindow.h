@@ -57,15 +57,15 @@ private:
     std::vector<std::tuple<GLuint, std::filesystem::path>> selectable_textures;
     int selected_texture_index;
 
-    ShaderPipeline pipeline_fullscreen_quad;
-    ShaderPipeline pipeline_log_luminance;
-    ShaderPipeline pipeline_high_luminance_region_extraction;
-    ShaderPipeline pipeline_downsampling_2x2;
-    ShaderPipeline pipeline_downsampling_4x4;
-    ShaderPipeline pipeline_kawase_blur;
-    ShaderPipeline pipeline_streak;
-    ShaderPipeline pipeline_tonemapping;
-    ShaderPipeline pipeline_apply;
+    common::ShaderPipeline pipeline_fullscreen_quad;
+    common::ShaderPipeline pipeline_log_luminance;
+    common::ShaderPipeline pipeline_high_luminance_region_extraction;
+    common::ShaderPipeline pipeline_downsampling_2x2;
+    common::ShaderPipeline pipeline_downsampling_4x4;
+    common::ShaderPipeline pipeline_kawase_blur;
+    common::ShaderPipeline pipeline_streak;
+    common::ShaderPipeline pipeline_tonemapping;
+    common::ShaderPipeline pipeline_apply;
 
     std::unique_ptr<FrameBuffer> scene_rt;
     std::unique_ptr<FrameBuffer> luminance_rt;

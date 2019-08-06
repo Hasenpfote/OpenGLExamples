@@ -47,9 +47,9 @@ private:
     std::vector<std::tuple<GLuint, std::filesystem::path>> selectable_textures;
     int selected_texture_index;
 
-    ShaderPipeline pipeline_fullscreen_quad;
-    ShaderPipeline pipeline_linear_to_linear;
-    ShaderPipeline pipeline_linear_to_srgb;
+    common::ShaderPipeline pipeline_fullscreen_quad;
+    common::ShaderPipeline pipeline_linear_to_linear;
+    common::ShaderPipeline pipeline_linear_to_srgb;
 
     std::unique_ptr<FrameBuffer> scene_rt;
 

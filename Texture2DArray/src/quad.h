@@ -20,5 +20,5 @@ private:
     GLuint sampler;
     GLuint texture;
 
-    ShaderPipeline pipeline;
+    common::ShaderPipeline pipeline;
 };

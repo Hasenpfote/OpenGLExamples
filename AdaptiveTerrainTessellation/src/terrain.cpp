@@ -83,24 +83,25 @@ void Terrain::Initialize()
     glSamplerParameteri(sampler, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glSamplerParameteri(sampler, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    diffuse_map = System::GetConstInstance().GetTextureManager().GetTexture("assets/textures/terrain.png");
-    height_map = System::GetConstInstance().GetTextureManager().GetTexture("assets/textures/heightmap_linear.png");
+    auto& rm = System::GetConstInstance().GetResourceManager();
 
-    auto& man = System::GetConstInstance().GetShaderManager();
+    diffuse_map = rm.GetResource<common::Texture>("assets/textures/terrain.png")->GetTexture();
+    height_map = rm.GetResource<common::Texture>("assets/textures/heightmap_linear.png")->GetTexture();
+
     // for solid model
     pipeline1.Create();
-    pipeline1.SetShaderProgram(man.GetShaderProgram("assets/shaders/terrain.vs"));
-    pipeline1.SetShaderProgram(man.GetShaderProgram("assets/shaders/terrain.tcs"));
-    pipeline1.SetShaderProgram(man.GetShaderProgram("assets/shaders/terrain.tes"));
-    pipeline1.SetShaderProgram(man.GetShaderProgram("assets/shaders/terrain.gs"));
-    pipeline1.SetShaderProgram(man.GetShaderProgram("assets/shaders/terrain.fs"));
+    pipeline1.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/terrain.vs"));
+    pipeline1.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/terrain.tcs"));
+    pipeline1.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/terrain.tes"));
+    pipeline1.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/terrain.gs"));
+    pipeline1.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/terrain.fs"));
     // for wireframe model
     pipeline2.Create();
-    pipeline2.SetShaderProgram(man.GetShaderProgram("assets/shaders/terrain.vs"));
-    pipeline2.SetShaderProgram(man.GetShaderProgram("assets/shaders/terrain.tcs"));
-    pipeline2.SetShaderProgram(man.GetShaderProgram("assets/shaders/terrain.tes"));
-    pipeline2.SetShaderProgram(man.GetShaderProgram("assets/shaders/terrain_wf.gs"));
-    pipeline2.SetShaderProgram(man.GetShaderProgram("assets/shaders/terrain_wf.fs"));
+    pipeline2.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/terrain.vs"));
+    pipeline2.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/terrain.tcs"));
+    pipeline2.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/terrain.tes"));
+    pipeline2.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/terrain_wf.gs"));
+    pipeline2.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/terrain_wf.fs"));
 }
 
 void Terrain::Draw()

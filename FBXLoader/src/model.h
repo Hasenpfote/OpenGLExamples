@@ -88,6 +88,6 @@ private:
     GLuint pipeline;
     GLuint common_matrices;
 
-    ShaderProgram* vs;
-    ShaderProgram* fs;
+    common::ShaderProgram* vs;
+    common::ShaderProgram* fs;
 };

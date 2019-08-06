@@ -64,13 +64,14 @@ void BillboardBeam::Initialize()
     glSamplerParameteri(sampler, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glSamplerParameteri(sampler, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    //texture = System::GetConstInstance().GetTextureManager().GetTexture("assets/textures/beam.png");
-    texture = System::GetConstInstance().GetTextureManager().GetTexture("assets/textures/beam_a.png");
+    auto& rm = System::GetConstInstance().GetResourceManager();
 
-    auto& man = System::GetConstInstance().GetShaderManager();
+    texture = rm.GetResource<common::Texture>("assets/textures/beam.png")->GetTexture();
+    texture = rm.GetResource<common::Texture>("assets/textures/beam_a.png")->GetTexture();
+
     pipeline.Create();
-    pipeline.SetShaderProgram(man.GetShaderProgram("assets/shaders/billboard_beam.vs"));
-    pipeline.SetShaderProgram(man.GetShaderProgram("assets/shaders/billboard_beam.fs"));
+    pipeline.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/billboard_beam.vs"));
+    pipeline.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/billboard_beam.fs"));
 }
 
 void BillboardBeam::UpdateMatrices(const hasenpfote::math::CMatrix4& model)

@@ -70,16 +70,15 @@ void MyWindow::Setup()
 
     // load shader.
     {
-        auto& man = System::GetMutableInstance().GetShaderManager();
-        std::filesystem::path directory("assets/shaders");
-        man.LoadShaderPrograms(directory);
+        std::filesystem::path dirpath("assets/shaders");
+        auto& rm = System::GetMutableInstance().GetResourceManager();
+        rm.AddResourcesFromDirectory<common::ShaderProgram>(dirpath, false);
     }
-
     // load texture.
     {
-        std::filesystem::path directory("assets/textures");
-        auto& man = System::GetMutableInstance().GetTextureManager();
-        man.LoadTextures(directory);
+        std::filesystem::path dirpath("assets/textures");
+        auto& rm = System::GetMutableInstance().GetResourceManager();
+        rm.AddResourcesFromDirectory<common::Texture>(dirpath, false);
     }
     // generate font.
     {
@@ -88,13 +87,15 @@ void MyWindow::Setup()
         text = std::make_unique<SDFText>(font, std::make_shared<SDFTextRenderer>());
         text->SetSmoothness(1.0f);
     }
+
+    auto& rm = System::GetConstInstance().GetResourceManager();
     //
     {
         std::filesystem::path texpath;
         GLuint texture;
 
         texpath = "assets/textures/testimg_1920x1080.png";
-        texture = System::GetConstInstance().GetTextureManager().GetTexture(texpath);
+        texture = rm.GetResource<common::Texture>(texpath.string())->GetTexture();
         selectable_textures.push_back(std::make_tuple(texture, texpath));
 
         selected_texture_index = 0;
@@ -120,18 +121,17 @@ void MyWindow::Setup()
 
     RecreateResources(width, height);
 
-    auto& man = System::GetConstInstance().GetShaderManager();
     pipeline_fullscreen_quad.Create();
-    pipeline_fullscreen_quad.SetShaderProgram(man.GetShaderProgram("assets/shaders/fullscreen_quad.vs"));
-    pipeline_fullscreen_quad.SetShaderProgram(man.GetShaderProgram("assets/shaders/fullscreen_quad.fs"));
+    pipeline_fullscreen_quad.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/fullscreen_quad.vs"));
+    pipeline_fullscreen_quad.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/fullscreen_quad.fs"));
 
     pipeline_linear_to_linear.Create();
-    pipeline_linear_to_linear.SetShaderProgram(man.GetShaderProgram("assets/shaders/linear_to_linear.vs"));
-    pipeline_linear_to_linear.SetShaderProgram(man.GetShaderProgram("assets/shaders/linear_to_linear.fs"));
+    pipeline_linear_to_linear.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/linear_to_linear.vs"));
+    pipeline_linear_to_linear.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/linear_to_linear.fs"));
 
     pipeline_linear_to_srgb.Create();
-    pipeline_linear_to_srgb.SetShaderProgram(man.GetShaderProgram("assets/shaders/linear_to_srgb.vs"));
-    pipeline_linear_to_srgb.SetShaderProgram(man.GetShaderProgram("assets/shaders/linear_to_srgb.fs"));
+    pipeline_linear_to_srgb.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/linear_to_srgb.vs"));
+    pipeline_linear_to_srgb.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/linear_to_srgb.fs"));
 
     conversion_mode = 0;
 }
@@ -330,12 +330,28 @@ void MyWindow::OnRender()
 
 void MyWindow::RecreateResources(int width, int height)
 {
-    GLuint color_texture;
+    auto recreate_fb = [](const std::string& name, GLsizei levels, GLenum internal_format, GLsizei width, GLsizei height)
+    {
+        auto& rm = System::GetMutableInstance().GetResourceManager();
+
+        rm.RemoveResource<common::Texture>(name);
+
+        if(levels == 0)
+            levels = common::Texture::CalcNumOfMipmapLevels(width, height);
+
+        auto p = std::make_unique<common::Texture>(levels, internal_format, width, height);
+        auto texture = p->GetTexture();
+
+        rm.AddResource<common::Texture>(name, std::move(p));
+
+        return std::make_unique<FrameBuffer>(texture, 0, 0);
+    };
 
     // for scene.
-    System::GetMutableInstance().GetTextureManager().DeleteTexture("scene_rt_color");
-    color_texture = System::GetMutableInstance().GetTextureManager().CreateTexture("scene_rt_color", GL_RGBA16F, width, height);
-    scene_rt = std::make_unique<FrameBuffer>(color_texture, 0, 0);
+    {
+        const auto name = std::string("scene_rt_color");
+        scene_rt = recreate_fb(name, 1, GL_RGBA16F, width, height);
+    }
 }
 
 void MyWindow::DrawTextLines(std::vector<std::string> text_lines)

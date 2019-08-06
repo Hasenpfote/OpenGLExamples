@@ -53,9 +53,9 @@ private:
     };
     std::vector<Vertex> vertices;
     std::vector<std::uint32_t> indices;
-    ShaderProgram vs;
-    ShaderProgram fs;
-    ShaderPipeline pipeline;
+    common::ShaderProgram vs;
+    common::ShaderProgram fs;
+    common::ShaderPipeline pipeline;
 };
 
 /*!

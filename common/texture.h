@@ -1,37 +1,39 @@
 ﻿#pragma once
-#include <string>
-#include <unordered_map>
 #include <filesystem>
 #include <GL/glew.h>
+#include "resource.h"
 
-class TextureManager final
+namespace common
 {
+
+class Texture final : public common::Resource<Texture>
+{
+    friend common::Resource<Texture>;
 public:
-    TextureManager() = default;
-    ~TextureManager();
+    Texture(GLsizei levels, GLenum internal_format, GLsizei width, GLsizei height);
+    Texture(GLenum internal_format, GLsizei width, GLsizei height);
+    Texture(const std::filesystem::path& filepath, bool generate_mipmap = true);
+    ~Texture();
 
-    TextureManager(const TextureManager&) = delete;
-    TextureManager& operator = (const TextureManager&) = delete;
-    TextureManager(TextureManager&&) = delete;
-    TextureManager& operator = (TextureManager&&) = delete;
+    Texture(const Texture&) = delete;
+    Texture& operator = (const Texture&) = delete;
+    Texture(Texture&&) = delete;
+    Texture& operator = (Texture&&) = delete;
 
-    GLuint CreateTexture(const std::string& name, GLsizei levels, GLenum internal_format, GLsizei width, GLsizei height);
-    GLuint CreateTexture(const std::string& name, GLenum internal_format, GLsizei width, GLsizei height);
-    GLuint CreateTextureFromFile(const std::filesystem::path& filepath, bool generate_mipmap = true);
-
-    GLuint LoadTexture(const std::filesystem::path& filepath, bool generate_mipmap = true);
-    void LoadTextures(const std::filesystem::path& directory, bool generate_mipmap = true);
-
-    void DeleteTexture(std::size_t hash);
-    void DeleteTexture(const std::filesystem::path& filepath);
-    void DeleteTextures();
-
-    GLuint GetTexture(std::size_t hash) const;
-    GLuint GetTexture(const std::filesystem::path& filepath) const;
+    GLuint GetTexture() const noexcept { return texture_; };
 
     static GLsizei CalcNumOfMipmapLevels(GLsizei width);
     static GLsizei CalcNumOfMipmapLevels(GLsizei width, GLsizei height);
 
 private:
-    std::unordered_map<std::size_t, GLuint> texture;
+    static const string_set_t& allowed_extensions_impl()
+    {
+        static string_set_t ss({ ".png", ".exr" });
+        return ss;
+    }
+
+private:
+    GLuint texture_;
 };
+
+}   // namespace common

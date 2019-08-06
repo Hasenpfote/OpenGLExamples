@@ -28,16 +28,16 @@ Quad::~Quad()
 
 void Quad::Initialize()
 {
-    static float vertices[] = 
+    static float vertices[] =
     {
         //
         -20.0f, -10.0f, 0.0f, // left bottom
-          0.0f, -10.0f, 0.0f, // right bottom  
+          0.0f, -10.0f, 0.0f, // right bottom
           0.0f,  10.0f, 0.0f, // right top
         -20.0f,  10.0f, 0.0f, // left top
         //
          0.0f, -10.0f, 0.0f, // left bottom
-        20.0f, -10.0f, 0.0f, // right bottom  
+        20.0f, -10.0f, 0.0f, // right bottom
         20.0f,  10.0f, 0.0f, // right top
          0.0f,  10.0f, 0.0f  // left top
     };
@@ -128,10 +128,11 @@ void Quad::Initialize()
 
     glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 #endif
-    auto& man = System::GetConstInstance().GetShaderManager();
+    auto& rm = System::GetConstInstance().GetResourceManager();
+
     pipeline.Create();
-    pipeline.SetShaderProgram(man.GetShaderProgram("assets/shaders/quad.vs"));
-    pipeline.SetShaderProgram(man.GetShaderProgram("assets/shaders/quad.fs"));
+    pipeline.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/quad.vs"));
+    pipeline.SetShaderProgram(rm.GetResource<common::ShaderProgram>("assets/shaders/quad.fs"));
 }
 
 void Quad::Draw()

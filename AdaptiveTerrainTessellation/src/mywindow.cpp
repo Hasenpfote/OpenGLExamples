@@ -59,16 +59,16 @@ void MyWindow::Setup()
 
     // load shader.
     {
-        auto& man = System::GetMutableInstance().GetShaderManager();
-        std::filesystem::path directory("assets/shaders");
-        man.LoadShaderPrograms(directory);
+        std::filesystem::path dirpath("assets/shaders");
+        auto& rm = System::GetMutableInstance().GetResourceManager();
+        rm.AddResourcesFromDirectory<common::ShaderProgram>(dirpath, false);
     }
 
     // load texture.
     {
-        std::filesystem::path directory("assets/textures");
-        auto& man = System::GetMutableInstance().GetTextureManager();
-        man.LoadTextures(directory);
+        std::filesystem::path dirpath("assets/textures");
+        auto& rm = System::GetMutableInstance().GetResourceManager();
+        rm.AddResourcesFromDirectory<common::Texture>(dirpath, false);
     }
     // generate font.
     {
@@ -163,7 +163,7 @@ void MyWindow::OnRender()
 
     // 情報の表示
     auto metrics = text->GetFont().GetFontMetrics();
-    auto line_height = static_cast<float>(metrics.GetLineHeight()); 
+    auto line_height = static_cast<float>(metrics.GetLineHeight());
     const float scale = 1.0f;
     const float fh = line_height * scale;
 

@@ -34,5 +34,5 @@ private:
     hasenpfote::math::CMatrix4 mv;
     hasenpfote::math::CMatrix4 mvp;
 
-    ShaderPipeline pipeline;
+    common::ShaderPipeline pipeline;
 };

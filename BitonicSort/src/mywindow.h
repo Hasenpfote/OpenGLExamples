@@ -47,10 +47,10 @@ private:
     GLuint nearest_sampler;
     GLuint linear_sampler;
 
-    ShaderPipeline pipeline_noise;
-    ShaderPipeline pipeline_decode;
-    ShaderPipeline pipeline_sort;
-    ShaderPipeline pipeline_apply;
+    common::ShaderPipeline pipeline_noise;
+    common::ShaderPipeline pipeline_decode;
+    common::ShaderPipeline pipeline_sort;
+    common::ShaderPipeline pipeline_apply;
 
     std::unique_ptr<FrameBuffer> input_rt;
     std::array<std::unique_ptr<FrameBuffer>, 2> sort_rts;

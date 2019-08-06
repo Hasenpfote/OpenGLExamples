@@ -168,10 +168,11 @@ void Model::Setup(fbxloader::Model& model, GLuint common_matrices)
 
     this->common_matrices = common_matrices;
 
-    auto& man = System::GetMutableInstance().GetShaderManager();
-    vs = man.GetShaderProgram("assets/shaders/simple.vs");
+    auto& rm = System::GetMutableInstance().GetResourceManager();
+
+    vs = rm.GetResource<common::ShaderProgram>("assets/shaders/simple.vs");
     assert(vs);
-    fs = man.GetShaderProgram("assets/shaders/simple.fs");
+    fs = rm.GetResource<common::ShaderProgram>("assets/shaders/simple.fs");
     assert(fs);
 
     glGenProgramPipelines(1, &pipeline);
@@ -209,15 +210,19 @@ void Model::DrawOpaqueMeshes(const hasenpfote::math::CMatrix4& model)
     glUseProgram(0);
     glBindProgramPipeline(pipeline);
 
-    auto& man = System::GetConstInstance().GetTextureManager();
+    auto& rm = System::GetConstInstance().GetResourceManager();
 
-    for(const auto& mesh : opaque_meshes){
+    for(const auto& mesh : opaque_meshes)
+    {
         decltype(material)::const_iterator it = material.find(mesh->GetMaterialName());
-        if(it != material.cend()){
-            if(it->second->IsDoubleSideEnabled()){
+        if(it != material.cend())
+        {
+            if(it->second->IsDoubleSideEnabled())
+            {
                 glDisable(GL_CULL_FACE);
             }
-            else{
+            else
+            {
                 glEnable(GL_CULL_FACE);
             }
             //
@@ -226,25 +231,35 @@ void Model::DrawOpaqueMeshes(const hasenpfote::math::CMatrix4& model)
 #else       // 暫定
             const auto difuse_texture_name = "assets/textures/" + it->second->GetDiffuseTextureName();
 #endif
-            if(!difuse_texture_name.empty()){
-                const auto texture = man.GetTexture(difuse_texture_name);
-                if(texture > 0){
+            if(!difuse_texture_name.empty())
+            {
+                GLuint texture = 0;
+                auto resource = rm.GetResource<common::Texture>(difuse_texture_name);
+                if(resource != nullptr)
+                    texture = resource->GetTexture();
+
+                if(texture > 0)
+                {
                     glActiveTexture(GL_TEXTURE0);
                     glBindTexture(GL_TEXTURE_2D, texture);
                     glBindSampler(0, it->second->GetDiffuseSampler());
                 }
-                else{
+                else
+                {
                     glActiveTexture(GL_TEXTURE0);
                 }
             }
             //
-            if(mesh->IsSkinnedMesh()){
+            if(mesh->IsSkinnedMesh())
+            {
                 auto palette_count = 0;
                 CMatrix4 mat_final;
                 auto& joints_name = mesh->GetJointNames();
-                for(const auto& joint_name : joints_name){
+                for(const auto& joint_name : joints_name)
+                {
                     auto joint = skeleton->GetJoint(joint_name);
-                    if(joint){
+                    if(joint)
+                    {
                         mat_final = joint->GetGlobalPose() * joint->GetInverseBindPose();
                     }
                     palette[palette_count] = mat_final;
@@ -253,7 +268,8 @@ void Model::DrawOpaqueMeshes(const hasenpfote::math::CMatrix4& model)
                 glProgramUniformMatrix4fv(vs_program, loc1, palette_count, GL_FALSE, reinterpret_cast<float*>(palette.data()));
                 glProgramUniform1i(vs_program, loc2, GL_TRUE);
             }
-            else{
+            else
+            {
                 glProgramUniform1i(vs_program, loc2, GL_FALSE);
             }
             mesh->Draw();
@@ -264,10 +280,12 @@ void Model::DrawOpaqueMeshes(const hasenpfote::math::CMatrix4& model)
 
     glBindProgramPipeline(0);
 
-    if(cf){
+    if(cf)
+    {
         glEnable(GL_CULL_FACE);
     }
-    else{
+    else
+    {
         glDisable(GL_CULL_FACE);
     }
     glFrontFace(ff);
@@ -305,15 +323,19 @@ void Model::DrawTransparentMeshes(const hasenpfote::math::CMatrix4& model)
     glUseProgram(0);
     glBindProgramPipeline(pipeline);
 
-    auto& man = System::GetConstInstance().GetTextureManager();
+    auto& rm = System::GetConstInstance().GetResourceManager();
 
-    for(const auto& mesh : transparent_meshes){
+    for(const auto& mesh : transparent_meshes)
+    {
         decltype(material)::const_iterator it = material.find(mesh->GetMaterialName());
-        if(it != material.cend()){
-            if(it->second->IsDoubleSideEnabled()){
+        if(it != material.cend())
+        {
+            if(it->second->IsDoubleSideEnabled())
+            {
                 glDisable(GL_CULL_FACE);
             }
-            else{
+            else
+            {
                 glEnable(GL_CULL_FACE);
             }
             //
@@ -322,25 +344,35 @@ void Model::DrawTransparentMeshes(const hasenpfote::math::CMatrix4& model)
 #else       // 暫定
             const auto difuse_texture_name = "assets/textures/" + it->second->GetDiffuseTextureName();
 #endif
-            if(!difuse_texture_name.empty()){
-                const auto texture = man.GetTexture(difuse_texture_name);
-                if(texture > 0){
+            if(!difuse_texture_name.empty())
+            {
+                GLuint texture = 0;
+                auto resource = rm.GetResource<common::Texture>(difuse_texture_name);
+                if (resource != nullptr)
+                    texture = resource->GetTexture();
+
+                if(texture > 0)
+                {
                     glActiveTexture(GL_TEXTURE0);
                     glBindTexture(GL_TEXTURE_2D, texture);
                     glBindSampler(0, it->second->GetDiffuseSampler());
                 }
-                else{
+                else
+                {
                     glActiveTexture(GL_TEXTURE0);
                 }
             }
             //
-            if (mesh->IsSkinnedMesh()) {
+            if(mesh->IsSkinnedMesh())
+            {
                 auto palette_count = 0;
                 CMatrix4 mat_final;
                 auto& joints_name = mesh->GetJointNames();
-                for (const auto& joint_name : joints_name) {
+                for (const auto& joint_name : joints_name)
+                {
                     auto joint = skeleton->GetJoint(joint_name);
-                    if (joint) {
+                    if(joint)
+                    {
                         mat_final = joint->GetGlobalPose() * joint->GetInverseBindPose();
                     }
                     palette[palette_count] = mat_final;
@@ -349,7 +381,8 @@ void Model::DrawTransparentMeshes(const hasenpfote::math::CMatrix4& model)
                 glProgramUniformMatrix4fv(vs_program, loc1, palette_count, GL_FALSE, reinterpret_cast<float*>(palette.data()));
                 glProgramUniform1i(vs_program, loc2, GL_TRUE);
             }
-            else {
+            else
+            {
                 glProgramUniform1i(vs_program, loc2, GL_FALSE);
             }
             mesh->Draw();
@@ -360,10 +393,12 @@ void Model::DrawTransparentMeshes(const hasenpfote::math::CMatrix4& model)
 
     glBindProgramPipeline(0);
 
-    if(cf){
+    if(cf)
+    {
         glEnable(GL_CULL_FACE);
     }
-    else{
+    else
+    {
         glDisable(GL_CULL_FACE);
     }
     glFrontFace(ff);

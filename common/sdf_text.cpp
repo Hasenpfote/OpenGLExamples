@@ -81,6 +81,7 @@ static const std::string fs_source =
 // SDFTextRenderer
 
 SDFTextRenderer::SDFTextRenderer()
+    : vs(vs_source, GL_VERTEX_SHADER), fs(fs_source, GL_FRAGMENT_SHADER)
 {
     vertices.reserve(max_vertices);
     indices.reserve(max_indices);
@@ -108,8 +109,6 @@ SDFTextRenderer::SDFTextRenderer()
     glSamplerParameteri(sampler, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glSamplerParameteri(sampler, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    vs.Create(GL_VERTEX_SHADER, vs_source);
-    fs.Create(GL_FRAGMENT_SHADER, fs_source);
     pipeline.Create();
     pipeline.SetShaderProgram(&vs);
     pipeline.SetShaderProgram(&fs);

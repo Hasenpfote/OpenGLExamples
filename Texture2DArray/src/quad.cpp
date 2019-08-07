@@ -127,11 +127,13 @@ void Quad::Initialize()
 
     glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 #endif
-    auto& rm = System::GetConstInstance().GetResourceManager();
+    auto& rm = System::GetMutableInstance().GetResourceManager();
 
-    pipeline.Create();
-    pipeline.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/quad.vs"));
-    pipeline.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/quad.fs"));
+    pipeline = std::make_unique<ProgramPipeline>(
+        ProgramPipeline::ProgramPtrSet({
+            rm.GetResource<Program>("assets/shaders/quad.vs"),
+            rm.GetResource<Program>("assets/shaders/quad.fs")})
+            );
 }
 
 void Quad::Draw()
@@ -141,20 +143,21 @@ void Quad::Draw()
     const auto& camera = System::GetConstInstance().GetCamera();
     CMatrix4 mvp = camera.GetProjectionMatrix() * camera.GetViewMatrix();
 
-    pipeline.SetUniformMatrix4fv("mvp", 1, GL_FALSE, static_cast<GLfloat*>(mvp));
-    pipeline.SetUniform1i("texture", 0);
+    auto& uniform = pipeline->GetPipelineUniform();
+    uniform.SetMatrix4fv("mvp", 1, GL_FALSE, static_cast<GLfloat*>(mvp));
+    uniform.Set1i("texture", 0);
 
-    pipeline.Bind();
+    pipeline->Bind();
+    {
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D_ARRAY, texture);
+        glBindSampler(0, sampler);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D_ARRAY, texture);
-    glBindSampler(0, sampler);
+        glBindVertexArray(vao);
+        glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, nullptr);
+        glBindVertexArray(0);
 
-    glBindVertexArray(vao);
-    glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, nullptr);
-    glBindVertexArray(0);
-
-    glActiveTexture(GL_TEXTURE0);
-
-    pipeline.Unbind();
+        glActiveTexture(GL_TEXTURE0);
+    }
+    pipeline->Unbind();
 }

@@ -71,7 +71,7 @@ void MyWindow::Setup()
     {
         std::filesystem::path dirpath("assets/shaders");
         auto& rm = System::GetMutableInstance().GetResourceManager();
-        rm.AddResourcesFromDirectory<ShaderProgram>(dirpath, false);
+        rm.AddResourcesFromDirectory<Program>(dirpath, false);
     }
     // load texture.
     {
@@ -87,7 +87,7 @@ void MyWindow::Setup()
         text->SetSmoothness(1.0f);
     }
 
-    auto& rm = System::GetConstInstance().GetResourceManager();
+    auto& rm = System::GetMutableInstance().GetResourceManager();
     //
     {
         std::filesystem::path texpath;
@@ -120,17 +120,23 @@ void MyWindow::Setup()
 
     RecreateResources(width, height);
 
-    pipeline_fullscreen_quad.Create();
-    pipeline_fullscreen_quad.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/fullscreen_quad.vs"));
-    pipeline_fullscreen_quad.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/fullscreen_quad.fs"));
+    pipeline_fullscreen_quad = std::make_unique<ProgramPipeline>(
+        ProgramPipeline::ProgramPtrSet({
+            rm.GetResource<Program>("assets/shaders/fullscreen_quad.vs"),
+            rm.GetResource<Program>("assets/shaders/fullscreen_quad.fs")})
+            );
 
-    pipeline_linear_to_linear.Create();
-    pipeline_linear_to_linear.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/linear_to_linear.vs"));
-    pipeline_linear_to_linear.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/linear_to_linear.fs"));
+    pipeline_linear_to_linear = std::make_unique<ProgramPipeline>(
+        ProgramPipeline::ProgramPtrSet({
+            rm.GetResource<Program>("assets/shaders/linear_to_linear.vs"),
+            rm.GetResource<Program>("assets/shaders/linear_to_linear.fs")})
+            );
 
-    pipeline_linear_to_srgb.Create();
-    pipeline_linear_to_srgb.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/linear_to_srgb.vs"));
-    pipeline_linear_to_srgb.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/linear_to_srgb.fs"));
+    pipeline_linear_to_srgb = std::make_unique<ProgramPipeline>(
+        ProgramPipeline::ProgramPtrSet({
+            rm.GetResource<Program>("assets/shaders/linear_to_srgb.vs"),
+            rm.GetResource<Program>("assets/shaders/linear_to_srgb.fs")})
+            );
 
     conversion_mode = 0;
 }
@@ -381,20 +387,20 @@ void MyWindow::DrawTextLines(std::vector<std::string> text_lines)
 
 void MyWindow::DrawFullScreenQuad(GLuint texture)
 {
-    pipeline_fullscreen_quad.SetUniform1i("u_tex0", 0);
+    pipeline_fullscreen_quad->GetPipelineUniform().Set1i("u_tex0", 0);
 
-    pipeline_fullscreen_quad.Bind();
+    pipeline_fullscreen_quad->Bind();
+    {
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glBindSampler(0, linear_sampler);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glBindSampler(0, linear_sampler);
+        fs_pass_geom->Draw();
 
-    fs_pass_geom->Draw();
-
-    glBindSampler(0, 0);
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-    pipeline_fullscreen_quad.Unbind();
+        glBindSampler(0, 0);
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
+    pipeline_fullscreen_quad->Unbind();
 }
 
 void MyWindow::PassLinearToLinear(FrameBuffer* input)
@@ -402,10 +408,11 @@ void MyWindow::PassLinearToLinear(FrameBuffer* input)
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
 
-    pipeline_linear_to_linear.SetUniform1i("u_tex0", 0);
-    pipeline_linear_to_linear.SetUniform2f("u_pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
+    auto& uniform = pipeline_linear_to_linear->GetPipelineUniform();
+    uniform.Set1i("u_tex0", 0);
+    uniform.Set2f("u_pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
 
-    pipeline_linear_to_linear.Bind();
+    pipeline_linear_to_linear->Bind();
     {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, input->GetColorTexture());
@@ -416,7 +423,7 @@ void MyWindow::PassLinearToLinear(FrameBuffer* input)
         glBindSampler(0, 0);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
-    pipeline_linear_to_linear.Unbind();
+    pipeline_linear_to_linear->Unbind();
 }
 
 void MyWindow::PassLinearToSRGB(FrameBuffer* input)
@@ -424,10 +431,11 @@ void MyWindow::PassLinearToSRGB(FrameBuffer* input)
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
 
-    pipeline_linear_to_srgb.SetUniform1i("u_tex0", 0);
-    pipeline_linear_to_srgb.SetUniform2f("u_pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
+    auto& uniform = pipeline_linear_to_srgb->GetPipelineUniform();
+    uniform.Set1i("u_tex0", 0);
+    uniform.Set2f("u_pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
 
-    pipeline_linear_to_srgb.Bind();
+    pipeline_linear_to_srgb->Bind();
     {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, input->GetColorTexture());
@@ -438,5 +446,5 @@ void MyWindow::PassLinearToSRGB(FrameBuffer* input)
         glBindSampler(0, 0);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
-    pipeline_linear_to_srgb.Unbind();
+    pipeline_linear_to_srgb->Unbind();
 }

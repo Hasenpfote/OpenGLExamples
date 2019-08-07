@@ -74,7 +74,7 @@ void MyWindow::Setup()
     {
         std::filesystem::path dirpath("assets/shaders");
         auto& rm = System::GetMutableInstance().GetResourceManager();
-        rm.AddResourcesFromDirectory<ShaderProgram>(dirpath, false);
+        rm.AddResourcesFromDirectory<Program>(dirpath, false);
     }
     // load texture.
     {
@@ -153,19 +153,25 @@ void MyWindow::Setup()
 
     RecreateResources(width, height);
 
-    auto& rm = System::GetConstInstance().GetResourceManager();
+    auto& rm = System::GetMutableInstance().GetResourceManager();
 
-    pipeline_fullscreen_quad.Create();
-    pipeline_fullscreen_quad.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/fullscreen_quad.vs"));
-    pipeline_fullscreen_quad.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/fullscreen_quad.fs"));
+    pipeline_fullscreen_quad = std::make_unique<ProgramPipeline>(
+        ProgramPipeline::ProgramPtrSet({
+            rm.GetResource<Program>("assets/shaders/fullscreen_quad.vs"),
+            rm.GetResource<Program>("assets/shaders/fullscreen_quad.fs")})
+            );
 
-    pipeline_dithering.Create();
-    pipeline_dithering.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/dithering.vs"));
-    pipeline_dithering.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/dithering.fs"));
+    pipeline_dithering = std::make_unique<ProgramPipeline>(
+        ProgramPipeline::ProgramPtrSet({
+            rm.GetResource<Program>("assets/shaders/dithering.vs"),
+            rm.GetResource<Program>("assets/shaders/dithering.fs")})
+            );
 
-    pipeline_apply.Create();
-    pipeline_apply.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/apply.vs"));
-    pipeline_apply.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/apply.fs"));
+    pipeline_apply = std::make_unique<ProgramPipeline>(
+        ProgramPipeline::ProgramPtrSet({
+            rm.GetResource<Program>("assets/shaders/apply.vs"),
+            rm.GetResource<Program>("assets/shaders/apply.fs")})
+            );
 
     is_dithering_enabled = false;
     dithering_mode = 0;
@@ -429,20 +435,20 @@ void MyWindow::DrawTextLines(std::vector<std::string> text_lines)
 
 void MyWindow::DrawFullScreenQuad(GLuint texture)
 {
-    pipeline_fullscreen_quad.SetUniform1i("u_tex0", 0);
+    pipeline_fullscreen_quad->GetPipelineUniform().Set1i("u_tex0", 0);
 
-    pipeline_fullscreen_quad.Bind();
+    pipeline_fullscreen_quad->Bind();
+    {
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glBindSampler(0, linear_sampler);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glBindSampler(0, linear_sampler);
+        fs_pass_geom->Draw();
 
-    fs_pass_geom->Draw();
-
-    glBindSampler(0, 0);
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-    pipeline_fullscreen_quad.Unbind();
+        glBindSampler(0, 0);
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
+    pipeline_fullscreen_quad->Unbind();
 }
 
 void MyWindow::PassDithering(FrameBuffer* input, FrameBuffer* output)
@@ -463,13 +469,14 @@ void MyWindow::PassDithering(FrameBuffer* input, FrameBuffer* output)
     auto& rm = System::GetConstInstance().GetResourceManager();
     const auto dither_texture = rm.GetResource<Texture>(name)->GetTexture();
 
-    pipeline_dithering.SetUniform1i("u_tex0", 0);
-    pipeline_dithering.SetUniform1i("u_tex1", 1);
-    pipeline_dithering.SetUniform2f("u_pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
-    pipeline_dithering.SetUniform1f("u_dimension", static_cast<float>(dim));
-    pipeline_dithering.SetUniform1i("u_mode", dithering_mode);
+    auto& uniform = pipeline_dithering->GetPipelineUniform();
+    uniform.Set1i("u_tex0", 0);
+    uniform.Set1i("u_tex1", 1);
+    uniform.Set2f("u_pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
+    uniform.Set1f("u_dimension", static_cast<float>(dim));
+    uniform.Set1i("u_mode", dithering_mode);
 
-    pipeline_dithering.Bind();
+    pipeline_dithering->Bind();
     {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, dither_texture);
@@ -488,7 +495,7 @@ void MyWindow::PassDithering(FrameBuffer* input, FrameBuffer* output)
         glBindSampler(0, 0);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
-    pipeline_dithering.Unbind();
+    pipeline_dithering->Unbind();
 
     if(output != nullptr)
         output->Unbind();
@@ -502,10 +509,11 @@ void MyWindow::PassApply(FrameBuffer* input, FrameBuffer* output)
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
 
-    pipeline_apply.SetUniform1i("u_tex0", 0);
-    pipeline_apply.SetUniform2f("u_pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
+    auto& uniform = pipeline_apply->GetPipelineUniform();
+    uniform.Set1i("u_tex0", 0);
+    uniform.Set2f("u_pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
 
-    pipeline_apply.Bind();
+    pipeline_apply->Bind();
     {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, input->GetColorTexture());
@@ -516,7 +524,7 @@ void MyWindow::PassApply(FrameBuffer* input, FrameBuffer* output)
         glBindSampler(0, 0);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
-    pipeline_apply.Unbind();
+    pipeline_apply->Unbind();
 
     if(output != nullptr)
         output->Unbind();

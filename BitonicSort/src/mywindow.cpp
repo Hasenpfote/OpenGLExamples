@@ -62,7 +62,7 @@ void MyWindow::Setup()
     {
         std::filesystem::path dirpath("assets/shaders");
         auto& rm = System::GetMutableInstance().GetResourceManager();
-        rm.AddResourcesFromDirectory<ShaderProgram>(dirpath, false);
+        rm.AddResourcesFromDirectory<Program>(dirpath, false);
     }
     // load texture.
     {
@@ -98,23 +98,31 @@ void MyWindow::Setup()
 
     RecreateResources(width, height);
 
-    auto& rm = System::GetConstInstance().GetResourceManager();
+    auto& rm = System::GetMutableInstance().GetResourceManager();
 
-    pipeline_noise.Create();
-    pipeline_noise.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/noise.vs"));
-    pipeline_noise.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/noise.fs"));
+    pipeline_noise = std::make_unique<ProgramPipeline>(
+        ProgramPipeline::ProgramPtrSet({
+            rm.GetResource<Program>("assets/shaders/noise.vs"),
+            rm.GetResource<Program>("assets/shaders/noise.fs")})
+            );
 
-    pipeline_decode.Create();
-    pipeline_decode.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/decode.vs"));
-    pipeline_decode.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/decode.fs"));
+    pipeline_decode = std::make_unique<ProgramPipeline>(
+        ProgramPipeline::ProgramPtrSet({
+            rm.GetResource<Program>("assets/shaders/decode.vs"),
+            rm.GetResource<Program>("assets/shaders/decode.fs")})
+            );
 
-    pipeline_sort.Create();
-    pipeline_sort.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/sort.vs"));
-    pipeline_sort.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/sort.fs"));
+    pipeline_sort = std::make_unique<ProgramPipeline>(
+        ProgramPipeline::ProgramPtrSet({
+            rm.GetResource<Program>("assets/shaders/sort.vs"),
+            rm.GetResource<Program>("assets/shaders/sort.fs")})
+            );
 
-    pipeline_apply.Create();
-    pipeline_apply.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/apply.vs"));
-    pipeline_apply.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/apply.fs"));
+    pipeline_apply = std::make_unique<ProgramPipeline>(
+        ProgramPipeline::ProgramPtrSet({
+            rm.GetResource<Program>("assets/shaders/apply.vs"),
+            rm.GetResource<Program>("assets/shaders/apply.fs")})
+            );
 
     state = State::Idle;
 }
@@ -361,13 +369,13 @@ void MyWindow::PassNoise(FrameBuffer* output)
         GLint viewport[4];
         glGetIntegerv(GL_VIEWPORT, viewport);
 
-        pipeline_noise.SetUniform2f("u_pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
+        pipeline_noise->GetPipelineUniform().Set2f("u_pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
 
-        pipeline_noise.Bind();
+        pipeline_noise->Bind();
         {
             fs_pass_geom->Draw();
         }
-        pipeline_noise.Unbind();
+        pipeline_noise->Unbind();
     }
     output->Unbind();
 }
@@ -389,10 +397,11 @@ void MyWindow::PassEncode(FrameBuffer* input, FrameBuffer* output)
 
         glViewport(0, 0, i_width, i_height);
 
-        pipeline_apply.SetUniform1i("u_tex0", 0);
-        pipeline_apply.SetUniform2f("u_pixel_size", 1.0f / static_cast<float>(i_width), 1.0f / static_cast<float>(i_height));
+        auto& uniform = pipeline_apply->GetPipelineUniform();
+        uniform.Set1i("u_tex0", 0);
+        uniform.Set2f("u_pixel_size", 1.0f / static_cast<float>(i_width), 1.0f / static_cast<float>(i_height));
 
-        pipeline_apply.Bind();
+        pipeline_apply->Bind();
         {
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, input->GetColorTexture());
@@ -403,7 +412,7 @@ void MyWindow::PassEncode(FrameBuffer* input, FrameBuffer* output)
             glBindSampler(0, 0);
             glBindTexture(GL_TEXTURE_2D, 0);
         }
-        pipeline_apply.Unbind();
+        pipeline_apply->Unbind();
     }
     output->Unbind();
 }
@@ -422,11 +431,12 @@ void MyWindow::PassDecode(FrameBuffer* input, FrameBuffer* output)
     {
         glGetIntegerv(GL_VIEWPORT, viewport);
 
-        pipeline_decode.SetUniform1i("u_tex0", 0);
-        pipeline_decode.SetUniform2f("u_src_resolution", static_cast<float>(i_width), static_cast<float>(i_height));
-        pipeline_decode.SetUniform2f("u_dst_resolution", static_cast<float>(viewport[2]), static_cast<float>(viewport[3]));
+        auto& uniform = pipeline_decode->GetPipelineUniform();
+        uniform.Set1i("u_tex0", 0);
+        uniform.Set2f("u_src_resolution", static_cast<float>(i_width), static_cast<float>(i_height));
+        uniform.Set2f("u_dst_resolution", static_cast<float>(viewport[2]), static_cast<float>(viewport[3]));
 
-        pipeline_decode.Bind();
+        pipeline_decode->Bind();
         {
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, input->GetColorTexture());
@@ -437,7 +447,7 @@ void MyWindow::PassDecode(FrameBuffer* input, FrameBuffer* output)
             glBindSampler(0, 0);
             glBindTexture(GL_TEXTURE_2D, 0);
         }
-        pipeline_decode.Unbind();
+        pipeline_decode->Unbind();
     }
     output->Unbind();
 }
@@ -492,13 +502,14 @@ void MyWindow::PassSort(FrameBuffer* input, FrameBuffer* output, int seq_size, i
         GLint viewport[4];
         glGetIntegerv(GL_VIEWPORT, viewport);
 
-        pipeline_sort.SetUniform1i("u_tex0", 0);
-        pipeline_sort.SetUniform2f("u_resolution", static_cast<float>(viewport[2]), static_cast<float>(viewport[3]));
-        pipeline_sort.SetUniform1f("u_seq_size", static_cast<float>(seq_size));
-        pipeline_sort.SetUniform1f("u_offset", static_cast<float>(offset));
-        pipeline_sort.SetUniform1f("u_range", static_cast<float>(range));
+        auto& uniform = pipeline_sort->GetPipelineUniform();
+        uniform.Set1i("u_tex0", 0);
+        uniform.Set2f("u_resolution", static_cast<float>(viewport[2]), static_cast<float>(viewport[3]));
+        uniform.Set1f("u_seq_size", static_cast<float>(seq_size));
+        uniform.Set1f("u_offset", static_cast<float>(offset));
+        uniform.Set1f("u_range", static_cast<float>(range));
 
-        pipeline_sort.Bind();
+        pipeline_sort->Bind();
         {
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, input->GetColorTexture());
@@ -509,7 +520,7 @@ void MyWindow::PassSort(FrameBuffer* input, FrameBuffer* output, int seq_size, i
             glBindSampler(0, 0);
             glBindTexture(GL_TEXTURE_2D, 0);
         }
-        pipeline_sort.Unbind();
+        pipeline_sort->Unbind();
     }
     output->Unbind();
 }
@@ -522,10 +533,11 @@ void MyWindow::PassApply(FrameBuffer* input, FrameBuffer* output)
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
 
-    pipeline_apply.SetUniform1i("u_tex0", 0);
-    pipeline_apply.SetUniform2f("u_pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
+    auto& uniform = pipeline_apply->GetPipelineUniform();
+    uniform.Set1i("u_tex0", 0);
+    uniform.Set2f("u_pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
 
-    pipeline_apply.Bind();
+    pipeline_apply->Bind();
     {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, input->GetColorTexture());
@@ -536,7 +548,7 @@ void MyWindow::PassApply(FrameBuffer* input, FrameBuffer* output)
         glBindSampler(0, 0);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
-    pipeline_apply.Unbind();
+    pipeline_apply->Unbind();
 
     if(output != nullptr)
         output->Unbind();

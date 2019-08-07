@@ -112,7 +112,7 @@ void MyWindow::Setup()
     {
         std::filesystem::path dirpath("assets/shaders");
         auto& rm = System::GetMutableInstance().GetResourceManager();
-        rm.AddResourcesFromDirectory<ShaderProgram>(dirpath, false);
+        rm.AddResourcesFromDirectory<Program>(dirpath, false);
     }
     // load texture.
     {

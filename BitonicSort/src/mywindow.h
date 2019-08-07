@@ -8,7 +8,9 @@
 #include <hasenpfote/math/quaternion.h>
 #include "../../common/window.h"
 #include "../../common/system.h"
+#include "../../common/render/texture.h"
 #include "../../common/render/framebuffer.h"
+#include "../../common/render/shader/shader.h"
 #include "../../common/render/text/sdf_text.h"
 #include "fullscreen_pass_geometry.h"
 
@@ -16,8 +18,8 @@ class MyWindow final : public common::Window
 {
     using System = common::System;
     using Texture = common::render::Texture;
-    using ShaderProgram = common::render::ShaderProgram;
-    using ShaderPipeline = common::render::ShaderPipeline;
+    using Program = common::render::shader::Program;
+    using ProgramPipeline = common::render::shader::ProgramPipeline;
     using FrameBuffer = common::render::FrameBuffer;
     using Font = common::render::text::Font;
     using SDFText = common::render::text::SDFText;
@@ -58,10 +60,10 @@ private:
     GLuint nearest_sampler;
     GLuint linear_sampler;
 
-    ShaderPipeline pipeline_noise;
-    ShaderPipeline pipeline_decode;
-    ShaderPipeline pipeline_sort;
-    ShaderPipeline pipeline_apply;
+    std::unique_ptr<ProgramPipeline> pipeline_noise;
+    std::unique_ptr<ProgramPipeline> pipeline_decode;
+    std::unique_ptr<ProgramPipeline> pipeline_sort;
+    std::unique_ptr<ProgramPipeline> pipeline_apply;
 
     std::unique_ptr<FrameBuffer> input_rt;
     std::array<std::unique_ptr<FrameBuffer>, 2> sort_rts;

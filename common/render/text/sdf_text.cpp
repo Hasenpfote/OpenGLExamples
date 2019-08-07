@@ -84,7 +84,6 @@ static const std::string fs_source =
 // SDFTextRenderer
 
 SDFTextRenderer::SDFTextRenderer()
-    : vs(vs_source, GL_VERTEX_SHADER), fs(fs_source, GL_FRAGMENT_SHADER)
 {
     vertices.reserve(max_vertices);
     indices.reserve(max_indices);
@@ -112,13 +111,21 @@ SDFTextRenderer::SDFTextRenderer()
     glSamplerParameteri(sampler, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glSamplerParameteri(sampler, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    pipeline.Create();
-    pipeline.SetShaderProgram(&vs);
-    pipeline.SetShaderProgram(&fs);
-    pipeline.SetUniform1i("texture", 0);
-    pipeline.SetUniform1f("smoothness", 0.5f);
+    vs = std::make_unique<shader::Program>(vs_source, GL_VERTEX_SHADER);
+    fs = std::make_unique<shader::Program>(fs_source, GL_FRAGMENT_SHADER);
+
+    pipeline = std::make_unique<shader::ProgramPipeline>(
+        shader::ProgramPipeline::ProgramPtrSet({
+            vs.get(),
+            fs.get()})
+        );
+
+    auto& uniform = pipeline->GetPipelineUniform();
+
+    uniform.Set1i("texture", 0);
+    uniform.Set1f("smoothness", 0.5f);
     const std::array<GLfloat, 4> outline_color = { 0.0f, 0.0f, 0.0f, 1.0f };
-    pipeline.SetUniform4fv("outline_color", 1, outline_color.data());
+    uniform.Set4fv("outline_color", 1, outline_color.data());
 }
 
 SDFTextRenderer::~SDFTextRenderer()
@@ -139,7 +146,7 @@ void SDFTextRenderer::BeginRendering(GLuint texture)
     glDepthMask(GL_FALSE);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    pipeline.Bind();
+    pipeline->Bind();
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D_ARRAY, texture);
     glBindSampler(0, sampler);
@@ -149,7 +156,7 @@ void SDFTextRenderer::EndRendering()
 {
     glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
     glActiveTexture(GL_TEXTURE0);
-    pipeline.Unbind();
+    pipeline->Unbind();
     glDisable(GL_BLEND);
     glDepthMask(GL_TRUE);
     glEnable(GL_DEPTH_TEST);
@@ -170,22 +177,22 @@ void SDFTextRenderer::Render()
 
 void SDFTextRenderer::SetOrthographicProjectionMatrix(const GLfloat* m)
 {
-    pipeline.SetUniformMatrix4fv("mvp", 1, GL_FALSE, m);
+    pipeline->GetPipelineUniform().SetMatrix4fv("mvp", 1, GL_FALSE, m);
 }
 
 void SDFTextRenderer::SetColor(const GLfloat* color)
 {
-    pipeline.SetUniform4fv("color", 1, color);
+    pipeline->GetPipelineUniform().Set4fv("color", 1, color);
 }
 
 void SDFTextRenderer::SetSmoothness(GLfloat smoothness)
 {
-    pipeline.SetUniform1f("smoothness", smoothness);
+    pipeline->GetPipelineUniform().Set1f("smoothness", smoothness);
 }
 
 void SDFTextRenderer::SetOutlineColor(const GLfloat* color)
 {
-    pipeline.SetUniform4fv("outline_color", 1, color);
+    pipeline->GetPipelineUniform().Set4fv("outline_color", 1, color);
 }
 
 std::size_t SDFTextRenderer::GetMaxBufferLength()

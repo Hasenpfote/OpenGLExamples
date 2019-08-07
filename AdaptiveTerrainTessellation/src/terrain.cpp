@@ -82,25 +82,30 @@ void Terrain::Initialize()
     glSamplerParameteri(sampler, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glSamplerParameteri(sampler, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    auto& rm = System::GetConstInstance().GetResourceManager();
+    auto& rm = System::GetMutableInstance().GetResourceManager();
 
     diffuse_map = rm.GetResource<Texture>("assets/textures/terrain.png")->GetTexture();
     height_map = rm.GetResource<Texture>("assets/textures/heightmap_linear.png")->GetTexture();
 
     // for solid model
-    pipeline1.Create();
-    pipeline1.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/terrain.vs"));
-    pipeline1.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/terrain.tcs"));
-    pipeline1.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/terrain.tes"));
-    pipeline1.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/terrain.gs"));
-    pipeline1.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/terrain.fs"));
+    pipeline1 = std::make_unique<ProgramPipeline>(
+        ProgramPipeline::ProgramPtrSet({
+            rm.GetResource<Program>("assets/shaders/terrain.vs"),
+            rm.GetResource<Program>("assets/shaders/terrain.tcs"),
+            rm.GetResource<Program>("assets/shaders/terrain.tes"),
+            rm.GetResource<Program>("assets/shaders/terrain.gs"),
+            rm.GetResource<Program>("assets/shaders/terrain.fs")})
+            );
+
     // for wireframe model
-    pipeline2.Create();
-    pipeline2.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/terrain.vs"));
-    pipeline2.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/terrain.tcs"));
-    pipeline2.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/terrain.tes"));
-    pipeline2.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/terrain_wf.gs"));
-    pipeline2.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/terrain_wf.fs"));
+    pipeline2 = std::make_unique<ProgramPipeline>(
+        ProgramPipeline::ProgramPtrSet({
+            rm.GetResource<Program>("assets/shaders/terrain.vs"),
+            rm.GetResource<Program>("assets/shaders/terrain.tcs"),
+            rm.GetResource<Program>("assets/shaders/terrain.tes"),
+            rm.GetResource<Program>("assets/shaders/terrain_wf.gs"),
+            rm.GetResource<Program>("assets/shaders/terrain_wf.fs") })
+            );
 }
 
 void Terrain::Draw()
@@ -122,33 +127,34 @@ void Terrain::DrawSolid()
     auto height = camera.GetViewport().GetHeight();
     CMatrix4 mvp = camera.GetProjectionMatrix() * camera.GetViewMatrix();
 
-    pipeline1.SetUniform1i("diffuse_map", 0);
-    pipeline1.SetUniform1i("height_map", 1);
-    pipeline1.SetUniform1f("horizontal_scale", horizontal_scale);
-    pipeline1.SetUniform1f("vertical_scale", vertical_scale);
-    pipeline1.SetUniform1f("lod_factor", lod_factor);
-    pipeline1.SetUniformMatrix4fv("mvp", 1, GL_FALSE, static_cast<GLfloat*>(mvp));
-    pipeline1.SetUniform2f("vp_size", static_cast<float>(width), static_cast<float>(height));
-    pipeline1.SetUniform3fv("light_direction", 1, static_cast<GLfloat*>(light_direction));
+    auto& uniform = pipeline1->GetPipelineUniform();
+    uniform.Set1i("diffuse_map", 0);
+    uniform.Set1i("height_map", 1);
+    uniform.Set1f("horizontal_scale", horizontal_scale);
+    uniform.Set1f("vertical_scale", vertical_scale);
+    uniform.Set1f("lod_factor", lod_factor);
+    uniform.SetMatrix4fv("mvp", 1, GL_FALSE, static_cast<GLfloat*>(mvp));
+    uniform.Set2f("vp_size", static_cast<float>(width), static_cast<float>(height));
+    uniform.Set3fv("light_direction", 1, static_cast<GLfloat*>(light_direction));
 
-    pipeline1.Bind();
+    pipeline1->Bind();
+    {
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, diffuse_map);
+        glBindSampler(0, sampler);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, diffuse_map);
-    glBindSampler(0, sampler);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, height_map);
+        glBindSampler(1, sampler);
 
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, height_map);
-    glBindSampler(1, sampler);
+        glPatchParameteri(GL_PATCH_VERTICES, 4);
+        glBindVertexArray(vao);
+        glDrawElements(GL_PATCHES, num_indices, GL_UNSIGNED_INT, nullptr);
+        glBindVertexArray(0);
 
-    glPatchParameteri(GL_PATCH_VERTICES, 4);
-    glBindVertexArray(vao);
-    glDrawElements(GL_PATCHES, num_indices, GL_UNSIGNED_INT, nullptr);
-    glBindVertexArray(0);
-
-    glActiveTexture(GL_TEXTURE0);
-
-    pipeline1.Unbind();
+        glActiveTexture(GL_TEXTURE0);
+    }
+    pipeline1->Unbind();
 }
 
 void Terrain::DrawWireFrame()
@@ -160,25 +166,26 @@ void Terrain::DrawWireFrame()
     auto height = camera.GetViewport().GetHeight();
     CMatrix4 mvp = camera.GetProjectionMatrix() * camera.GetViewMatrix();
 
-    pipeline2.SetUniform1i("height_map", 0);
-    pipeline2.SetUniform1f("horizontal_scale", horizontal_scale);
-    pipeline2.SetUniform1f("vertical_scale", vertical_scale);
-    pipeline2.SetUniform1f("lod_factor", lod_factor);
-    pipeline2.SetUniformMatrix4fv("mvp", 1, GL_FALSE, static_cast<GLfloat*>(mvp));
-    pipeline2.SetUniform2f("vp_size", static_cast<float>(width), static_cast<float>(height));
+    auto& uniform = pipeline2->GetPipelineUniform();
+    uniform.Set1i("height_map", 0);
+    uniform.Set1f("horizontal_scale", horizontal_scale);
+    uniform.Set1f("vertical_scale", vertical_scale);
+    uniform.Set1f("lod_factor", lod_factor);
+    uniform.SetMatrix4fv("mvp", 1, GL_FALSE, static_cast<GLfloat*>(mvp));
+    uniform.Set2f("vp_size", static_cast<float>(width), static_cast<float>(height));
 
-    pipeline2.Bind();
+    pipeline2->Bind();
+    {
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, height_map);
+        glBindSampler(0, sampler);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, height_map);
-    glBindSampler(0, sampler);
+        glPatchParameteri(GL_PATCH_VERTICES, 4);
+        glBindVertexArray(vao);
+        glDrawElements(GL_PATCHES, num_indices, GL_UNSIGNED_INT, nullptr);
+        glBindVertexArray(0);
 
-    glPatchParameteri(GL_PATCH_VERTICES, 4);
-    glBindVertexArray(vao);
-    glDrawElements(GL_PATCHES, num_indices, GL_UNSIGNED_INT, nullptr);
-    glBindVertexArray(0);
-
-    glActiveTexture(GL_TEXTURE0);
-
-    pipeline2.Unbind();
+        glActiveTexture(GL_TEXTURE0);
+    }
+    pipeline2->Unbind();
 }

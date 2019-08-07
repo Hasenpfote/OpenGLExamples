@@ -4,7 +4,6 @@
 #include <unordered_map>
 #include <GL/glew.h>
 #include <hasenpfote/assert.h>
-//#include <hasenpfote//math/utility.h>
 #include <hasenpfote//math/utils.h>
 #include <hasenpfote/math/vector3.h>
 #include <hasenpfote/math/vector4.h>
@@ -62,7 +61,7 @@ void MyWindow::Setup()
     {
         std::filesystem::path dirpath("assets/shaders");
         auto& rm = System::GetMutableInstance().GetResourceManager();
-        rm.AddResourcesFromDirectory<ShaderProgram>(dirpath, false);
+        rm.AddResourcesFromDirectory<Program>(dirpath, false);
     }
     // load texture.
     {
@@ -78,7 +77,7 @@ void MyWindow::Setup()
         text->SetSmoothness(1.0f);
     }
 
-    auto& rm = System::GetConstInstance().GetResourceManager();
+    auto& rm = System::GetMutableInstance().GetResourceManager();
     //
     texture = rm.GetResource<Texture>("assets/textures/kloofendal_48d_partly_cloudy_1k.exr")->GetTexture();
 
@@ -95,13 +94,17 @@ void MyWindow::Setup()
 
     RecreateResources(width, height);
 
-    pipeline_fullscreen_quad.Create();
-    pipeline_fullscreen_quad.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/fullscreen_quad.vs"));
-    pipeline_fullscreen_quad.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/fullscreen_quad.fs"));
+    pipeline_fullscreen_quad = std::make_unique<ProgramPipeline>(
+        ProgramPipeline::ProgramPtrSet({
+            rm.GetResource<Program>("assets/shaders/fullscreen_quad.vs"),
+            rm.GetResource<Program>("assets/shaders/fullscreen_quad.fs")})
+            );
 
-    pipeline_tonemapping.Create();
-    pipeline_tonemapping.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/tonemapping.vs"));
-    pipeline_tonemapping.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/tonemapping.fs"));
+    pipeline_tonemapping = std::make_unique<ProgramPipeline>(
+        ProgramPipeline::ProgramPtrSet({
+            rm.GetResource<Program>("assets/shaders/tonemapping.vs"),
+            rm.GetResource<Program>("assets/shaders/tonemapping.fs")})
+            );
 
     is_tonemapping_enabled = false;
     exposure = 2.0f;
@@ -277,35 +280,36 @@ void MyWindow::RecreateResources(int width, int height)
 
 void MyWindow::DrawFullScreenQuad(GLuint texture)
 {
-    pipeline_fullscreen_quad.SetUniform1i("u_tex0", 0);
+    pipeline_fullscreen_quad->GetPipelineUniform().Set1i("u_tex0", 0);
 
-    pipeline_fullscreen_quad.Bind();
+    pipeline_fullscreen_quad->Bind();
+    {
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glBindSampler(0, sampler);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glBindSampler(0, sampler);
+        fs_pass_geom->Draw();
 
-    fs_pass_geom->Draw();
-
-    glActiveTexture(GL_TEXTURE0);
-
-    pipeline_fullscreen_quad.Unbind();
+        glActiveTexture(GL_TEXTURE0);
+    }
+    pipeline_fullscreen_quad->Unbind();
 }
 
 void MyWindow::PassTonemapping(GLuint texture)
 {
-    pipeline_tonemapping.SetUniform1i("u_tex0", 0);
-    pipeline_tonemapping.SetUniform1f("u_exposure", exposure);
+    auto& uniform = pipeline_tonemapping->GetPipelineUniform();
+    uniform.Set1i("u_tex0", 0);
+    uniform.Set1f("u_exposure", exposure);
 
-    pipeline_tonemapping.Bind();
+    pipeline_tonemapping->Bind();
+    {
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glBindSampler(0, sampler);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glBindSampler(0, sampler);
+        fs_pass_geom->Draw();
 
-    fs_pass_geom->Draw();
-
-    glActiveTexture(GL_TEXTURE0);
-
-    pipeline_tonemapping.Unbind();
+        glActiveTexture(GL_TEXTURE0);
+    }
+    pipeline_tonemapping->Unbind();
 }

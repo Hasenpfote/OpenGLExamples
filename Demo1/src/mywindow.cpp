@@ -60,7 +60,7 @@ void MyWindow::Setup()
     {
         std::filesystem::path dirpath("assets/shaders");
         auto& rm = System::GetMutableInstance().GetResourceManager();
-        rm.AddResourcesFromDirectory<ShaderProgram>(dirpath, false);
+        rm.AddResourcesFromDirectory<Program>(dirpath, false);
     }
     // load texture.
     {
@@ -112,43 +112,61 @@ void MyWindow::Setup()
 
     RecreateResources(width, height);
 
-    auto& rm = System::GetConstInstance().GetResourceManager();
+    auto& rm = System::GetMutableInstance().GetResourceManager();
 
-    pipeline_fullscreen_quad.Create();
-    pipeline_fullscreen_quad.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/fullscreen_quad.vs"));
-    pipeline_fullscreen_quad.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/fullscreen_quad.fs"));
+    pipeline_fullscreen_quad = std::make_unique<ProgramPipeline>(
+        ProgramPipeline::ProgramPtrSet({
+            rm.GetResource<Program>("assets/shaders/fullscreen_quad.vs"),
+            rm.GetResource<Program>("assets/shaders/fullscreen_quad.fs")})
+            );
 
-    pipeline_log_luminance.Create();
-    pipeline_log_luminance.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/log_luminance.vs"));
-    pipeline_log_luminance.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/log_luminance.fs"));
+    pipeline_log_luminance = std::make_unique<ProgramPipeline>(
+        ProgramPipeline::ProgramPtrSet({
+            rm.GetResource<Program>("assets/shaders/log_luminance.vs"),
+            rm.GetResource<Program>("assets/shaders/log_luminance.fs")})
+            );
 
-    pipeline_high_luminance_region_extraction.Create();
-    pipeline_high_luminance_region_extraction.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/high_luminance_region_extraction.vs"));
-    pipeline_high_luminance_region_extraction.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/high_luminance_region_extraction.fs"));
+    pipeline_high_luminance_region_extraction = std::make_unique<ProgramPipeline>(
+        ProgramPipeline::ProgramPtrSet({
+            rm.GetResource<Program>("assets/shaders/high_luminance_region_extraction.vs"),
+            rm.GetResource<Program>("assets/shaders/high_luminance_region_extraction.fs")})
+            );
 
-    pipeline_downsampling_2x2.Create();
-    pipeline_downsampling_2x2.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/downsampling.vs"));
-    pipeline_downsampling_2x2.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/downsampling_2x2.fs"));
+    pipeline_downsampling_2x2 = std::make_unique<ProgramPipeline>(
+        ProgramPipeline::ProgramPtrSet({
+            rm.GetResource<Program>("assets/shaders/downsampling.vs"),
+            rm.GetResource<Program>("assets/shaders/downsampling_2x2.fs")})
+            );
 
-    pipeline_downsampling_4x4.Create();
-    pipeline_downsampling_4x4.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/downsampling.vs"));
-    pipeline_downsampling_4x4.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/downsampling_4x4.fs"));
+    pipeline_downsampling_4x4 = std::make_unique<ProgramPipeline>(
+        ProgramPipeline::ProgramPtrSet({
+            rm.GetResource<Program>("assets/shaders/downsampling.vs"),
+            rm.GetResource<Program>("assets/shaders/downsampling_4x4.fs")})
+            );
 
-    pipeline_kawase_blur.Create();
-    pipeline_kawase_blur.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/kawase_blur.vs"));
-    pipeline_kawase_blur.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/kawase_blur.fs"));
+    pipeline_kawase_blur = std::make_unique<ProgramPipeline>(
+        ProgramPipeline::ProgramPtrSet({
+            rm.GetResource<Program>("assets/shaders/kawase_blur.vs"),
+            rm.GetResource<Program>("assets/shaders/kawase_blur.fs")})
+            );
 
-    pipeline_streak.Create();
-    pipeline_streak.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/streak.vs"));
-    pipeline_streak.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/streak.fs"));
+    pipeline_streak = std::make_unique<ProgramPipeline>(
+        ProgramPipeline::ProgramPtrSet({
+            rm.GetResource<Program>("assets/shaders/streak.vs"),
+            rm.GetResource<Program>("assets/shaders/streak.fs")})
+            );
 
-    pipeline_tonemapping.Create();
-    pipeline_tonemapping.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/tonemapping.vs"));
-    pipeline_tonemapping.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/tonemapping.fs"));
+    pipeline_tonemapping = std::make_unique<ProgramPipeline>(
+        ProgramPipeline::ProgramPtrSet({
+            rm.GetResource<Program>("assets/shaders/tonemapping.vs"),
+            rm.GetResource<Program>("assets/shaders/tonemapping.fs")})
+            );
 
-    pipeline_apply.Create();
-    pipeline_apply.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/apply.vs"));
-    pipeline_apply.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/apply.fs"));
+    pipeline_apply = std::make_unique<ProgramPipeline>(
+        ProgramPipeline::ProgramPtrSet({
+            rm.GetResource<Program>("assets/shaders/apply.vs"),
+            rm.GetResource<Program>("assets/shaders/apply.fs")})
+            );
 
     exposure = 2.0f;
     lum_soft_threshold = 0.5f;
@@ -578,9 +596,10 @@ void MyWindow::DrawTextLines(std::vector<std::string> text_lines)
 
 void MyWindow::DrawFullScreenQuad(GLuint texture)
 {
-    pipeline_fullscreen_quad.SetUniform1i("u_tex0", 0);
 
-    pipeline_fullscreen_quad.Bind();
+    pipeline_fullscreen_quad->GetPipelineUniform().Set1i("u_tex0", 0);
+
+    pipeline_fullscreen_quad->Bind();
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture);
@@ -591,7 +610,7 @@ void MyWindow::DrawFullScreenQuad(GLuint texture)
     glBindSampler(0, 0);
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    pipeline_fullscreen_quad.Unbind();
+    pipeline_fullscreen_quad->Unbind();
 }
 
 float MyWindow::ComputeAverageLuminance(FrameBuffer* input)
@@ -630,10 +649,11 @@ void MyWindow::PassLogLuminance(FrameBuffer* input, FrameBuffer* output)
         GLint viewport[4];
         glGetIntegerv(GL_VIEWPORT, viewport);
 
-        pipeline_log_luminance.SetUniform1i("u_tex0", 0);
-        pipeline_log_luminance.SetUniform2f("u_pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
+        auto& uniform = pipeline_log_luminance->GetPipelineUniform();
+        uniform.Set1i("u_tex0", 0);
+        uniform.Set2f("u_pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
 
-        pipeline_log_luminance.Bind();
+        pipeline_log_luminance->Bind();
         {
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, input->GetColorTexture());
@@ -644,7 +664,7 @@ void MyWindow::PassLogLuminance(FrameBuffer* input, FrameBuffer* output)
             glBindSampler(0, 0);
             glBindTexture(GL_TEXTURE_2D, 0);
         }
-        pipeline_log_luminance.Unbind();
+        pipeline_log_luminance->Unbind();
     }
     output->Unbind();
 }
@@ -656,13 +676,14 @@ void MyWindow::PassHighLuminanceRegionExtraction(FrameBuffer* input, FrameBuffer
         GLint viewport[4];
         glGetIntegerv(GL_VIEWPORT, viewport);
 
-        pipeline_high_luminance_region_extraction.SetUniform1i("u_tex0", 0);
-        pipeline_high_luminance_region_extraction.SetUniform2f("u_pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
-        pipeline_high_luminance_region_extraction.SetUniform1f("u_exposure", exposure);
-        pipeline_high_luminance_region_extraction.SetUniform1f("u_threshold", lum_hard_threshold);
-        pipeline_high_luminance_region_extraction.SetUniform1f("u_soft_threshold", lum_soft_threshold);
+        auto& uniform = pipeline_high_luminance_region_extraction->GetPipelineUniform();
+        uniform.Set1i("u_tex0", 0);
+        uniform.Set2f("u_pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
+        uniform.Set1f("u_exposure", exposure);
+        uniform.Set1f("u_threshold", lum_hard_threshold);
+        uniform.Set1f("u_soft_threshold", lum_soft_threshold);
 
-        pipeline_high_luminance_region_extraction.Bind();
+        pipeline_high_luminance_region_extraction->Bind();
         {
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, input->GetColorTexture());
@@ -673,7 +694,7 @@ void MyWindow::PassHighLuminanceRegionExtraction(FrameBuffer* input, FrameBuffer
             glBindSampler(0, 0);
             glBindTexture(GL_TEXTURE_2D, 0);
         }
-        pipeline_high_luminance_region_extraction.Unbind();
+        pipeline_high_luminance_region_extraction->Unbind();
     }
     output->Unbind();
 }
@@ -685,10 +706,11 @@ void MyWindow::PassDownsampling2x2(FrameBuffer* input, FrameBuffer* output)
         GLint viewport[4];
         glGetIntegerv(GL_VIEWPORT, viewport);
 
-        pipeline_downsampling_2x2.SetUniform1i("u_tex0", 0);
-        pipeline_downsampling_2x2.SetUniform2f("u_pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
+        auto& uniform = pipeline_downsampling_2x2->GetPipelineUniform();
+        uniform.Set1i("u_tex0", 0);
+        uniform.Set2f("u_pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
 
-        pipeline_downsampling_2x2.Bind();
+        pipeline_downsampling_2x2->Bind();
         {
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, input->GetColorTexture());
@@ -699,7 +721,7 @@ void MyWindow::PassDownsampling2x2(FrameBuffer* input, FrameBuffer* output)
             glBindSampler(0, 0);
             glBindTexture(GL_TEXTURE_2D, 0);
         }
-        pipeline_downsampling_2x2.Unbind();
+        pipeline_downsampling_2x2->Unbind();
     }
     output->Unbind();
 }
@@ -711,10 +733,11 @@ void MyWindow::PassDownsampling4x4(FrameBuffer* input, FrameBuffer* output)
         GLint viewport[4];
         glGetIntegerv(GL_VIEWPORT, viewport);
 
-        pipeline_downsampling_4x4.SetUniform1i("u_tex0", 0);
-        pipeline_downsampling_4x4.SetUniform2f("u_pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
+        auto& uniform = pipeline_downsampling_4x4->GetPipelineUniform();
+        uniform.Set1i("u_tex0", 0);
+        uniform.Set2f("u_pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
 
-        pipeline_downsampling_4x4.Bind();
+        pipeline_downsampling_4x4->Bind();
         {
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, input->GetColorTexture());
@@ -725,7 +748,7 @@ void MyWindow::PassDownsampling4x4(FrameBuffer* input, FrameBuffer* output)
             glBindSampler(0, 0);
             glBindTexture(GL_TEXTURE_2D, 0);
         }
-        pipeline_downsampling_4x4.Unbind();
+        pipeline_downsampling_4x4->Unbind();
     }
     output->Unbind();
 }
@@ -737,11 +760,12 @@ void MyWindow::PassKawaseBlur(FrameBuffer* input, FrameBuffer* output, int itera
         GLint viewport[4];
         glGetIntegerv(GL_VIEWPORT, viewport);
 
-        pipeline_kawase_blur.SetUniform1i("u_tex0", 0);
-        pipeline_kawase_blur.SetUniform2f("u_pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
-        pipeline_kawase_blur.SetUniform1f("u_iteration", static_cast<float>(iteration));
+        auto& uniform = pipeline_kawase_blur->GetPipelineUniform();
+        uniform.Set1i("u_tex0", 0);
+        uniform.Set2f("u_pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
+        uniform.Set1f("u_iteration", static_cast<float>(iteration));
 
-        pipeline_kawase_blur.Bind();
+        pipeline_kawase_blur->Bind();
         {
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, input->GetColorTexture());
@@ -752,7 +776,7 @@ void MyWindow::PassKawaseBlur(FrameBuffer* input, FrameBuffer* output, int itera
             glBindSampler(0, 0);
             glBindTexture(GL_TEXTURE_2D, 0);
         }
-        pipeline_kawase_blur.Unbind();
+        pipeline_kawase_blur->Unbind();
     }
     output->Unbind();
 }
@@ -862,12 +886,13 @@ void MyWindow::PassStreak(FrameBuffer* input, FrameBuffer* output, float dx, flo
         GLint viewport[4];
         glGetIntegerv(GL_VIEWPORT, viewport);
 
-        pipeline_streak.SetUniform1i("u_tex0", 0);
-        pipeline_streak.SetUniform2f("u_pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
-        pipeline_streak.SetUniform2f("u_direction", dx, dy);
-        pipeline_streak.SetUniform2f("u_params", attenuation, static_cast<float>(pass));
+        auto& uniform = pipeline_streak->GetPipelineUniform();
+        uniform.Set1i("u_tex0", 0);
+        uniform.Set2f("u_pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
+        uniform.Set2f("u_direction", dx, dy);
+        uniform.Set2f("u_params", attenuation, static_cast<float>(pass));
 
-        pipeline_streak.Bind();
+        pipeline_streak->Bind();
         {
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, input->GetColorTexture());
@@ -878,7 +903,7 @@ void MyWindow::PassStreak(FrameBuffer* input, FrameBuffer* output, float dx, flo
             glBindSampler(0, 0);
             glBindTexture(GL_TEXTURE_2D, 0);
         }
-        pipeline_streak.Unbind();
+        pipeline_streak->Unbind();
     }
     output->Unbind();
 }
@@ -891,11 +916,12 @@ void MyWindow::PassTonemapping(FrameBuffer* input, FrameBuffer* output)
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
 
-    pipeline_tonemapping.SetUniform1i("u_tex0", 0);
-    pipeline_tonemapping.SetUniform2f("u_pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
-    pipeline_tonemapping.SetUniform1f("u_exposure", exposure);
+    auto& uniform = pipeline_tonemapping->GetPipelineUniform();
+    uniform.Set1i("u_tex0", 0);
+    uniform.Set2f("u_pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
+    uniform.Set1f("u_exposure", exposure);
 
-    pipeline_tonemapping.Bind();
+    pipeline_tonemapping->Bind();
     {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, input->GetColorTexture());
@@ -906,7 +932,7 @@ void MyWindow::PassTonemapping(FrameBuffer* input, FrameBuffer* output)
         glBindSampler(0, 0);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
-    pipeline_tonemapping.Unbind();
+    pipeline_tonemapping->Unbind();
 
     if(output != nullptr)
         output->Unbind();
@@ -920,10 +946,11 @@ void MyWindow::PassApply(FrameBuffer* input, FrameBuffer* output)
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
 
-    pipeline_apply.SetUniform1i("u_tex0", 0);
-    pipeline_apply.SetUniform2f("u_pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
+    auto& uniform = pipeline_apply->GetPipelineUniform();
+    uniform.Set1i("u_tex0", 0);
+    uniform.Set2f("u_pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
 
-    pipeline_apply.Bind();
+    pipeline_apply->Bind();
     {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, input->GetColorTexture());
@@ -934,7 +961,7 @@ void MyWindow::PassApply(FrameBuffer* input, FrameBuffer* output)
         glBindSampler(0, 0);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
-    pipeline_apply.Unbind();
+    pipeline_apply->Unbind();
 
     if(output != nullptr)
         output->Unbind();

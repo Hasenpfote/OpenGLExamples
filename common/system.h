@@ -2,8 +2,6 @@
 #include <memory>
 #include "singleton.h"
 #include "resource.h"
-#include "render/texture.h"
-#include "render/shader.h"
 #include "render/custom_camera.h"
 
 namespace common

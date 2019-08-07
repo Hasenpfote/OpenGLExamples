@@ -2,13 +2,15 @@
 #include <GLFW/glfw3.h>
 #include <hasenpfote/math/cmatrix4.h>
 #include "../../common/system.h"
+#include "../../common/render/texture.h"
+#include "../../common/render/shader/shader.h"
 
 class Quad final
 {
     using System = common::System;
     using Texture = common::render::Texture;
-    using ShaderProgram = common::render::ShaderProgram;
-    using ShaderPipeline = common::render::ShaderPipeline;
+    using Program = common::render::shader::Program;
+    using ProgramPipeline = common::render::shader::ProgramPipeline;
 
 public:
     Quad();
@@ -25,5 +27,5 @@ private:
     GLuint sampler;
     GLuint texture;
 
-    ShaderPipeline pipeline;
+    std::unique_ptr<ProgramPipeline> pipeline;
 };

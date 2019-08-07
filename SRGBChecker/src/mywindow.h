@@ -8,7 +8,9 @@
 #include <hasenpfote/math/quaternion.h>
 #include "../../common/window.h"
 #include "../../common/system.h"
+#include "../../common/render/texture.h"
 #include "../../common/render/framebuffer.h"
+#include "../../common/render/shader/shader.h"
 #include "../../common/render/text/sdf_text.h"
 #include "fullscreen_pass_geometry.h"
 
@@ -16,8 +18,8 @@ class MyWindow final : public common::Window
 {
     using System = common::System;
     using Texture = common::render::Texture;
-    using ShaderProgram = common::render::ShaderProgram;
-    using ShaderPipeline = common::render::ShaderPipeline;
+    using Program = common::render::shader::Program;
+    using ProgramPipeline = common::render::shader::ProgramPipeline;
     using FrameBuffer = common::render::FrameBuffer;
     using Font = common::render::text::Font;
     using SDFText = common::render::text::SDFText;
@@ -58,9 +60,9 @@ private:
     std::vector<std::tuple<GLuint, std::filesystem::path>> selectable_textures;
     int selected_texture_index;
 
-    ShaderPipeline pipeline_fullscreen_quad;
-    ShaderPipeline pipeline_linear_to_linear;
-    ShaderPipeline pipeline_linear_to_srgb;
+    std::unique_ptr<ProgramPipeline> pipeline_fullscreen_quad;
+    std::unique_ptr<ProgramPipeline> pipeline_linear_to_linear;
+    std::unique_ptr<ProgramPipeline> pipeline_linear_to_srgb;
 
     std::unique_ptr<FrameBuffer> scene_rt;
 

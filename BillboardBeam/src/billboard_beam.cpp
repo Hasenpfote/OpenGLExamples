@@ -63,14 +63,16 @@ void BillboardBeam::Initialize()
     glSamplerParameteri(sampler, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glSamplerParameteri(sampler, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    auto& rm = System::GetConstInstance().GetResourceManager();
+    auto& rm = System::GetMutableInstance().GetResourceManager();
 
     texture = rm.GetResource<Texture>("assets/textures/beam.png")->GetTexture();
     texture = rm.GetResource<Texture>("assets/textures/beam_a.png")->GetTexture();
 
-    pipeline.Create();
-    pipeline.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/billboard_beam.vs"));
-    pipeline.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/billboard_beam.fs"));
+    pipeline = std::make_unique<ProgramPipeline>(
+        ProgramPipeline::ProgramPtrSet({
+            rm.GetResource<Program>("assets/shaders/billboard_beam.vs"),
+            rm.GetResource<Program>("assets/shaders/billboard_beam.fs")})
+            );
 }
 
 void BillboardBeam::UpdateMatrices(const hasenpfote::math::CMatrix4& model)
@@ -99,27 +101,28 @@ void BillboardBeam::Draw(const hasenpfote::math::Vector3& ep1, const hasenpfote:
     CMatrix4 ma, mb;
     ComputeBillboardBeamMatrix2(ep1, ep2, mv, ma, mb);
 
-    pipeline.SetUniform1f("size", size);
-    pipeline.SetUniformMatrix4fv("bb[0]", 1, GL_FALSE, static_cast<GLfloat*>(ma));
-    pipeline.SetUniformMatrix4fv("bb[1]", 1, GL_FALSE, static_cast<GLfloat*>(mb));
-    pipeline.SetUniform4fv("color[0]", 1, static_cast<const GLfloat*>(color1));
-    pipeline.SetUniform4fv("color[1]", 1, static_cast<const GLfloat*>(color2));
-    pipeline.SetUniformMatrix4fv("mvp", 1, GL_FALSE, static_cast<GLfloat*>(mvp));
-    pipeline.SetUniform1i("texture", 0);
+    auto& uniform = pipeline->GetPipelineUniform();
+    uniform.Set1f("size", size);
+    uniform.SetMatrix4fv("bb[0]", 1, GL_FALSE, static_cast<GLfloat*>(ma));
+    uniform.SetMatrix4fv("bb[1]", 1, GL_FALSE, static_cast<GLfloat*>(mb));
+    uniform.Set4fv("color[0]", 1, static_cast<const GLfloat*>(color1));
+    uniform.Set4fv("color[1]", 1, static_cast<const GLfloat*>(color2));
+    uniform.SetMatrix4fv("mvp", 1, GL_FALSE, static_cast<GLfloat*>(mvp));
+    uniform.Set1i("texture", 0);
 
-    pipeline.Bind();
+    pipeline->Bind();
+    {
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glBindSampler(0, sampler);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glBindSampler(0, sampler);
+        glBindVertexArray(vao);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 6);
+        glBindVertexArray(0);
 
-    glBindVertexArray(vao);
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 6);
-    glBindVertexArray(0);
-
-    glActiveTexture(GL_TEXTURE0);
-
-    pipeline.Unbind();
+        glActiveTexture(GL_TEXTURE0);
+    }
+    pipeline->Unbind();
 }
 
 void BillboardBeam::ComputeBillboardBeamMatrix(const hasenpfote::math::Vector3& ep1, const hasenpfote::math::Vector3& ep2, const hasenpfote::math::CMatrix4& view, hasenpfote::math::CMatrix4& bb1, hasenpfote::math::CMatrix4& bb2)

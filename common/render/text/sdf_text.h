@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "../shader.h"
+#include "../shader/shader.h"
 #include "text.h"
 
 namespace common::render::text
@@ -54,11 +54,13 @@ private:
         {
         }
     };
+
     std::vector<Vertex> vertices;
     std::vector<std::uint32_t> indices;
-    ShaderProgram vs;
-    ShaderProgram fs;
-    ShaderPipeline pipeline;
+
+    std::unique_ptr<shader::Program> vs;
+    std::unique_ptr<shader::Program> fs;
+    std::unique_ptr<shader::ProgramPipeline> pipeline;
 };
 
 /*!

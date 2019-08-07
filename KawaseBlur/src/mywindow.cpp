@@ -72,7 +72,7 @@ void MyWindow::Setup()
     {
         std::filesystem::path dirpath("assets/shaders");
         auto& rm = System::GetMutableInstance().GetResourceManager();
-        rm.AddResourcesFromDirectory<ShaderProgram>(dirpath, false);
+        rm.AddResourcesFromDirectory<Program>(dirpath, false);
     }
     // load texture.
     {
@@ -88,7 +88,7 @@ void MyWindow::Setup()
         text->SetSmoothness(1.0f);
     }
 
-    auto& rm = System::GetConstInstance().GetResourceManager();
+    auto& rm = System::GetMutableInstance().GetResourceManager();
     //
     texture = rm.GetResource<Texture>("assets/textures/testimg_1920x1080.png")->GetTexture();
 
@@ -105,25 +105,35 @@ void MyWindow::Setup()
 
     RecreateResources(width, height);
 
-    pipeline_fullscreen_quad.Create();
-    pipeline_fullscreen_quad.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/fullscreen_quad.vs"));
-    pipeline_fullscreen_quad.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/fullscreen_quad.fs"));
+    pipeline_fullscreen_quad = std::make_unique<ProgramPipeline>(
+        ProgramPipeline::ProgramPtrSet({
+            rm.GetResource<Program>("assets/shaders/fullscreen_quad.vs"),
+            rm.GetResource<Program>("assets/shaders/fullscreen_quad.fs")})
+            );
 
-    pipeline_apply.Create();
-    pipeline_apply.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/apply.vs"));
-    pipeline_apply.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/apply.fs"));
+    pipeline_apply = std::make_unique<ProgramPipeline>(
+        ProgramPipeline::ProgramPtrSet({
+            rm.GetResource<Program>("assets/shaders/apply.vs"),
+            rm.GetResource<Program>("assets/shaders/apply.fs")})
+            );
 
-    pipeline_downsampling_2x2.Create();
-    pipeline_downsampling_2x2.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/downsampling.vs"));
-    pipeline_downsampling_2x2.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/downsampling_2x2.fs"));
+    pipeline_downsampling_2x2 = std::make_unique<ProgramPipeline>(
+        ProgramPipeline::ProgramPtrSet({
+            rm.GetResource<Program>("assets/shaders/downsampling.vs"),
+            rm.GetResource<Program>("assets/shaders/downsampling_2x2.fs")})
+            );
 
-    pipeline_downsampling_4x4.Create();
-    pipeline_downsampling_4x4.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/downsampling.vs"));
-    pipeline_downsampling_4x4.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/downsampling_4x4.fs"));
+    pipeline_downsampling_4x4 = std::make_unique<ProgramPipeline>(
+        ProgramPipeline::ProgramPtrSet({
+            rm.GetResource<Program>("assets/shaders/downsampling.vs"),
+            rm.GetResource<Program>("assets/shaders/downsampling_4x4.fs")})
+            );
 
-    pipeline_kawase_blur.Create();
-    pipeline_kawase_blur.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/kawase_blur.vs"));
-    pipeline_kawase_blur.SetShaderProgram(rm.GetResource<ShaderProgram>("assets/shaders/kawase_blur.fs"));
+    pipeline_kawase_blur = std::make_unique<ProgramPipeline>(
+        ProgramPipeline::ProgramPtrSet({
+            rm.GetResource<Program>("assets/shaders/kawase_blur.vs"),
+            rm.GetResource<Program>("assets/shaders/kawase_blur.fs")})
+            );
 
     shader_kernel_name = "gaussian_7x7";
 
@@ -363,19 +373,19 @@ void MyWindow::RecreateResources(int width, int height)
 
 void MyWindow::DrawFullScreenQuad()
 {
-    pipeline_fullscreen_quad.SetUniform1i("texture0", 0);
+    pipeline_fullscreen_quad->GetPipelineUniform().Set1i("texture0", 0);
 
-    pipeline_fullscreen_quad.Bind();
+    pipeline_fullscreen_quad->Bind();
+    {
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glBindSampler(0, sampler);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glBindSampler(0, sampler);
+        fs_pass_geom->Draw();
 
-    fs_pass_geom->Draw();
-
-    glActiveTexture(GL_TEXTURE0);
-
-    pipeline_fullscreen_quad.Unbind();
+        glActiveTexture(GL_TEXTURE0);
+    }
+    pipeline_fullscreen_quad->Unbind();
 }
 
 void MyWindow::PassDownsampling(FrameBuffer* input, FrameBuffer* output)
@@ -385,20 +395,21 @@ void MyWindow::PassDownsampling(FrameBuffer* input, FrameBuffer* output)
         GLint viewport[4];
         glGetIntegerv(GL_VIEWPORT, viewport);
 
-        pipeline_downsampling_4x4.SetUniform1i("texture0", 0);
-        pipeline_downsampling_4x4.SetUniform2f("pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
+        auto& uniform = pipeline_downsampling_4x4->GetPipelineUniform();
+        uniform.Set1i("texture0", 0);
+        uniform.Set2f("pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
 
-        pipeline_downsampling_4x4.Bind();
+        pipeline_downsampling_4x4->Bind();
+        {
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, input->GetColorTexture());
+            glBindSampler(0, sampler);
 
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, input->GetColorTexture());
-        glBindSampler(0, sampler);
+            fs_pass_geom->Draw();
 
-        fs_pass_geom->Draw();
-
-        glActiveTexture(GL_TEXTURE0);
-
-        pipeline_downsampling_4x4.Unbind();
+            glActiveTexture(GL_TEXTURE0);
+        }
+        pipeline_downsampling_4x4->Unbind();
     }
     output->Unbind();
 }
@@ -410,20 +421,21 @@ void MyWindow::PassKawaseBlur(FrameBuffer* input, FrameBuffer* output, int itera
         GLint viewport[4];
         glGetIntegerv(GL_VIEWPORT, viewport);
 
-        pipeline_kawase_blur.SetUniform1i("texture0", 0);
-        pipeline_kawase_blur.SetUniform3f("params", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]), static_cast<float>(iteration));
+        auto& uniform = pipeline_kawase_blur->GetPipelineUniform();
+        uniform.Set1i("texture0", 0);
+        uniform.Set3f("params", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]), static_cast<float>(iteration));
 
-        pipeline_kawase_blur.Bind();
+        pipeline_kawase_blur->Bind();
+        {
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, input->GetColorTexture());
+            glBindSampler(0, sampler);
 
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, input->GetColorTexture());
-        glBindSampler(0, sampler);
+            fs_pass_geom->Draw();
 
-        fs_pass_geom->Draw();
-
-        glActiveTexture(GL_TEXTURE0);
-
-        pipeline_kawase_blur.Unbind();
+            glActiveTexture(GL_TEXTURE0);
+        }
+        pipeline_kawase_blur->Unbind();
     }
     output->Unbind();
 }
@@ -436,20 +448,21 @@ void MyWindow::PassApply(FrameBuffer* input, FrameBuffer* output)
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
 
-    pipeline_apply.SetUniform1i("texture0", 0);
-    pipeline_apply.SetUniform2f("pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
+    auto& uniform = pipeline_apply->GetPipelineUniform();
+    uniform.Set1i("texture0", 0);
+    uniform.Set2f("pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
 
-    pipeline_apply.Bind();
+    pipeline_apply->Bind();
+    {
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, input->GetColorTexture());
+        glBindSampler(0, sampler);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, input->GetColorTexture());
-    glBindSampler(0, sampler);
+        fs_pass_geom->Draw();
 
-    fs_pass_geom->Draw();
-
-    glActiveTexture(GL_TEXTURE0);
-
-    pipeline_apply.Unbind();
+        glActiveTexture(GL_TEXTURE0);
+    }
+    pipeline_apply->Unbind();
 
     if(output)
         output->Unbind();

@@ -169,9 +169,9 @@ void Model::Setup(fbxloader::Model& model, GLuint common_matrices)
 
     auto& rm = System::GetMutableInstance().GetResourceManager();
 
-    vs = rm.GetResource<ShaderProgram>("assets/shaders/simple.vs");
+    vs = rm.GetResource<Program>("assets/shaders/simple.vs");
     assert(vs);
-    fs = rm.GetResource<ShaderProgram>("assets/shaders/simple.fs");
+    fs = rm.GetResource<Program>("assets/shaders/simple.fs");
     assert(fs);
 
     glGenProgramPipelines(1, &pipeline);
@@ -196,15 +196,15 @@ void Model::DrawOpaqueMeshes(const hasenpfote::math::CMatrix4& model)
     auto vs_program = vs->GetProgram();
     //glGetProgramPipelineiv(pipeline, GL_VERTEX_SHADER, &vs_program);
     //GLuint ub_index = glGetUniformBlockIndex(vs_program, "CommonMatrices");
-    glBindBufferBase(GL_UNIFORM_BUFFER, vs->GetUniformBlockIndex("CommonMatrices"), common_matrices);
+    glBindBufferBase(GL_UNIFORM_BUFFER, vs->GetUniform().GetBlockIndex("CommonMatrices"), common_matrices);
 
-    glProgramUniformMatrix4fv(vs_program, vs->GetUniformLocation("matWorld"), 1, GL_FALSE, static_cast<const GLfloat*>(model));
+    glProgramUniformMatrix4fv(vs_program, vs->GetUniform().GetLocation("matWorld"), 1, GL_FALSE, static_cast<const GLfloat*>(model));
 
-    auto loc1 = vs->GetUniformLocation("jointPalette");
-    auto loc2 = vs->GetUniformLocation("isSkinnedMesh");
+    auto loc1 = vs->GetUniform().GetLocation("jointPalette");
+    auto loc2 = vs->GetUniform().GetLocation("isSkinnedMesh");
 
     auto fs_program = fs->GetProgram();
-    glProgramUniform1i(fs_program, fs->GetUniformLocation("texture"), 0);
+    glProgramUniform1i(fs_program, fs->GetUniform().GetLocation("texture"), 0);
 
     glUseProgram(0);
     glBindProgramPipeline(pipeline);
@@ -311,13 +311,13 @@ void Model::DrawTransparentMeshes(const hasenpfote::math::CMatrix4& model)
     GLuint ub_index = glGetUniformBlockIndex(vs_program, "CommonMatrices");
     glBindBufferBase(GL_UNIFORM_BUFFER, ub_index, common_matrices);
 
-    glProgramUniformMatrix4fv(vs_program, vs->GetUniformLocation("matWorld"), 1, GL_FALSE, static_cast<const GLfloat*>(model));
+    glProgramUniformMatrix4fv(vs_program, vs->GetUniform().GetLocation("matWorld"), 1, GL_FALSE, static_cast<const GLfloat*>(model));
 
-    auto loc1 = vs->GetUniformLocation("jointPalette");
-    auto loc2 = vs->GetUniformLocation("isSkinnedMesh");
+    auto loc1 = vs->GetUniform().GetLocation("jointPalette");
+    auto loc2 = vs->GetUniform().GetLocation("isSkinnedMesh");
 
     auto fs_program = fs->GetProgram();
-    glProgramUniform1i(fs_program, fs->GetUniformLocation("texture"), 0);
+    glProgramUniform1i(fs_program, fs->GetUniform().GetLocation("texture"), 0);
 
     glUseProgram(0);
     glBindProgramPipeline(pipeline);

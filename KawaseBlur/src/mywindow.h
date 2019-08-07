@@ -3,7 +3,9 @@
 #include <hasenpfote/math/quaternion.h>
 #include "../../common/window.h"
 #include "../../common/system.h"
+#include "../../common/render/texture.h"
 #include "../../common/render/framebuffer.h"
+#include "../../common/render/shader/shader.h"
 #include "../../common/render/text/sdf_text.h"
 #include "fullscreen_pass_geometry.h"
 
@@ -11,8 +13,8 @@ class MyWindow final : public common::Window
 {
     using System = common::System;
     using Texture = common::render::Texture;
-    using ShaderProgram = common::render::ShaderProgram;
-    using ShaderPipeline = common::render::ShaderPipeline;
+    using Program = common::render::shader::Program;
+    using ProgramPipeline = common::render::shader::ProgramPipeline;
     using FrameBuffer = common::render::FrameBuffer;
     using Font = common::render::text::Font;
     using SDFText = common::render::text::SDFText;
@@ -49,11 +51,12 @@ private:
     std::unique_ptr<FullscreenPassGeometry> fs_pass_geom;
     GLuint sampler;
     GLuint texture;
-    ShaderPipeline pipeline_fullscreen_quad;
-    ShaderPipeline pipeline_downsampling_2x2;
-    ShaderPipeline pipeline_downsampling_4x4;
-    ShaderPipeline pipeline_kawase_blur;
-    ShaderPipeline pipeline_apply;
+
+    std::unique_ptr<ProgramPipeline> pipeline_fullscreen_quad;
+    std::unique_ptr<ProgramPipeline> pipeline_downsampling_2x2;
+    std::unique_ptr<ProgramPipeline> pipeline_downsampling_4x4;
+    std::unique_ptr<ProgramPipeline> pipeline_kawase_blur;
+    std::unique_ptr<ProgramPipeline> pipeline_apply;
 
     std::unique_ptr<FrameBuffer> scene_rt;
     std::unique_ptr<FrameBuffer> ds_rt_0;

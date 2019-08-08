@@ -1,5 +1,6 @@
 ﻿#include <algorithm>
 #include <hasenpfote/assert.h>
+#include "../../logger.h"
 #include "uniform.h"
 
 namespace common::render::shader
@@ -18,9 +19,8 @@ GLint Uniform::GetLocation(const std::string& name) const
     auto location = glGetUniformLocation(program_, name.c_str());
     if(location >= 0)
     {
-        location_cache_.insert(std::make_pair(name, location)); // caching
+        location_cache_.emplace(name, location); // caching
     }
-    //HASENPFOTE_ASSERT_MSG(location >= 0, "Could not find uniform variable `" << name << "` in shader.");
     return location;
 }
 
@@ -37,175 +37,241 @@ GLuint Uniform::GetBlockIndex(const std::string& name) const
     auto index = glGetUniformBlockIndex(program_, name.c_str());
     if(index != GL_INVALID_INDEX)
     {
-        block_index_cache_.insert(std::make_pair(name, index)); // caching
+        block_index_cache_.emplace(name, index); // caching
     }
-    //HASENPFOTE_ASSERT_MSG(index != GL_INVALID_INDEX, "Could not find uniform block index `" << name << "` in shader.");
+    //LOG_W("Could not find uniform block index `" << name << "` in shader.");
     return index;
 }
 
 void Uniform::Set1f_impl(const std::string& name, GLfloat v0)
 {
-    glProgramUniform1f(program_, GetLocation(name), v0);
+    const auto loc = GetLocation(name);
+    HASENPFOTE_ASSERT_MSG(loc >= 0, "Could not find uniform variable `" << name << "` in shader.");
+    glProgramUniform1f(program_, loc, v0);
 }
 
 void Uniform::Set2f_impl(const std::string& name, GLfloat v0, GLfloat v1)
 {
-    glProgramUniform2f(program_, GetLocation(name), v0, v1);
+    const auto loc = GetLocation(name);
+    HASENPFOTE_ASSERT_MSG(loc >= 0, "Could not find uniform variable `" << name << "` in shader.");
+    glProgramUniform2f(program_, loc, v0, v1);
 }
 
 void Uniform::Set3f_impl(const std::string& name, GLfloat v0, GLfloat v1, GLfloat v2)
 {
-    glProgramUniform3f(program_, GetLocation(name), v0, v1, v2);
+    const auto loc = GetLocation(name);
+    HASENPFOTE_ASSERT_MSG(loc >= 0, "Could not find uniform variable `" << name << "` in shader.");
+    glProgramUniform3f(program_, loc, v0, v1, v2);
 }
 
 void Uniform::Set4f_impl(const std::string& name, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3)
 {
-    glProgramUniform4f(program_, GetLocation(name), v0, v1, v2, v3);
+    const auto loc = GetLocation(name);
+    HASENPFOTE_ASSERT_MSG(loc >= 0, "Could not find uniform variable `" << name << "` in shader.");
+    glProgramUniform4f(program_, loc, v0, v1, v2, v3);
 }
 
 void Uniform::Set1i_impl(const std::string& name, GLint v0)
 {
-    glProgramUniform1i(program_, GetLocation(name), v0);
+    const auto loc = GetLocation(name);
+    HASENPFOTE_ASSERT_MSG(loc >= 0, "Could not find uniform variable `" << name << "` in shader.");
+    glProgramUniform1i(program_, loc, v0);
 }
 
 void Uniform::Set2i_impl(const std::string& name, GLint v0, GLint v1)
 {
-    glProgramUniform2i(program_, GetLocation(name), v0, v1);
+    const auto loc = GetLocation(name);
+    HASENPFOTE_ASSERT_MSG(loc >= 0, "Could not find uniform variable `" << name << "` in shader.");
+    glProgramUniform2i(program_, loc, v0, v1);
 }
 
 void Uniform::Set3i_impl(const std::string& name, GLint v0, GLint v1, GLint v2)
 {
-    glProgramUniform3i(program_, GetLocation(name), v0, v1, v2);
+    const auto loc = GetLocation(name);
+    HASENPFOTE_ASSERT_MSG(loc >= 0, "Could not find uniform variable `" << name << "` in shader.");
+    glProgramUniform3i(program_, loc, v0, v1, v2);
 }
 
 void Uniform::Set4i_impl(const std::string& name, GLint v0, GLint v1, GLint v2, GLint v3)
 {
-    glProgramUniform4i(program_, GetLocation(name), v0, v1, v2, v3);
+    const auto loc = GetLocation(name);
+    HASENPFOTE_ASSERT_MSG(loc >= 0, "Could not find uniform variable `" << name << "` in shader.");
+    glProgramUniform4i(program_, loc, v0, v1, v2, v3);
 }
 
 void Uniform::Set1ui_impl(const std::string& name, GLuint v0)
 {
-    glProgramUniform1ui(program_, GetLocation(name), v0);
+    const auto loc = GetLocation(name);
+    HASENPFOTE_ASSERT_MSG(loc >= 0, "Could not find uniform variable `" << name << "` in shader.");
+    glProgramUniform1ui(program_, loc, v0);
 }
 
 void Uniform::Set2ui_impl(const std::string& name, GLuint v0, GLuint v1)
 {
-    glProgramUniform2ui(program_, GetLocation(name), v0, v1);
+    const auto loc = GetLocation(name);
+    HASENPFOTE_ASSERT_MSG(loc >= 0, "Could not find uniform variable `" << name << "` in shader.");
+    glProgramUniform2ui(program_, loc, v0, v1);
 }
 
 void Uniform::Set3ui_impl(const std::string& name, GLuint v0, GLuint v1, GLuint v2)
 {
-    glProgramUniform3ui(program_, GetLocation(name), v0, v1, v2);
+    const auto loc = GetLocation(name);
+    HASENPFOTE_ASSERT_MSG(loc >= 0, "Could not find uniform variable `" << name << "` in shader.");
+    glProgramUniform3ui(program_, loc, v0, v1, v2);
 }
 
 void Uniform::Set4ui_impl(const std::string& name, GLuint v0, GLuint v1, GLuint v2, GLuint v3)
 {
-    glProgramUniform4ui(program_, GetLocation(name), v0, v1, v2, v3);
+    const auto loc = GetLocation(name);
+    HASENPFOTE_ASSERT_MSG(loc >= 0, "Could not find uniform variable `" << name << "` in shader.");
+    glProgramUniform4ui(program_, loc, v0, v1, v2, v3);
 }
 
 void Uniform::Set1fv_impl(const std::string& name, GLsizei count, const GLfloat* value)
 {
-    glProgramUniform1fv(program_, GetLocation(name), count, value);
+    const auto loc = GetLocation(name);
+    HASENPFOTE_ASSERT_MSG(loc >= 0, "Could not find uniform variable `" << name << "` in shader.");
+    glProgramUniform1fv(program_, loc, count, value);
 }
 
 void Uniform::Set2fv_impl(const std::string& name, GLsizei count, const GLfloat* value)
 {
-    glProgramUniform2fv(program_, GetLocation(name), count, value);
+    const auto loc = GetLocation(name);
+    HASENPFOTE_ASSERT_MSG(loc >= 0, "Could not find uniform variable `" << name << "` in shader.");
+    glProgramUniform2fv(program_, loc, count, value);
 }
 
 void Uniform::Set3fv_impl(const std::string& name, GLsizei count, const GLfloat* value)
 {
-    glProgramUniform3fv(program_, GetLocation(name), count, value);
+    const auto loc = GetLocation(name);
+    HASENPFOTE_ASSERT_MSG(loc >= 0, "Could not find uniform variable `" << name << "` in shader.");
+    glProgramUniform3fv(program_, loc, count, value);
 }
 
 void Uniform::Set4fv_impl(const std::string& name, GLsizei count, const GLfloat* value)
 {
-    glProgramUniform4fv(program_, GetLocation(name), count, value);
+    const auto loc = GetLocation(name);
+    HASENPFOTE_ASSERT_MSG(loc >= 0, "Could not find uniform variable `" << name << "` in shader.");
+    glProgramUniform4fv(program_, loc, count, value);
 }
 
 void Uniform::Set1iv_impl(const std::string& name, GLsizei count, const GLint* value)
 {
-    glProgramUniform1iv(program_, GetLocation(name), count, value);
+    const auto loc = GetLocation(name);
+    HASENPFOTE_ASSERT_MSG(loc >= 0, "Could not find uniform variable `" << name << "` in shader.");
+    glProgramUniform1iv(program_, loc, count, value);
 }
 
 void Uniform::Set2iv_impl(const std::string& name, GLsizei count, const GLint* value)
 {
-    glProgramUniform2iv(program_, GetLocation(name), count, value);
+    const auto loc = GetLocation(name);
+    HASENPFOTE_ASSERT_MSG(loc >= 0, "Could not find uniform variable `" << name << "` in shader.");
+    glProgramUniform2iv(program_, loc, count, value);
 }
 
 void Uniform::Set3iv_impl(const std::string& name, GLsizei count, const GLint* value)
 {
-    glProgramUniform3iv(program_, GetLocation(name), count, value);
+    const auto loc = GetLocation(name);
+    HASENPFOTE_ASSERT_MSG(loc >= 0, "Could not find uniform variable `" << name << "` in shader.");
+    glProgramUniform3iv(program_, loc, count, value);
 }
 
 void Uniform::Set4iv_impl(const std::string& name, GLsizei count, const GLint* value)
 {
-    glProgramUniform4iv(program_, GetLocation(name), count, value);
+    const auto loc = GetLocation(name);
+    HASENPFOTE_ASSERT_MSG(loc >= 0, "Could not find uniform variable `" << name << "` in shader.");
+    glProgramUniform4iv(program_, loc, count, value);
 }
 
 void Uniform::Set1uiv_impl(const std::string& name, GLsizei count, const GLuint* value)
 {
-    glProgramUniform1uiv(program_, GetLocation(name), count, value);
+    const auto loc = GetLocation(name);
+    HASENPFOTE_ASSERT_MSG(loc >= 0, "Could not find uniform variable `" << name << "` in shader.");
+    glProgramUniform1uiv(program_, loc, count, value);
 }
 
 void Uniform::Set2uiv_impl(const std::string& name, GLsizei count, const GLuint* value)
 {
-    glProgramUniform2uiv(program_, GetLocation(name), count, value);
+    const auto loc = GetLocation(name);
+    HASENPFOTE_ASSERT_MSG(loc >= 0, "Could not find uniform variable `" << name << "` in shader.");
+    glProgramUniform2uiv(program_, loc, count, value);
 }
 
 void Uniform::Set3uiv_impl(const std::string& name, GLsizei count, const GLuint* value)
 {
-    glProgramUniform3uiv(program_, GetLocation(name), count, value);
+    const auto loc = GetLocation(name);
+    HASENPFOTE_ASSERT_MSG(loc >= 0, "Could not find uniform variable `" << name << "` in shader.");
+    glProgramUniform3uiv(program_, loc, count, value);
 }
 
 void Uniform::Set4uiv_impl(const std::string& name, GLsizei count, const GLuint* value)
 {
-    glProgramUniform4uiv(program_, GetLocation(name), count, value);
+    const auto loc = GetLocation(name);
+    HASENPFOTE_ASSERT_MSG(loc >= 0, "Could not find uniform variable `" << name << "` in shader.");
+    glProgramUniform4uiv(program_, loc, count, value);
 }
 
 void Uniform::SetMatrix2fv_impl(const std::string& name, GLsizei count, GLboolean transpose, const GLfloat* value)
 {
-    glProgramUniformMatrix2fv(program_, GetLocation(name), count, transpose, value);
+    const auto loc = GetLocation(name);
+    HASENPFOTE_ASSERT_MSG(loc >= 0, "Could not find uniform variable `" << name << "` in shader.");
+    glProgramUniformMatrix2fv(program_, loc, count, transpose, value);
 }
 
 void Uniform::SetMatrix3fv_impl(const std::string& name, GLsizei count, GLboolean transpose, const GLfloat* value)
 {
-    glProgramUniformMatrix3fv(program_, GetLocation(name), count, transpose, value);
+    const auto loc = GetLocation(name);
+    HASENPFOTE_ASSERT_MSG(loc >= 0, "Could not find uniform variable `" << name << "` in shader.");
+    glProgramUniformMatrix3fv(program_, loc, count, transpose, value);
 }
 
 void Uniform::SetMatrix4fv_impl(const std::string& name, GLsizei count, GLboolean transpose, const GLfloat* value)
 {
-    glProgramUniformMatrix4fv(program_, GetLocation(name), count, transpose, value);
+    const auto loc = GetLocation(name);
+    HASENPFOTE_ASSERT_MSG(loc >= 0, "Could not find uniform variable `" << name << "` in shader.");
+    glProgramUniformMatrix4fv(program_, loc, count, transpose, value);
 }
 
 void Uniform::SetMatrix2x3fv_impl(const std::string& name, GLsizei count, GLboolean transpose, const GLfloat* value)
 {
-    glProgramUniformMatrix2x3fv(program_, GetLocation(name), count, transpose, value);
+    const auto loc = GetLocation(name);
+    HASENPFOTE_ASSERT_MSG(loc >= 0, "Could not find uniform variable `" << name << "` in shader.");
+    glProgramUniformMatrix2x3fv(program_, loc, count, transpose, value);
 }
 
 void Uniform::SetMatrix3x2fv_impl(const std::string& name, GLsizei count, GLboolean transpose, const GLfloat* value)
 {
-    glProgramUniformMatrix3x2fv(program_, GetLocation(name), count, transpose, value);
+    const auto loc = GetLocation(name);
+    HASENPFOTE_ASSERT_MSG(loc >= 0, "Could not find uniform variable `" << name << "` in shader.");
+    glProgramUniformMatrix3x2fv(program_, loc, count, transpose, value);
 }
 
 void Uniform::SetMatrix2x4fv_impl(const std::string& name, GLsizei count, GLboolean transpose, const GLfloat* value)
 {
-    glProgramUniformMatrix2x4fv(program_, GetLocation(name), count, transpose, value);
+    const auto loc = GetLocation(name);
+    HASENPFOTE_ASSERT_MSG(loc >= 0, "Could not find uniform variable `" << name << "` in shader.");
+    glProgramUniformMatrix2x4fv(program_, loc, count, transpose, value);
 }
 
 void Uniform::SetMatrix4x2fv_impl(const std::string& name, GLsizei count, GLboolean transpose, const GLfloat* value)
 {
-    glProgramUniformMatrix4x2fv(program_, GetLocation(name), count, transpose, value);
+    const auto loc = GetLocation(name);
+    HASENPFOTE_ASSERT_MSG(loc >= 0, "Could not find uniform variable `" << name << "` in shader.");
+    glProgramUniformMatrix4x2fv(program_, loc, count, transpose, value);
 }
 
 void Uniform::SetMatrix3x4fv_impl(const std::string& name, GLsizei count, GLboolean transpose, const GLfloat* value)
 {
-    glProgramUniformMatrix3x4fv(program_, GetLocation(name), count, transpose, value);
+    const auto loc = GetLocation(name);
+    HASENPFOTE_ASSERT_MSG(loc >= 0, "Could not find uniform variable `" << name << "` in shader.");
+    glProgramUniformMatrix3x4fv(program_, loc, count, transpose, value);
 }
 
 void Uniform::SetMatrix4x3fv_impl(const std::string& name, GLsizei count, GLboolean transpose, const GLfloat* value)
 {
-    glProgramUniformMatrix4x3fv(program_, GetLocation(name), count, transpose, value);
+    const auto loc = GetLocation(name);
+    HASENPFOTE_ASSERT_MSG(loc >= 0, "Could not find uniform variable `" << name << "` in shader.");
+    glProgramUniformMatrix4x3fv(program_, loc, count, transpose, value);
 }
 
 

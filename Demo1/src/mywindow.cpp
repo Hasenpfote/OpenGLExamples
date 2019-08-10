@@ -8,6 +8,9 @@
 #include <hasenpfote/math/vector4.h>
 #include <hasenpfote/math/cmatrix4.h>
 #include <hasenpfote/math/axis_angle.h>
+#if defined(USE_IMGUI)
+#include "../../external/imgui/imgui.h"
+#endif
 #include "../../common/logger.h"
 #include "mywindow.h"
 
@@ -78,16 +81,17 @@ void MyWindow::Setup()
     //
     {
         std::filesystem::path texpath;
-        GLuint texture;
+        //GLuint texture;
         auto& rm = System::GetConstInstance().GetResourceManager();
 
         texpath = "assets/textures/street_lamp_1k.exr";
-        texture = rm.GetResource<Texture>(texpath.string())->GetTexture();
-        selectable_textures.push_back(std::make_tuple(texture, texpath));
+        //texture = rm.GetResource<Texture>(texpath.string())->GetTexture();
+        selectable_textures.emplace_back(texpath);
+
 
         texpath = "assets/textures/satara_night_no_lamps_1k.exr";
-        texture = rm.GetResource<Texture>(texpath.string())->GetTexture();
-        selectable_textures.push_back(std::make_tuple(texture, texpath));
+        //texture = rm.GetResource<Texture>(texpath.string())->GetTexture();
+        selectable_textures.emplace_back(texpath);
 
         selected_texture_index = 0;
     }
@@ -207,59 +211,6 @@ void MyWindow::OnKey(GLFWwindow* window, int key, int scancode, int action, int 
             glEnable(GL_MULTISAMPLE);
         }
     }
-    if(key == GLFW_KEY_X && action == GLFW_PRESS)
-    {
-        is_auto_exposure_enabled = !is_auto_exposure_enabled;
-    }
-    if(key == GLFW_KEY_P && action == GLFW_PRESS)
-    {
-        is_debug_enabled = !is_debug_enabled;
-    }
-    if(key == GLFW_KEY_B && action == GLFW_PRESS)
-    {
-        is_bloom_enabled = !is_bloom_enabled;
-    }
-    if(key == GLFW_KEY_L && action == GLFW_PRESS)
-    {
-        is_streak_enabled = !is_streak_enabled;
-    }
-    if(key == GLFW_KEY_T && action == GLFW_PRESS)
-    {
-        is_tonemapping_enabled = !is_tonemapping_enabled;
-    }
-    if(key == GLFW_KEY_F1 && (action == GLFW_PRESS || action == GLFW_REPEAT))
-    {
-        if(!selectable_textures.empty())
-        {
-            selected_texture_index += (mods == GLFW_MOD_SHIFT) ? -1 : 1;
-            if(selected_texture_index < 0)
-                selected_texture_index = selectable_textures.size() - 1;
-            else
-            if(selected_texture_index >= selectable_textures.size())
-                selected_texture_index = 0;
-        }
-    }
-    if(key == GLFW_KEY_F2 && (action == GLFW_PRESS || action == GLFW_REPEAT))
-    {
-        exposure += (mods == GLFW_MOD_SHIFT) ? -0.1f : 0.1f;
-        if (exposure < 0.0f)
-            exposure = 0.0f;
-    }
-    if(key == GLFW_KEY_F3 && (action == GLFW_PRESS || action == GLFW_REPEAT))
-    {
-        lum_soft_threshold += (mods == GLFW_MOD_SHIFT) ? -0.1f : 0.1f;
-        if(lum_soft_threshold < 0.0f)
-            lum_soft_threshold = 0.0f;
-        else
-        if(lum_soft_threshold > 1.0f)
-            lum_soft_threshold = 1.0f;
-    }
-    if(key == GLFW_KEY_F4 && (action == GLFW_PRESS || action == GLFW_REPEAT))
-    {
-        lum_hard_threshold += (mods == GLFW_MOD_SHIFT) ? -0.1f : 0.1f;
-        if(lum_hard_threshold < 0.0f)
-            lum_hard_threshold = 0.0f;
-    }
 }
 
 void MyWindow::OnMouseMove(GLFWwindow* window, double xpos, double ypos)
@@ -321,7 +272,10 @@ void MyWindow::OnRender()
     //
 
     // 1) Render scene to texture.
-    auto texture = std::get<0>(selectable_textures[selected_texture_index]);
+    auto& rm = System::GetConstInstance().GetResourceManager();
+    auto& filepath = selectable_textures[selected_texture_index];
+    auto texture = rm.GetResource<Texture>(filepath.string())->GetTexture();
+
     scene_rt->Bind();
     DrawFullScreenQuad(texture);
     scene_rt->Unbind();
@@ -403,59 +357,6 @@ void MyWindow::OnRender()
     GLboolean ms;
     glGetBooleanv(GL_MULTISAMPLE, &ms);
     oss << "MultiSample:" << ((ms == GL_TRUE) ? "On" : "Off") << "(Toggle MultiSample: m)";
-    text_lines.push_back(oss.str());
-    oss.str("");
-    oss.clear(std::stringstream::goodbit);
-
-    const auto& texpath = std::get<1>(selectable_textures[selected_texture_index]);
-    oss << "Texture:" << texpath << " ([Shift +] F1)";
-    text_lines.push_back(oss.str());
-    oss.str("");
-    oss.clear(std::stringstream::goodbit);
-
-    oss << std::fixed << std::setprecision(4);
-    oss << "Average Luminance:" << std::fixed << std::setprecision(4) << average_luminance;
-    text_lines.push_back(oss.str());
-    oss.str("");
-    oss.clear(std::stringstream::goodbit);
-    oss << std::fixed << std::setprecision(2);
-
-    oss << "Auto Exposure:" << (is_auto_exposure_enabled ? "On" : "Off") << "(Toggle Auto Exposure: x)";
-    text_lines.push_back(oss.str());
-    oss.str("");
-    oss.clear(std::stringstream::goodbit);
-
-    oss << "Exposure=" << exposure << " ([Shift +] F2)";
-    text_lines.push_back(oss.str());
-    oss.str("");
-    oss.clear(std::stringstream::goodbit);
-
-    oss << "Soft Threshold=" << lum_soft_threshold << " ([Shift +] F3)";
-    text_lines.push_back(oss.str());
-    oss.str("");
-    oss.clear(std::stringstream::goodbit);
-
-    oss << "Hard Threshold=" << lum_hard_threshold << " ([Shift +] F4)";
-    text_lines.push_back(oss.str());
-    oss.str("");
-    oss.clear(std::stringstream::goodbit);
-
-    oss << "Bloom:" << (is_bloom_enabled ? "On" : "Off") << "(Toggle Bloom: b)";
-    text_lines.push_back(oss.str());
-    oss.str("");
-    oss.clear(std::stringstream::goodbit);
-
-    oss << "Streak:" << (is_streak_enabled ? "On" : "Off") << "(Toggle Streak: l)";
-    text_lines.push_back(oss.str());
-    oss.str("");
-    oss.clear(std::stringstream::goodbit);
-
-    oss << "Debug:" << (is_debug_enabled ? "On" : "Off") << "(Toggle Debug: p)";
-    text_lines.push_back(oss.str());
-    oss.str("");
-    oss.clear(std::stringstream::goodbit);
-
-    oss << "Tone Mapping:" << (is_tonemapping_enabled ? "On" : "Off") << "(Toggle Tone Mapping: t)";
     text_lines.push_back(oss.str());
     oss.str("");
     oss.clear(std::stringstream::goodbit);
@@ -965,4 +866,48 @@ void MyWindow::PassApply(FrameBuffer* input, FrameBuffer* output)
 
     if(output != nullptr)
         output->Unbind();
+}
+
+void MyWindow::OnGUI()
+{
+#if defined(USE_IMGUI)
+    std::ostringstream oss;
+
+    ImGui::Begin("config");
+    {
+        {
+            auto delim = '\0';
+            for(const auto& texture : selectable_textures)
+                oss << texture.string() << delim;
+            oss << delim;
+            ImGui::Combo("textures", &selected_texture_index, oss.str().c_str());
+            oss.str("");
+            oss.clear(std::stringstream::goodbit);
+        }
+        ImGui::Checkbox("auto_exposure", &is_auto_exposure_enabled);
+        if(is_auto_exposure_enabled)
+        {
+            oss << "average_luminance " << average_luminance;
+            ImGui::Text(oss.str().c_str());
+            oss.str("");
+            oss.clear(std::stringstream::goodbit);
+
+            oss << "exposure " << exposure;
+            ImGui::Text(oss.str().c_str());
+            oss.str("");
+            oss.clear(std::stringstream::goodbit);
+        }
+        else
+        {
+            ImGui::SliderFloat("exposure", &exposure, 0.0f, 10.0f);
+        }
+        ImGui::SliderFloat("lum_soft_threshold", &lum_soft_threshold, 0.0f, 1.0f);
+        ImGui::SliderFloat("lum_hard_threshold", &lum_hard_threshold, 0.0f, 10.0f);
+        ImGui::Checkbox("bloom", &is_bloom_enabled);
+        ImGui::Checkbox("streak", &is_streak_enabled);
+        ImGui::Checkbox("debug", &is_debug_enabled);
+        ImGui::Checkbox("tonemapping", &is_tonemapping_enabled);
+    }
+    ImGui::End();
+#endif
 }

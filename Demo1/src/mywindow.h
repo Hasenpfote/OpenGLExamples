@@ -43,6 +43,7 @@ private:
 
     void OnUpdate(double dt) override;
     void OnRender() override;
+    void OnGUI() override;
 
     void RecreateResources(int width, int height);
     void DrawTextLines(std::vector<std::string> text_lines);
@@ -67,7 +68,7 @@ private:
     GLuint nearest_sampler;
     GLuint linear_sampler;
 
-    std::vector<std::tuple<GLuint, std::filesystem::path>> selectable_textures;
+    std::vector<std::filesystem::path> selectable_textures;
     int selected_texture_index;
 
     std::unique_ptr<ProgramPipeline> pipeline_fullscreen_quad;

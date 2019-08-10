@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.5)
 
 project(FBXLoader)
 
+include(template)
+
 ###
 message("CMAKE_GENERATOR: " ${CMAKE_GENERATOR})
 
@@ -33,6 +35,22 @@ set(COMMON_DIR "../common")
 file(GLOB_RECURSE COMMON_HEADER_FILES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" ${COMMON_DIR}/*.h)
 file(GLOB_RECURSE COMMON_SOURCE_FILES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" ${COMMON_DIR}/*.cpp)
 set(ALL_COMMON_FILES ${COMMON_HEADER_FILES} ${COMMON_SOURCE_FILES})
+
+### Remove files.
+set(COMMON_IMGUI_DIR "../common/imgui")
+
+set(HEADER_FILES_TO_REMOVE
+    "${COMMON_IMGUI_DIR}/imgui_impl_opengl3.h"
+    "${COMMON_IMGUI_DIR}/imgui_impl_glfw.h"
+)
+remove_sublist("${COMMON_HEADER_FILES}" "${HEADER_FILES_TO_REMOVE}" COMMON_HEADER_FILES)
+
+set(SOURCE_FILES_TO_REMOVE
+    "${COMMON_IMGUI_DIR}/imgui_impl_opengl3.cpp"
+    "${COMMON_IMGUI_DIR}/imgui_impl_glfw.cpp"
+)
+remove_sublist("${COMMON_SOURCE_FILES}" "${SOURCE_FILES_TO_REMOVE}" COMMON_SOURCE_FILES)
+######
 
 set(ALL_FILES ${ALL_FILES} ${ALL_COMMON_FILES})
 

@@ -3,154 +3,24 @@
 #include <chrono>
 #include <thread>
 #include <GL/glew.h>
+#if defined(USE_IMGUI)
+#include "../../external/imgui/imgui.h"
+#include "../common/imgui/imgui_impl_opengl3.h"
+#include "../common/imgui/imgui_impl_glfw.h"
+#endif
 #include "logger.h"
 #include "window.h"
 
 #define STRINGIFY(value) #value
 #define TOKEN_TO_STRING(value) STRINGIFY(value)
 
-namespace common
+namespace
 {
-
-Window::Window()
+#if defined(ENABLE_OGL_DEBUG_OUTPUT)
+const char* source_to_string(GLenum source)
 {
-    has_iconified = false;
-}
-
-Window::~Window()
-{
-    if(window)
-        glfwDestroyWindow(window);
-}
-
-bool Window::Initialize(int width, int height)
-{
-    LOG_I("Compiled against GLFW " << GLFW_VERSION_MAJOR << "." << GLFW_VERSION_MINOR << "." << GLFW_VERSION_REVISION);
-    int major, minor, revision;
-    glfwGetVersion(&major, &minor, &revision);
-    LOG_I("Running against GLFW " << major << "." << minor << "." << revision);
-
-    glfwSetErrorCallback(error_callback);
-    if(!glfwInit()){
-        LOG_E("Could not initialize GLFW.");
-        return false;
-    }
-    // cf. http://www.glfw.org/docs/latest/window_guide.html#window_hints
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
-#if 0   // TODO: font 周りの都合で互換性を維持.
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
-#else
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_FALSE);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-#endif
-    //glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
-    //glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-
-    glfwWindowHint(GLFW_SAMPLES, 4);
-    window = glfwCreateWindow(width, height, TOKEN_TO_STRING(PRODUCT_NAME), nullptr, nullptr);
-    if(!window){
-        LOG_E("Could not open GLFW window.");
-        return false;
-    }
-    glfwSetWindowUserPointer(window, this);
-    glfwMakeContextCurrent(window);
-
-    glewExperimental = GL_TRUE; // cf. https://www.opengl.org/wiki/OpenGL_Loading_Library
-    GLenum glew_error = glewInit();
-    if(glew_error != GLEW_OK){
-        LOG_E(glewGetErrorString(glew_error));
-        return false;
-    }
-    LOG_I("OpenGL version: " << glGetString(GL_VERSION));
-    LOG_I("GLEW version: " << glewGetString(GLEW_VERSION));
-
-    glfwSwapInterval(0);    // 0 で vsync 無視 ... 1秒に n 回
-    // callback
-    glfwSetKeyCallback(window, key_callback);
-    glfwSetCursorPosCallback(window, mouse_move_callback);
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-    glfwSetMouseButtonCallback(window, mouse_button_callback);
-    glfwSetScrollCallback(window, mouse_wheel_callback);
-    glfwSetFramebufferSizeCallback(window, resize_framebuffer_callback);
-    glfwSetWindowSizeCallback(window, resize_window_callback);
-    glfwSetWindowIconifyCallback(window, iconify_window_callback);
-#ifdef ENABLE_OGL_DEBUG_OUTPUT
-    glEnable(GL_DEBUG_OUTPUT);
-    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-    glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_TRUE);
-    glDebugMessageCallback(opengl_debug_callback, NULL);
-#endif
-    return true;
-}
-
-void Window::MainLoop()
-{
-    assert(window);
-    Setup();
-
-    constexpr std::int64_t one = std::chrono::duration<std::int64_t, std::nano>(std::chrono::seconds(1)).count();
-    constexpr std::int64_t frame_period = one / 60LL;
-    constexpr std::int64_t update_period = one / 120LL;
-
-    std::int64_t lag = 0LL;
-    std::int64_t sleep_error = 0LL;
-    std::int64_t frame_count = 0LL;
-    std::int64_t update_count = 0LL;
-
-    auto previous = std::chrono::high_resolution_clock::now();
-    auto measure_start = previous;
-    while(!glfwWindowShouldClose(window)){
-        auto current = std::chrono::high_resolution_clock::now();
-        lag += std::chrono::duration<std::int64_t, std::nano>(current - previous).count();
-        previous = current;
-        // fps の算出
-        auto elapsed = std::chrono::duration<std::int64_t, std::nano>(std::chrono::high_resolution_clock::now() - measure_start).count();
-        if(elapsed >= one){
-            fps = static_cast<double>(frame_count * one) / elapsed;
-            ups = static_cast<double>(update_count * one) / elapsed;
-            frame_count = update_count = 0LL;
-            //std::cout << "fps:" << fps << ", ups:" << ups << std::endl;
-            measure_start = std::chrono::high_resolution_clock::now();
-        }
-
-        glfwPollEvents();
-
-        while(lag >= update_period){
-            OnUpdate(static_cast<double>(update_period) / one);
-            lag -= update_period;
-            update_count++;
-        }
-        if(!has_iconified){
-            OnRender();
-            glfwSwapBuffers(window);
-            frame_count++;
-        }
-        auto end = std::chrono::high_resolution_clock::now();
-        auto sleep = frame_period - std::chrono::duration<std::int64_t, std::nano>(end - previous).count() - sleep_error;
-        if(sleep > 0){
-            std::this_thread::sleep_for(std::chrono::duration<std::int64_t, std::nano>(sleep));
-            // sleep の誤差は次フレームで吸収
-            sleep_error = std::chrono::duration<std::int64_t, std::nano>(std::chrono::high_resolution_clock::now() - end).count() - sleep;
-        }
-        else{
-            sleep_error = 0LL;
-        }
-    }
-    Cleanup();
-}
-
-void Window::error_callback(int error, const char* description)
-{
-    LOG_E(error << ": " << description);
-    assert(!"glfw error");
-}
-
-#ifdef ENABLE_OGL_DEBUG_OUTPUT
-static const char* source_to_string(GLenum source)
-{
-    switch (source){
+    switch(source)
+    {
     case GL_DEBUG_SOURCE_API:               // Calls to the OpenGL API
         return "OpenGL";
     case GL_DEBUG_SOURCE_WINDOW_SYSTEM:     // Calls to a window - system API
@@ -168,9 +38,10 @@ static const char* source_to_string(GLenum source)
     }
 }
 
-static const char* type_to_string(GLenum source)
+const char* type_to_string(GLenum source)
 {
-    switch(source){
+    switch(source)
+    {
     case GL_DEBUG_TYPE_ERROR:               // An error, typically from the API
         return "Error";
     case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: // Some behavior marked deprecated has been used
@@ -194,9 +65,10 @@ static const char* type_to_string(GLenum source)
     }
 }
 
-static const char* severity_to_string(GLenum severity)
+const char* severity_to_string(GLenum severity)
 {
-    switch(severity){
+    switch(severity)
+    {
     case GL_DEBUG_SEVERITY_HIGH:        // All OpenGL Errors, shader compilation / linking errors, or highly - dangerous undefined behavior
         return "High";
     case GL_DEBUG_SEVERITY_MEDIUM:      // Major performance warnings, shader compilation / linking warnings, or the use of deprecated functionality
@@ -209,7 +81,192 @@ static const char* severity_to_string(GLenum severity)
         return "Unknown";
     }
 }
+#endif
+}
 
+namespace common
+{
+
+Window::Window()
+{
+    has_iconified = false;
+}
+
+Window::~Window()
+{
+#if defined(USE_IMGUI)
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+#endif
+    if(window)
+        glfwDestroyWindow(window);
+    glfwTerminate();
+}
+
+bool Window::Initialize(int width, int height)
+{
+    assert(window == nullptr);
+
+    LOG_I("Compiled against GLFW " << GLFW_VERSION_MAJOR << "." << GLFW_VERSION_MINOR << "." << GLFW_VERSION_REVISION);
+    int major, minor, revision;
+    glfwGetVersion(&major, &minor, &revision);
+    LOG_I("Running against GLFW " << major << "." << minor << "." << revision);
+
+    glfwSetErrorCallback(error_callback);
+    if(!glfwInit())
+    {
+        LOG_E("Could not initialize GLFW.");
+        return false;
+    }
+    // cf. http://www.glfw.org/docs/latest/window_guide.html#window_hints
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
+#if 0   // TODO: font 周りの都合で互換性を維持.
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
+#else
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_FALSE);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+#endif
+    //glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
+    //glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+
+    glfwWindowHint(GLFW_SAMPLES, 4);
+    window = glfwCreateWindow(width, height, TOKEN_TO_STRING(PRODUCT_NAME), nullptr, nullptr);
+    if(!window)
+    {
+        LOG_E("Could not open GLFW window.");
+        return false;
+    }
+    glfwSetWindowUserPointer(window, this);
+    glfwMakeContextCurrent(window);
+
+    glewExperimental = GL_TRUE; // cf. https://www.opengl.org/wiki/OpenGL_Loading_Library
+    GLenum glew_error = glewInit();
+    if(glew_error != GLEW_OK)
+    {
+        LOG_E(glewGetErrorString(glew_error));
+        return false;
+    }
+    LOG_I("OpenGL version: " << glGetString(GL_VERSION));
+    LOG_I("GLEW version: " << glewGetString(GLEW_VERSION));
+
+    glfwSwapInterval(0);    // 0 で vsync 無視 ... 1秒に n 回
+    // callback
+    glfwSetKeyCallback(window, key_callback);
+    glfwSetCursorPosCallback(window, mouse_move_callback);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    glfwSetMouseButtonCallback(window, mouse_button_callback);
+    glfwSetScrollCallback(window, mouse_wheel_callback);
+    glfwSetFramebufferSizeCallback(window, resize_framebuffer_callback);
+    glfwSetWindowSizeCallback(window, resize_window_callback);
+    glfwSetWindowIconifyCallback(window, iconify_window_callback);
+#ifdef ENABLE_OGL_DEBUG_OUTPUT
+    glEnable(GL_DEBUG_OUTPUT);
+    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+    glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_TRUE);
+    glDebugMessageCallback(opengl_debug_callback, NULL);
+#endif
+
+#if defined(USE_IMGUI)
+    // Setup Dear ImGui context
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+
+    // Setup Dear ImGui style
+    ImGui::StyleColorsDark();
+    //ImGui::StyleColorsClassic();
+
+    // Setup Platform/Renderer bindings
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init("#version 430 core");
+#endif
+    return true;
+}
+
+void Window::MainLoop()
+{
+    assert(window);
+
+    Setup();
+
+    constexpr std::int64_t one = std::chrono::duration<std::int64_t, std::nano>(std::chrono::seconds(1)).count();
+    constexpr std::int64_t frame_period = one / 60LL;
+    constexpr std::int64_t update_period = one / 120LL;
+
+    std::int64_t lag = 0LL;
+    std::int64_t sleep_error = 0LL;
+    std::int64_t frame_count = 0LL;
+    std::int64_t update_count = 0LL;
+
+    auto previous = std::chrono::high_resolution_clock::now();
+    auto measure_start = previous;
+    while(!glfwWindowShouldClose(window))
+    {
+        auto current = std::chrono::high_resolution_clock::now();
+        lag += std::chrono::duration<std::int64_t, std::nano>(current - previous).count();
+        previous = current;
+        // fps の算出
+        auto elapsed = std::chrono::duration<std::int64_t, std::nano>(std::chrono::high_resolution_clock::now() - measure_start).count();
+        if(elapsed >= one)
+        {
+            fps = static_cast<double>(frame_count * one) / elapsed;
+            ups = static_cast<double>(update_count * one) / elapsed;
+            frame_count = update_count = 0LL;
+            //std::cout << "fps:" << fps << ", ups:" << ups << std::endl;
+            measure_start = std::chrono::high_resolution_clock::now();
+        }
+
+        glfwPollEvents();
+
+        while(lag >= update_period)
+        {
+            OnUpdate(static_cast<double>(update_period) / one);
+            lag -= update_period;
+            update_count++;
+        }
+        if(!has_iconified)
+        {
+            OnRender();
+#if defined(USE_IMGUI)
+            // Start the Dear ImGui frame
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
+            OnGUI();
+            ImGui::Render();
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+#endif
+            glfwSwapBuffers(window);
+            frame_count++;
+        }
+        auto end = std::chrono::high_resolution_clock::now();
+        auto sleep = frame_period - std::chrono::duration<std::int64_t, std::nano>(end - previous).count() - sleep_error;
+        if(sleep > 0)
+        {
+            std::this_thread::sleep_for(std::chrono::duration<std::int64_t, std::nano>(sleep));
+            // sleep の誤差は次フレームで吸収
+            sleep_error = std::chrono::duration<std::int64_t, std::nano>(std::chrono::high_resolution_clock::now() - end).count() - sleep;
+        }
+        else
+        {
+            sleep_error = 0LL;
+        }
+    }
+    Cleanup();
+}
+
+void Window::error_callback(int error, const char* description)
+{
+    LOG_E(error << ": " << description);
+    assert(!"glfw error");
+}
+
+#ifdef ENABLE_OGL_DEBUG_OUTPUT
 void APIENTRY Window::opengl_debug_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *param)
 {
     LOG_D("source: " << source_to_string(source) << " type: " << type_to_string(type) << " id: " << id << " severity: " << severity_to_string(severity) << " message: " << message);
@@ -294,6 +351,15 @@ void Window::OnIconifyWindow(GLFWwindow* window, int iconified)
 {
     //std::cout << "Window::OnIconifyWindow{iconified=" << iconified << "}" << std::endl;
     has_iconified = (iconified == GL_TRUE);
+}
+
+void Window::OnGUI()
+{
+#if defined(USE_IMGUI)
+    static bool show_demo_window = true;
+    if(show_demo_window)
+        ImGui::ShowDemoWindow(&show_demo_window);
+#endif
 }
 
 }   // namespace common

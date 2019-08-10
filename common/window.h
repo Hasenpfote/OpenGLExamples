@@ -54,6 +54,7 @@ private:
 
     virtual void OnUpdate(double dt) = 0;
     virtual void OnRender() = 0;
+    virtual void OnGUI();
 
 private:
     GLFWwindow* window = nullptr;

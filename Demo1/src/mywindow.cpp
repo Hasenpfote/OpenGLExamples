@@ -197,20 +197,6 @@ void MyWindow::OnKey(GLFWwindow* window, int key, int scancode, int action, int 
 
     auto& camera = System::GetMutableInstance().GetCamera();
     camera.OnKey(key, scancode, action, mods);
-
-    if(key == GLFW_KEY_M && action == GLFW_PRESS)
-    {
-        GLboolean ms;
-        glGetBooleanv(GL_MULTISAMPLE, &ms);
-        if(ms == GL_TRUE)
-        {
-            glDisable(GL_MULTISAMPLE);
-        }
-        else
-        {
-            glEnable(GL_MULTISAMPLE);
-        }
-    }
 }
 
 void MyWindow::OnMouseMove(GLFWwindow* window, double xpos, double ypos)
@@ -327,36 +313,6 @@ void MyWindow::OnRender()
 
     oss << "FPS:UPS=";
     oss << GetFPS() << ":" << GetUPS();
-    text_lines.push_back(oss.str());
-    oss.str("");
-    oss.clear(std::stringstream::goodbit);
-
-    oss << "Screen size:";
-    oss << camera.GetViewport().GetWidth() << "x" << camera.GetViewport().GetHeight();
-    text_lines.push_back(oss.str());
-    oss.str("");
-    oss.clear(std::stringstream::goodbit);
-
-    oss << "Aov D=" << ConvertRadiansToDegrees(camera.GetAngleOfView(CustomCamera::AngleOfView::Diagonal));
-    oss << " H=" << ConvertRadiansToDegrees(camera.GetAngleOfView(CustomCamera::AngleOfView::Horizontal));
-    oss << " V=" << ConvertRadiansToDegrees(camera.GetAngleOfView(CustomCamera::AngleOfView::Vertical));
-    text_lines.push_back(oss.str());
-    oss.str("");
-    oss.clear(std::stringstream::goodbit);
-
-    oss << "Focal length=" << camera.GetFocalLength() << " (35mm=" << camera.Get35mmEquivalentFocalLength() << ")";
-    text_lines.push_back(oss.str());
-    oss.str("");
-    oss.clear(std::stringstream::goodbit);
-
-    oss << "Zoom=x" << camera.GetZoomMagnification();
-    text_lines.push_back(oss.str());
-    oss.str("");
-    oss.clear(std::stringstream::goodbit);
-
-    GLboolean ms;
-    glGetBooleanv(GL_MULTISAMPLE, &ms);
-    oss << "MultiSample:" << ((ms == GL_TRUE) ? "On" : "Off") << "(Toggle MultiSample: m)";
     text_lines.push_back(oss.str());
     oss.str("");
     oss.clear(std::stringstream::goodbit);
@@ -497,20 +453,19 @@ void MyWindow::DrawTextLines(std::vector<std::string> text_lines)
 
 void MyWindow::DrawFullScreenQuad(GLuint texture)
 {
-
     pipeline_fullscreen_quad->GetPipelineUniform().Set1i("u_tex0", 0);
 
     pipeline_fullscreen_quad->Bind();
+    {
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glBindSampler(0, linear_sampler);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glBindSampler(0, linear_sampler);
+        fs_pass_geom->Draw();
 
-    fs_pass_geom->Draw();
-
-    glBindSampler(0, 0);
-    glBindTexture(GL_TEXTURE_2D, 0);
-
+        glBindSampler(0, 0);
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
     pipeline_fullscreen_quad->Unbind();
 }
 
@@ -871,42 +826,119 @@ void MyWindow::PassApply(FrameBuffer* input, FrameBuffer* output)
 void MyWindow::OnGUI()
 {
 #if defined(USE_IMGUI)
-    std::ostringstream oss;
+    auto oss2s = [](std::ostream& os)
+    {
+        return dynamic_cast<std::ostringstream&>(os).str();
+    };
 
+    ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Once);
+    ImGui::SetNextWindowCollapsed(true, ImGuiCond_Once);
     ImGui::Begin("config");
     {
+        ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+        if(ImGui::CollapsingHeader("Basic"))
         {
-            auto delim = '\0';
-            for(const auto& texture : selectable_textures)
-                oss << texture.string() << delim;
-            oss << delim;
-            ImGui::Combo("textures", &selected_texture_index, oss.str().c_str());
-            oss.str("");
-            oss.clear(std::stringstream::goodbit);
-        }
-        ImGui::Checkbox("auto_exposure", &is_auto_exposure_enabled);
-        if(is_auto_exposure_enabled)
-        {
-            oss << "average_luminance " << average_luminance;
-            ImGui::Text(oss.str().c_str());
-            oss.str("");
-            oss.clear(std::stringstream::goodbit);
+#if defined(RECORD_STATISTICS)
+            auto values_getter = [](void* data, int idx)
+            {
+                return static_cast<float>((static_cast<double*>(data))[idx]);
+            };
 
-            oss << "exposure " << exposure;
-            ImGui::Text(oss.str().c_str());
-            oss.str("");
-            oss.clear(std::stringstream::goodbit);
+            auto& fps_record = GetFPSRecord();
+            ImGui::PlotLines(
+                "FPS",
+                values_getter,
+                static_cast<void*>(const_cast<double*>(fps_record.data())),
+                fps_record.capacity(),
+                fps_record.tail(),
+                oss2s(std::ostringstream() << std::fixed << std::setprecision(2) << GetFPS()).c_str(),
+                0.0f, 90.0f, ImVec2(0, 40)
+            );
+            auto& ups_record = GetUPSRecord();
+            ImGui::PlotLines(
+                "UPS",
+                values_getter,
+                static_cast<void*>(const_cast<double*>(ups_record.data())),
+                ups_record.capacity(),
+                ups_record.tail(),
+                oss2s(std::ostringstream() << std::fixed << std::setprecision(2) << GetUPS()).c_str(),
+                0.0f, 180.0f, ImVec2(0, 40)
+            );
+#else
+            ImGui::Text(oss2s(
+                std::ostringstream() << std::fixed << std::setprecision(2) << "UPS: " << GetUPS()).c_str());
+            ImGui::Text(oss2s(
+                std::ostringstream() << std::fixed << std::setprecision(2) << "FPS: " << GetFPS()).c_str());
+#endif
+            int width, height;
+            glfwGetFramebufferSize(GetWindow(), &width, &height);
+            ImGui::Text(oss2s(std::ostringstream() << "Screen size: " << width << "x" << height).c_str());
         }
-        else
+        ImGui::Separator();
+        ImGui::SetNextItemOpen(false, ImGuiCond_Once);
+        if(ImGui::CollapsingHeader("Camera"))
         {
-            ImGui::SliderFloat("exposure", &exposure, 0.0f, 10.0f);
+            auto& camera = System::GetConstInstance().GetCamera();
+
+            auto aov_d = camera.GetAngleOfView(CustomCamera::AngleOfView::Diagonal);
+            ImGui::Text(oss2s(
+                std::ostringstream()
+                << std::fixed
+                << std::setprecision(2)
+                << "AoV D: " << hasenpfote::math::ConvertRadiansToDegrees(aov_d)
+            ).c_str());
+
+            auto aov_h = camera.GetAngleOfView(CustomCamera::AngleOfView::Horizontal);
+            ImGui::Text(oss2s(
+                std::ostringstream()
+                << std::fixed
+                << std::setprecision(2)
+                << "AoV H: " << hasenpfote::math::ConvertRadiansToDegrees(aov_h)
+            ).c_str());
+
+            auto aov_v = camera.GetAngleOfView(CustomCamera::AngleOfView::Vertical);
+            ImGui::Text(oss2s(
+                std::ostringstream()
+                << std::fixed
+                << std::setprecision(2)
+                << "AoV V: " << hasenpfote::math::ConvertRadiansToDegrees(aov_v)
+            ).c_str());
+
+            ImGui::Text(oss2s(std::ostringstream() << "Focal length: " << camera.GetFocalLength()).c_str());
+            ImGui::Text(oss2s(std::ostringstream() << "Focal length(35mm): " << camera.Get35mmEquivalentFocalLength()).c_str());
+            ImGui::Text(oss2s(std::ostringstream() << "Zoom: x" << camera.GetZoomMagnification()).c_str());
         }
-        ImGui::SliderFloat("lum_soft_threshold", &lum_soft_threshold, 0.0f, 1.0f);
-        ImGui::SliderFloat("lum_hard_threshold", &lum_hard_threshold, 0.0f, 10.0f);
-        ImGui::Checkbox("bloom", &is_bloom_enabled);
-        ImGui::Checkbox("streak", &is_streak_enabled);
-        ImGui::Checkbox("debug", &is_debug_enabled);
-        ImGui::Checkbox("tonemapping", &is_tonemapping_enabled);
+        ImGui::Separator();
+        ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+        if(ImGui::CollapsingHeader("App"))
+        {
+            {
+                auto delim = '\0';
+                std::ostringstream oss;
+                for(const auto& texture : selectable_textures)
+                    oss << texture.string() << delim;
+                oss << delim;
+                ImGui::Combo("textures", &selected_texture_index, oss.str().c_str());
+                //oss.str("");
+                //oss.clear(std::stringstream::goodbit);
+            }
+            ImGui::Checkbox("auto_exposure", &is_auto_exposure_enabled);
+            if(is_auto_exposure_enabled)
+            {
+                ImGui::Text(oss2s(std::ostringstream() << "average_luminance: " << average_luminance).c_str());
+                ImGui::Text(oss2s(std::ostringstream() << "exposure: " << exposure).c_str());
+            }
+            else
+            {
+                ImGui::SliderFloat("exposure", &exposure, 0.0f, 10.0f);
+            }
+            ImGui::SliderFloat("lum_soft_threshold", &lum_soft_threshold, 0.0f, 1.0f);
+            ImGui::SliderFloat("lum_hard_threshold", &lum_hard_threshold, 0.0f, 10.0f);
+            ImGui::Checkbox("bloom", &is_bloom_enabled);
+            ImGui::Checkbox("streak", &is_streak_enabled);
+            ImGui::Checkbox("debug", &is_debug_enabled);
+            ImGui::Checkbox("tonemapping", &is_tonemapping_enabled);
+        }
     }
     ImGui::End();
 #endif

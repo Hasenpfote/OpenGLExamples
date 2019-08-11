@@ -216,8 +216,11 @@ void Window::MainLoop()
         {
             fps = static_cast<double>(frame_count * one) / elapsed;
             ups = static_cast<double>(update_count * one) / elapsed;
+#if defined(RECORD_STATISTICS)
+            fps_record.push_back(fps);
+            ups_record.push_back(ups);
+#endif
             frame_count = update_count = 0LL;
-            //std::cout << "fps:" << fps << ", ups:" << ups << std::endl;
             measure_start = std::chrono::high_resolution_clock::now();
         }
 

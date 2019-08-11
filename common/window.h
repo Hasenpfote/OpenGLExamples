@@ -2,6 +2,10 @@
 #include <GL/glew.h>
 #define GLFW_INCLUDE_GLU
 #include <GLFW/glfw3.h>
+#define RECORD_STATISTICS
+#if defined(RECORD_STATISTICS)
+#include "circular_buffer.h"
+#endif
 
 #define ENABLE_OGL_DEBUG_OUTPUT
 
@@ -39,6 +43,11 @@ protected:
 
     bool HasIconified() { return has_iconified; }
 
+#if defined(RECORD_STATISTICS)
+    const simple_circular_buffer<double>& GetFPSRecord() const noexcept { return fps_record; };
+    const simple_circular_buffer<double>& GetUPSRecord() const noexcept { return ups_record; };
+#endif
+
 private:
     static void error_callback(int error, const char* description);
 #ifdef ENABLE_OGL_DEBUG_OUTPUT
@@ -62,6 +71,11 @@ private:
     double ups = 0.0;
 
     bool has_iconified;
+
+#if defined(RECORD_STATISTICS)
+    simple_circular_buffer<double> fps_record;
+    simple_circular_buffer<double> ups_record;
+#endif
 };
 
 }   // namespace common

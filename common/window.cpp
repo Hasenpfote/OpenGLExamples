@@ -88,6 +88,9 @@ namespace common
 {
 
 Window::Window()
+#if defined(RECORD_STATISTICS)
+    : fps_record(60), ups_record(60)
+#endif
 {
     has_iconified = false;
 }

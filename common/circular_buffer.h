@@ -80,9 +80,8 @@ public:
     bool is_linearized() const;
     void linearize();
 
-public:
-    std::vector<value_type> array_;
 private:
+    std::vector<value_type> array_;
     size_type head_;
     size_type tail_;
     size_type contents_size_;

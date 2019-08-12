@@ -76,10 +76,10 @@ public:
 
     array_range_t array_two();
     const_array_range_t array_two() const;
-
+#if 0
     bool is_linearized() const;
     void linearize();
-
+#endif
 private:
     std::vector<value_type> array_;
     size_type head_;

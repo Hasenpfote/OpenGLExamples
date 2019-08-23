@@ -4,7 +4,7 @@
 #include <GLFW/glfw3.h>
 #define RECORD_STATISTICS
 #if defined(RECORD_STATISTICS)
-#include "circular_buffer.h"
+#include "container/circular_buffer.h"
 #endif
 
 #define ENABLE_OGL_DEBUG_OUTPUT
@@ -14,6 +14,10 @@ namespace common
 
 class Window
 {
+#if defined(RECORD_STATISTICS)
+public:
+    using circular_buffer = container::circular_buffer<double>;
+#endif
 public:
     Window();
     virtual ~Window();
@@ -44,8 +48,8 @@ protected:
     bool HasIconified() { return has_iconified; }
 
 #if defined(RECORD_STATISTICS)
-    const simple_circular_buffer<double>& GetFPSRecord() const noexcept { return fps_record; };
-    const simple_circular_buffer<double>& GetUPSRecord() const noexcept { return ups_record; };
+    const circular_buffer& GetFPSRecord() const noexcept { return fps_record; };
+    const circular_buffer& GetUPSRecord() const noexcept { return ups_record; };
 #endif
 
 private:
@@ -73,8 +77,8 @@ private:
     bool has_iconified;
 
 #if defined(RECORD_STATISTICS)
-    simple_circular_buffer<double> fps_record;
-    simple_circular_buffer<double> ups_record;
+    circular_buffer fps_record;
+    circular_buffer ups_record;
 #endif
 };
 

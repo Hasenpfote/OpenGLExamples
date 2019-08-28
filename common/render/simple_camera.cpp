@@ -1,4 +1,6 @@
+#include <iostream>
 #include <GLFW/glfw3.h>
+#include "../logger.h"
 #include "simple_camera.h"
 
 namespace common::render
@@ -63,15 +65,11 @@ void SimpleCamera::OnMouseMove(double xpos, double ypos)
         auto current = glm::vec2(static_cast<float>(xpos), static_cast<float>(ypos));
         auto offset = current - prev;
 
-        angular_velocity_.x += offset.y * 0.001f;
-        angular_velocity_.y += offset.x * 0.001f;
+        constexpr float sensitivity = 0.001f;
+        angular_velocity_.x += offset.y * sensitivity;
+        angular_velocity_.y += offset.x * sensitivity;
 
         prev = current;
-    }
-    else if(tracking_state_ == TrackingState::Stopping)
-    {
-        angular_velocity_ = glm::vec3(0.0f);
-        tracking_state_ = TrackingState::Idling;
     }
 }
 
@@ -80,9 +78,14 @@ void SimpleCamera::OnMouseButton(int button, int action, int mods)
     if(button == GLFW_MOUSE_BUTTON_LEFT)
     {
         if(action == GLFW_PRESS)
+        {
             tracking_state_ = TrackingState::Starting;
+        }
         else if(action == GLFW_RELEASE)
-            tracking_state_ = TrackingState::Stopping;
+        {
+            angular_velocity_ = glm::vec3(0.0f);
+            tracking_state_ = TrackingState::Idling;
+        }
     }
 }
 

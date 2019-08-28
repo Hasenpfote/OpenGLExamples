@@ -64,10 +64,8 @@ private:
     {
         Idling,
         Starting,
-        Tracking,
-        Stopping,
+        Tracking
     } tracking_state_;
-
 };
 
 }   // namespace common::render

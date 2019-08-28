@@ -181,7 +181,7 @@ public:
 
     void SetMatrix4x3fv(const std::string& name, GLsizei count, GLboolean transpose, const GLfloat* value)
     {
-        underlying().SetMatrix4x3fv(name, count, transpose, value);
+        underlying().SetMatrix4x3fv_impl(name, count, transpose, value);
     }
 
 protected:

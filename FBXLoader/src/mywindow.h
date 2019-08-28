@@ -1,14 +1,13 @@
 ﻿#pragma once
 #include <iostream>
-#include <hasenpfote/math/quaternion.h>
-#include <hasenpfote/math/cmatrix4.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
 #include "../../common/window.h"
 #include "../../common/system.h"
 #include "../../common/render/texture.h"
 #include "../../common/render/shader/shader.h"
 #include "../../common/render/text/sdf_text.h"
 #include "model.h"
-//#include "arcball.h"
 
 class MyWindow final : public common::Window
 {
@@ -19,7 +18,7 @@ class MyWindow final : public common::Window
     using Font = common::render::text::Font;
     using SDFText = common::render::text::SDFText;
     using SDFTextRenderer = common::render::text::SDFTextRenderer;
-    using CustomCamera = common::render::CustomCamera;
+    using Camera = common::render::SimpleCamera;
 
 public:
     MyWindow();
@@ -39,17 +38,19 @@ private:
     void OnUpdate(double dt) override;
     void OnRender() override;
 
+    void DrawTextLines(const std::vector<std::string>& text_lines);
+
 private:
     std::unique_ptr<SDFText> text;
     Model model;
     bool is_draw_joints_enabled = false;
     //ArcBall arcball;
-    hasenpfote::math::Quaternion rot;
+    glm::quat rot;
 
     struct CommonMatrices
     {
-        hasenpfote::math::CMatrix4 view;
-        hasenpfote::math::CMatrix4 projection;
+        glm::mat4 view;
+        glm::mat4 projection;
     } common_matrices;
 
     GLuint ubo;

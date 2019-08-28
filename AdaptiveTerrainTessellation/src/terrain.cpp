@@ -1,18 +1,16 @@
 ﻿#include <cassert>
 #include <vector>
 #include <GL/glew.h>
+#include <glm/gtc/type_ptr.hpp>
 #include "terrain.h"
 
 Terrain::Terrain()
 {
-    using namespace hasenpfote::math;
-
     lod_factor = 10.0f;
     horizontal_scale = 1000.0f;
     vertical_scale = 300.0f;
     draw_mode = DrawMode::Solid;
-    light_direction = Vector3(1.0f, 1.0f,-1.0);
-    light_direction.Normalize();
+    light_direction = glm::normalize(glm::vec3(1.0f, 1.0f,-1.0));
 }
 
 Terrain::~Terrain()
@@ -120,22 +118,20 @@ void Terrain::Draw()
 
 void Terrain::DrawSolid()
 {
-    using namespace hasenpfote::math;
-
-    auto& camera = System::GetConstInstance().GetCamera();
-    auto width = camera.GetViewport().GetWidth();
-    auto height = camera.GetViewport().GetHeight();
-    CMatrix4 mvp = camera.GetProjectionMatrix() * camera.GetViewMatrix();
-
     auto& uniform = pipeline1->GetPipelineUniform();
     uniform.Set1i("diffuse_map", 0);
     uniform.Set1i("height_map", 1);
     uniform.Set1f("horizontal_scale", horizontal_scale);
     uniform.Set1f("vertical_scale", vertical_scale);
     uniform.Set1f("lod_factor", lod_factor);
-    uniform.SetMatrix4fv("mvp", 1, GL_FALSE, static_cast<GLfloat*>(mvp));
-    uniform.Set2f("vp_size", static_cast<float>(width), static_cast<float>(height));
-    uniform.Set3fv("light_direction", 1, static_cast<GLfloat*>(light_direction));
+
+    auto& camera = System::GetMutableInstance().GetCamera();
+    const auto& resolution = camera.viewport().size();
+    auto mvp = camera.proj() * camera.view();
+    uniform.SetMatrix4fv("mvp", 1, GL_FALSE, glm::value_ptr(mvp));
+    uniform.Set2f("vp_size", resolution.x, resolution.y);
+
+    uniform.Set3fv("light_direction", 1, glm::value_ptr(light_direction));
 
     pipeline1->Bind();
     {
@@ -159,20 +155,17 @@ void Terrain::DrawSolid()
 
 void Terrain::DrawWireFrame()
 {
-    using namespace hasenpfote::math;
-
-    auto& camera = System::GetConstInstance().GetCamera();
-    auto width = camera.GetViewport().GetWidth();
-    auto height = camera.GetViewport().GetHeight();
-    CMatrix4 mvp = camera.GetProjectionMatrix() * camera.GetViewMatrix();
-
     auto& uniform = pipeline2->GetPipelineUniform();
     uniform.Set1i("height_map", 0);
     uniform.Set1f("horizontal_scale", horizontal_scale);
     uniform.Set1f("vertical_scale", vertical_scale);
     uniform.Set1f("lod_factor", lod_factor);
-    uniform.SetMatrix4fv("mvp", 1, GL_FALSE, static_cast<GLfloat*>(mvp));
-    uniform.Set2f("vp_size", static_cast<float>(width), static_cast<float>(height));
+
+    auto& camera = System::GetMutableInstance().GetCamera();
+    const auto& resolution = camera.viewport().size();
+    auto mvp = camera.proj() * camera.view();
+    uniform.SetMatrix4fv("mvp", 1, GL_FALSE, glm::value_ptr(mvp));
+    uniform.Set2f("vp_size", resolution.x, resolution.y);
 
     pipeline2->Bind();
     {

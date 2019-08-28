@@ -1,12 +1,8 @@
 ﻿#include <iomanip>
 #include <sstream>
 #include <GL/glew.h>
-#include <hasenpfote/assert.h>
-#include <hasenpfote/math/utils.h>
-#include <hasenpfote/math/vector3.h>
-#include <hasenpfote/math/vector4.h>
-#include <hasenpfote/math/cmatrix4.h>
-#include <hasenpfote/math/axis_angle.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include "../../common/logger.h"
 #include "mywindow.h"
 
@@ -22,7 +18,6 @@ MyWindow::~MyWindow()
 
 void MyWindow::Setup()
 {
-    using namespace hasenpfote::math;
     //
     glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);
@@ -44,17 +39,19 @@ void MyWindow::Setup()
     glfwGetFramebufferSize(window, &width, &height);
     glViewport(0, 0, width, height);
 
-    auto& camera = System::GetMutableInstance().GetCamera();
+    //
+    {
+        auto& camera = System::GetMutableInstance().GetCamera();
 
-    camera.SetViewport(0, 0, width, height);
-    //camera.Set35mmEquivalentFocalLength(50.0f);
-    camera.SetClippingPlane(1.0f, 10000.0f);
+        auto& vp = camera.viewport();
+        vp.origin() = glm::vec2(0, 0);
+        vp.size() = glm::vec2(width, height);
+        vp.depth_range() = glm::vec2(1.0f, 10000.0f);
 
-    camera.SetPosition(Vector3(0.0f, 0.0f, 50.0f));
-    camera.SetTargetPosition(Vector3(0.0f, 0.0f, 0.0f));
+        camera.position() = glm::vec3(0.0f, 0.0f, 10.0f);
 
-    camera.Update(0.0f);
-
+        camera.Update(0.0);
+    }
     // load shader.
     {
         std::filesystem::path dirpath("assets/shaders");
@@ -89,8 +86,7 @@ void MyWindow::OnKey(GLFWwindow* window, int key, int scancode, int action, int 
 {
     Window::OnKey(window, key, scancode, action, mods);
 
-    auto& camera = System::GetMutableInstance().GetCamera();
-    camera.OnKey(key, scancode, action, mods);
+    System::GetMutableInstance().GetCamera().OnKey(key, scancode, action, mods);
 
     if(key == GLFW_KEY_M && action == GLFW_PRESS){
         GLboolean ms;
@@ -119,7 +115,7 @@ void MyWindow::OnMouseWheel(GLFWwindow* window, double xoffset, double yoffset)
 #if 0
     System::GetMutableInstance().GetCamera().OnMouseWheel(xoffset, yoffset);
 #else
-    smoothness = hasenpfote::math::Clamp(smoothness + static_cast<float>(yoffset) * 0.01f, 0.0f, 1.0f);
+    smoothness = glm::clamp(smoothness + static_cast<float>(yoffset) * 0.01f, 0.0f, 1.0f);
     text->SetSmoothness(smoothness);
 #endif
 }
@@ -134,7 +130,9 @@ void MyWindow::OnResizeWindow(GLFWwindow* window, int width, int height)
 {
     if(HasIconified())
         return;
-    System::GetMutableInstance().GetCamera().SetViewportSize(width, height);
+
+    auto& camera = System::GetMutableInstance().GetCamera();
+    camera.viewport().size() = glm::vec2(width, height);
 }
 
 void MyWindow::OnUpdate(double dt)
@@ -145,15 +143,14 @@ void MyWindow::OnUpdate(double dt)
 
 void MyWindow::OnRender()
 {
-    using namespace hasenpfote::math;
-
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     auto& camera = System::GetConstInstance().GetCamera();
-    auto& vp = camera.GetViewport();
 
-    const auto width = vp.GetWidth();
-    const auto height = vp.GetHeight();
+    auto& vp = camera.viewport();
+    auto& resolution = camera.viewport().size();
+    const auto width = static_cast<int>(resolution.x);
+    const auto height = static_cast<int>(resolution.y);
     glViewport(0, 0, width, height);
 
     glEnable(GL_FRAMEBUFFER_SRGB);
@@ -162,77 +159,80 @@ void MyWindow::OnRender()
     }
     glDisable(GL_FRAMEBUFFER_SRGB);
 
-    // 情報の表示
-    auto metrics = text->GetFont().GetFontMetrics();
-    auto ascent = static_cast<float>(metrics.GetAscent());
-    auto descent = static_cast<float>(metrics.GetDescent());
-    auto line_gap = static_cast<float>(metrics.GetLineGap());
-    auto line_height = static_cast<float>(metrics.GetLineHeight());
-
-    const float scale = 1.0f;
-    const float lh = line_height * scale;
-
-    static const Vector4 color(1.0f, 1.0f, 1.0f, 1.0f);
-    text->SetColor(static_cast<const GLfloat*>(color));
-    static const Vector4 color2(0.0f, 0.0f, 0.0f, 1.0f);
-    text->SetOutlineColor(static_cast<const GLfloat*>(color2));
-
-    text->BeginRendering();
-
+    // Display debug information.
+    std::vector<std::string> text_lines;
     std::ostringstream oss;
-    oss << "FPS:UPS=";
+    //std::streamsize ss = std::cout.precision();
+
     oss << std::fixed << std::setprecision(2);
+
+    oss << "FPS:UPS=";
     oss << GetFPS() << ":" << GetUPS();
-    text->DrawString(oss.str(), 0.0f, lh, scale);
+    text_lines.push_back(oss.str());
     oss.str("");
     oss.clear(std::stringstream::goodbit);
 
     oss << "Screen size:";
-    oss << camera.GetViewport().GetWidth() << "x" << camera.GetViewport().GetHeight();
-    text->DrawString(oss.str(), 0.0f, lh * 2, scale);
-    oss.str("");
-    oss.clear(std::stringstream::goodbit);
-#if 0
-    oss << "Aov D=" << to_degrees(camera.GetAngleOfView(CustomCamera::AngleOfView::Diagonal));
-    oss << " H=" << to_degrees(camera.GetAngleOfView(CustomCamera::AngleOfView::Horizontal));
-    oss << " V=" << to_degrees(camera.GetAngleOfView(CustomCamera::AngleOfView::Vertical));
-    current_text->DrawString(oss.str(), 0.0f, fh * 2.0f, scale);
-    oss.str("");
-    oss.clear(std::stringstream::goodbit);
-
-    oss << "Focal length=" << camera.GetFocalLength() << " (35mm=" << camera.Get35mmEquivalentFocalLength() << ")";
-    current_text->DrawString(oss.str(), 0.0f, fh * 3.0f, scale);
-    oss.str("");
-    oss.clear(std::stringstream::goodbit);
-
-    oss << "Zoom=x" << camera.GetZoomMagnification();
-    current_text->DrawString(oss.str(), 0.0f, fh * 4.0f, scale);
+    oss << width << "x" << height;
+    text_lines.push_back(oss.str());
     oss.str("");
     oss.clear(std::stringstream::goodbit);
 
     GLboolean ms;
     glGetBooleanv(GL_MULTISAMPLE, &ms);
     oss << "MultiSample:" << ((ms == GL_TRUE) ? "On" : "Off") << "(Toggle MultiSample: m)";
-    current_text->DrawString(oss.str(), 0.0f, fh * 5.0f, scale);
+    text_lines.push_back(oss.str());
     oss.str("");
     oss.clear(std::stringstream::goodbit);
-#else
+
     oss << "Smoothness=" << smoothness;
-    text->DrawString(oss.str(), 0.0f, lh * 3.0f, scale);
+    text_lines.push_back(oss.str());
     oss.str("");
     oss.clear(std::stringstream::goodbit);
 
-    text->DrawString("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 0.0f, lh * 4.0f, scale);
-    text->DrawString("abcdefghijklmnopqrstuvwxyz.", 0.0f, lh * 5.0f, scale);
-    text->DrawString("1234567890", 0.0f, lh * 6.0f, scale);
-    text->DrawString("\"!`?'.,;:()[]{}<>|/@\\^$-%+=#_&~*", 0.0f, lh * 7.0f, scale);
+    oss << "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    text_lines.push_back(oss.str());
+    oss.str("");
+    oss.clear(std::stringstream::goodbit);
 
-    auto w = static_cast<float>(width - metrics.MeasureWidth(u"AVT: あ")) * scale;
-    text->DrawString(u"AVT: あ", w, lh * 8.0f, scale);
+    oss << "abcdefghijklmnopqrstuvwxyz.";
+    text_lines.push_back(oss.str());
+    oss.str("");
+    oss.clear(std::stringstream::goodbit);
 
-    text->DrawString("\"!`?'.,;:()[]{}<>|/@\\^$-%+=#_&~*", 0.0f, height - descent - line_gap - line_height * scale , scale);
-    text->DrawString("\"!`?'.,;:()[]{}<>|/@\\^$-%+=#_&~*", 0.0f, height - descent - line_gap, scale);
+    oss << "1234567890";
+    text_lines.push_back(oss.str());
+    oss.str("");
+    oss.clear(std::stringstream::goodbit);
 
-#endif
+    oss << "\"!`?'.,;:()[]{}<>|/@\\^$-%+=#_&~*";
+    text_lines.push_back(oss.str());
+    oss.str("");
+    oss.clear(std::stringstream::goodbit);
+
+    DrawTextLines(text_lines);
+}
+
+void MyWindow::DrawTextLines(const std::vector<std::string>& text_lines)
+{
+    if(text_lines.empty())
+        return;
+
+    auto metrics = text->GetFont().GetFontMetrics();
+    auto line_height = static_cast<float>(metrics.GetLineHeight());
+    const float scale = 2.0f;
+    const float fh = line_height * scale;
+
+    static const glm::vec4 color(1.0f, 1.0f, 1.0f, 1.0f);
+    text->SetColor(glm::value_ptr(color));
+
+    text->BeginRendering();
+    int line_no = 1;
+    for(const auto& text_line : text_lines)
+    {
+        text->DrawString(text_line, 0.0f, fh * static_cast<float>(line_no), scale);
+        line_no++;
+    }
+
     text->EndRendering();
 }

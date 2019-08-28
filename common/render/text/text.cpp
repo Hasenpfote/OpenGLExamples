@@ -1,4 +1,6 @@
-﻿#include <hasenpfote/math/cmatrix4.h>
+﻿#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include "text.h"
 
 namespace common::render::text
@@ -13,14 +15,16 @@ void Text::BeginRendering()
 {
     GLint vp[4];
     glGetIntegerv(GL_VIEWPORT, vp);
-    const auto proj =
-        hasenpfote::math::CMatrix4::Ortho(
-            static_cast<float>(vp[1]),
-            static_cast<float>(vp[3]),
-            static_cast<float>(vp[0]),
-            static_cast<float>(vp[2]),
-            -1.0f, 1.0f);
-    renderer->SetOrthographicProjectionMatrix(static_cast<const GLfloat*>(proj));
+
+    const auto proj = glm::ortho(
+        static_cast<float>(vp[0]),
+        static_cast<float>(vp[2]),
+        static_cast<float>(vp[3]),
+        static_cast<float>(vp[1]),
+        -1.0f, 1.0f
+    );
+    renderer->SetOrthographicProjectionMatrix(glm::value_ptr(proj));
+
     renderer->BeginRendering(font->GetTexture());
 }
 

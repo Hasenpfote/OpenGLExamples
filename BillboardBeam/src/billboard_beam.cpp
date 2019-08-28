@@ -1,5 +1,6 @@
 ﻿#include <cassert>
 #include <GL/glew.h>
+#include <glm/gtc/type_ptr.hpp>
 #include "billboard_beam.h"
 
 float BillboardBeam::vertices[] =
@@ -75,39 +76,36 @@ void BillboardBeam::Initialize()
             );
 }
 
-void BillboardBeam::UpdateMatrices(const hasenpfote::math::CMatrix4& model)
+void BillboardBeam::UpdateMatrices(const glm::mat4& model)
 {
     auto& camera = System::GetConstInstance().GetCamera();
-    mv = camera.GetViewMatrix() * model;
-    mvp = camera.GetProjectionMatrix() * mv;
+    mv = camera.view() * model;
+    mvp = camera.proj() * mv;
 }
 
-void BillboardBeam::Draw(const hasenpfote::math::Vector3& ep1, const hasenpfote::math::Vector3& ep2, float size)
+void BillboardBeam::Draw(const glm::vec3& ep1, const glm::vec3& ep2, float size)
 {
-    using namespace hasenpfote::math;
-    static const Vector4 color(1.0f, 1.0f, 1.0f, 1.0f);
+    static const glm::vec4 color(1.0f, 1.0f, 1.0f, 1.0f);
     Draw(ep1, ep2, color, color, size);
 }
 
-void BillboardBeam::Draw(const hasenpfote::math::Vector3& ep1, const hasenpfote::math::Vector3& ep2, const hasenpfote::math::Vector4& color, float size)
+void BillboardBeam::Draw(const glm::vec3& ep1, const glm::vec3& ep2, const glm::vec4& color, float size)
 {
     Draw(ep1, ep2, color, color, size);
 }
 
-void BillboardBeam::Draw(const hasenpfote::math::Vector3& ep1, const hasenpfote::math::Vector3& ep2, const hasenpfote::math::Vector4& color1, const hasenpfote::math::Vector4& color2, float size)
+void BillboardBeam::Draw(const glm::vec3& ep1, const glm::vec3& ep2, const glm::vec4& color1, const glm::vec4& color2, float size)
 {
-    using namespace hasenpfote::math;
-
-    CMatrix4 ma, mb;
+    glm::mat4 ma, mb;
     ComputeBillboardBeamMatrix2(ep1, ep2, mv, ma, mb);
 
     auto& uniform = pipeline->GetPipelineUniform();
     uniform.Set1f("size", size);
-    uniform.SetMatrix4fv("bb[0]", 1, GL_FALSE, static_cast<GLfloat*>(ma));
-    uniform.SetMatrix4fv("bb[1]", 1, GL_FALSE, static_cast<GLfloat*>(mb));
-    uniform.Set4fv("color[0]", 1, static_cast<const GLfloat*>(color1));
-    uniform.Set4fv("color[1]", 1, static_cast<const GLfloat*>(color2));
-    uniform.SetMatrix4fv("mvp", 1, GL_FALSE, static_cast<GLfloat*>(mvp));
+    uniform.SetMatrix4fv("bb[0]", 1, GL_FALSE, glm::value_ptr(ma));
+    uniform.SetMatrix4fv("bb[1]", 1, GL_FALSE, glm::value_ptr(mb));
+    uniform.Set4fv("color[0]", 1, glm::value_ptr(color1));
+    uniform.Set4fv("color[1]", 1, glm::value_ptr(color2));
+    uniform.SetMatrix4fv("mvp", 1, GL_FALSE, glm::value_ptr(mvp));
     uniform.Set1i("texture", 0);
 
     pipeline->Bind();
@@ -125,126 +123,82 @@ void BillboardBeam::Draw(const hasenpfote::math::Vector3& ep1, const hasenpfote:
     pipeline->Unbind();
 }
 
-void BillboardBeam::ComputeBillboardBeamMatrix(const hasenpfote::math::Vector3& ep1, const hasenpfote::math::Vector3& ep2, const hasenpfote::math::CMatrix4& view, hasenpfote::math::CMatrix4& bb1, hasenpfote::math::CMatrix4& bb2)
+void BillboardBeam::ComputeBillboardBeamMatrix(const glm::vec3& ep1, const glm::vec3& ep2, const glm::mat4& view, glm::mat4& bb1, glm::mat4& bb2)
 {
-    using namespace hasenpfote::math;
-#if 1
-    CMatrix4 inv = CMatrix4::Inverse(view);
- #if 0
-    Vector3 E = Vector3(inv.m14, inv.m24, inv.m34) - ep1;
-    Vector3 F = Vector3(inv.m13, inv.m23, inv.m33);
- #else
-    Vector3 E = Vector3(inv.GetColumn(3));
-    Vector3 F = Vector3(inv.GetColumn(2));
-#endif
-#else
-    Vector3 pos;
-    pos.x = -(view.m11 * view.m14 + view.m21 * view.m24 + view.m31 * view.m34);
-    pos.y = -(view.m12 * view.m14 + view.m22 * view.m24 + view.m32 * view.m34);
-    pos.z = -(view.m13 * view.m14 + view.m23 * view.m24 + view.m33 * view.m34);
-    Vector3 E = pos - ep1;
-    Vector3 F = Vector3(view.m31, view.m32, view.m33);
-#endif
-    Vector3 B = ep1 - ep2;
-    Vector3 P = Vector3::CrossProduct(B, E);
-    Vector3 U = Vector3::CrossProduct(F, P);
-    U.Normalize();
-    //Vector3 R = Vector3::CrossProduct(F, U);  // cw
-    Vector3 R = Vector3::CrossProduct(U, F);    // ccw
-#if 0
-    bb1 = CMatrix4(
-        R.GetX(), U.GetX(), F.GetX(), ep1.GetX(),
-        R.GetY(), U.GetY(), F.GetY(), ep1.GetY(),
-        R.GetZ(), U.GetZ(), F.GetZ(), ep1.GetZ(),
-        0.0f, 0.0f, 0.0f, 1.0f
-    );
-    bb2 = CMatrix4(
-        R.GetX(), U.GetX(), F.GetX(), ep2.GetX(),
-        R.GetY(), U.GetY(), F.GetY(), ep2.GetY(),
-        R.GetZ(), U.GetZ(), F.GetZ(), ep2.GetZ(),
-        0.0f, 0.0f, 0.0f, 1.0f
-    );
-#else
-    bb1 = CMatrix4(Vector4(R, 0.0f), Vector4(U, 0.0f), Vector4(F, 0.0f), Vector4(ep1, 1.0f));
-    bb2 = CMatrix4(Vector4(R, 0.0f), Vector4(U, 0.0f), Vector4(F, 0.0f), Vector4(ep2, 1.0f));
-#endif
+    auto inv = glm::inverse(view);
+
+    auto E = glm::vec3(inv[3]);
+    auto F = glm::vec3(inv[2]);
+
+    auto B = ep1 - ep2;
+    auto P = glm::cross(B, E);
+    auto U = glm::normalize(glm::cross(F, P));
+
+    //auto R = glm::cross(F, U);  // cw
+    auto R = glm::cross(U, F);    // ccw
+
+    bb1[0] = glm::vec4(R, 0.0f);
+    bb1[1] = glm::vec4(U, 0.0f);
+    bb1[2] = glm::vec4(F, 0.0f);
+    bb1[3] = glm::vec4(ep1, 1.0f);
+
+    bb2[0] = glm::vec4(R, 0.0f);
+    bb2[1] = glm::vec4(U, 0.0f);
+    bb2[2] = glm::vec4(F, 0.0f);
+    bb2[3] = glm::vec4(ep2, 1.0f);
 }
 
-void BillboardBeam::ComputeBillboardBeamMatrix2(const hasenpfote::math::Vector3& ep1, const hasenpfote::math::Vector3& ep2, const hasenpfote::math::CMatrix4& view, hasenpfote::math::CMatrix4& bb1, hasenpfote::math::CMatrix4& bb2)
+void BillboardBeam::ComputeBillboardBeamMatrix2(const glm::vec3& ep1, const glm::vec3& ep2, const glm::mat4& view, glm::mat4& bb1, glm::mat4& bb2)
 {
-    using namespace hasenpfote::math;
+    auto inv = glm::inverse(view);
 
-    CMatrix4 inv = CMatrix4::Inverse(view);
-
-    Vector3 B = ep1 - ep2;
-    float d1 = B.Magnitude();
-    if(d1 > 0.0f){
-#if 0
-        Vector3 E = Vector3(inv.m14, inv.m24, inv.m34) - ep1;
-#else
-        Vector3 E = Vector3(inv.GetColumn(3)) - ep1;
-#endif
-        float d2 = E.Magnitude();
-        if(!(d2 > 0.0f)){
-#if 0
-            E = Vector3(inv.m14, inv.m24, inv.m34) - ep2;
-#else
-            E = Vector3(inv.GetColumn(3)) - ep2;
-#endif
-            d2 = E.Magnitude();
+    auto B = ep1 - ep2;
+    auto d1 = glm::length(B);
+    if(d1 > 0.0f)
+    {
+        auto E = glm::vec3(inv[3]) - ep1;
+        auto d2 = glm::length(E);
+        if(!(d2 > 0.0f))
+        {
+            E = glm::vec3(inv[3]) - ep2;
+            d2 = E.length();
         }
 
-        Vector3 P;
-        if(std::fabsf(Vector3::DotProduct(B, E)) < (d1 * d2)){
-            P = Vector3::CrossProduct(B, E);
-            P.Normalize();
+        glm::vec3 P;
+        if(glm::abs(glm::dot(B, E)) < (d1 * d2))
+        {
+            P = glm::normalize(glm::cross(B, E));
         }
-        else{
-            P = Vector3(0.0f, 1.0f, 0.0f);
+        else
+        {
+            P = glm::vec3(0.0f, 1.0f, 0.0f);
         }
-#if 0
-        Vector3 F = Vector3(inv.m13, inv.m23, inv.m33);
-#else
-        Vector3 F = Vector3(inv.GetColumn(2));
-#endif
-        Vector3 U = Vector3::CrossProduct(F, P);
-        Vector3 R = Vector3::CrossProduct(U, F);    // ccw
-#if 0
-        bb1 = CMatrix4(
-            R.GetX(), U.GetX(), F.GetX(), ep1.GetX(),
-            R.GetY(), U.GetY(), F.GetY(), ep1.GetY(),
-            R.GetZ(), U.GetZ(), F.GetZ(), ep1.GetZ(),
-            0.0f, 0.0f, 0.0f, 1.0f
-        );
-        bb2 = CMatrix4(
-            R.GetX(), U.GetX(), F.GetX(), ep2.GetX(),
-            R.GetY(), U.GetY(), F.GetY(), ep2.GetY(),
-            R.GetZ(), U.GetZ(), F.GetZ(), ep2.GetZ(),
-            0.0f, 0.0f, 0.0f, 1.0f
-        );
-#else
-        bb1 = CMatrix4(Vector4(R, 0.0f), Vector4(U, 0.0f), Vector4(F, 0.0f), Vector4(ep1, 1.0f));
-        bb2 = CMatrix4(Vector4(R, 0.0f), Vector4(U, 0.0f), Vector4(F, 0.0f), Vector4(ep2, 1.0f));
-#endif
+
+        auto F = glm::vec3(inv[2]);
+        auto U = glm::cross(F, P);
+        auto R = glm::cross(U, F);    // ccw
+
+        bb1[0] = glm::vec4(R, 0.0f);
+        bb1[1] = glm::vec4(U, 0.0f);
+        bb1[2] = glm::vec4(F, 0.0f);
+        bb1[3] = glm::vec4(ep1, 1.0f);
+
+        bb2[0] = glm::vec4(R, 0.0f);
+        bb2[1] = glm::vec4(U, 0.0f);
+        bb2[2] = glm::vec4(F, 0.0f);
+        bb2[3] = glm::vec4(ep2, 1.0f);
     }
-    else{
+    else
+    {
         // 点となるので通常のビルボード処理へ移行
-#if 0
-        bb1 = CMatrix4(
-            inv.m11, inv.m12, inv.m13, ep1.GetX(),
-            inv.m21, inv.m22, inv.m23, ep1.GetY(),
-            inv.m31, inv.m32, inv.m33, ep1.GetZ(),
-            0.0f, 0.0f, 0.0f, 1.0f
-        );
-        bb2 = CMatrix4(
-            inv.m11, inv.m12, inv.m13, ep2.GetX(),
-            inv.m21, inv.m22, inv.m23, ep2.GetY(),
-            inv.m31, inv.m32, inv.m33, ep2.GetZ(),
-            0.0f, 0.0f, 0.0f, 1.0f
-        );
-#else
-        bb1 = CMatrix4(inv.GetColumn(0), inv.GetColumn(1), inv.GetColumn(2), Vector4(ep1, 1.0f));
-        bb2 = CMatrix4(inv.GetColumn(0), inv.GetColumn(1), inv.GetColumn(2), Vector4(ep2, 1.0f));
-#endif
+        bb1[0] = inv[0];
+        bb1[1] = inv[1];
+        bb1[2] = inv[2];
+        bb1[3] = glm::vec4(ep1, 1.0f);
+
+        bb2[0] = inv[0];
+        bb2[1] = inv[1];
+        bb2[2] = inv[2];
+        bb2[3] = glm::vec4(ep2, 1.0f);
     }
 }

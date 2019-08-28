@@ -1,6 +1,5 @@
 ﻿#pragma once
 #include <GLFW/glfw3.h>
-#include <hasenpfote/math/cmatrix4.h>
 #include "../../common/system.h"
 #include "../../common/render/texture.h"
 #include "../../common/render/shader/shader.h"

@@ -128,6 +128,7 @@ function(make_simple_example_project project_name uses_imgui)
         ${OPENGL_gl_LIBRARY}
         glfw
         glew_s
+        glm
         hasenpfote
     )
 

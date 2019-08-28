@@ -2,24 +2,18 @@
 #include <sstream>
 #include <filesystem>
 #include <GL/glew.h>
-#include <hasenpfote/assert.h>
-#include <hasenpfote//math/utils.h>
-#include <hasenpfote/math/cmatrix4.h>
-#include <hasenpfote/math/axis_angle.h>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/transform.hpp>
 #include "../../common/logger.h"
 #include "mywindow.h"
-//////////
-#include <cmath>
-#include <cassert>
-#include <vector>
-#include <deque>
 
 uint64_t nchoosek(uint64_t n, uint64_t k)
 {
     assert(n >= k);
 
     uint64_t r = 1;
-    for (uint64_t d = 1; d <= k; ++d) {
+    for(uint64_t d = 1; d <= k; ++d)
+    {
         r *= n--;
         r /= d;
     }
@@ -48,12 +42,12 @@ float derivative_of_bernstein_basis(uint32_t n, uint32_t k, float t)
     return static_cast<float>(nchoosek(n, k)) * (dfdt * g + f * dgdt);
 }
 
-hasenpfote::math::Vector3 calc_bezier_point(std::vector<hasenpfote::math::Vector3> ctrl_points, float t)
+glm::vec3 calc_bezier_point(std::vector<glm::vec3> ctrl_points, float t)
 {
-    hasenpfote::math::Vector3 point(0.0f, 0.0f, 0.0f);
+    glm::vec3 point(0.0f, 0.0f, 0.0f);
     uint32_t n = ctrl_points.size();
     uint32_t k = 0;
-    for (auto ctrl_point : ctrl_points)
+    for(const auto& ctrl_point : ctrl_points)
     {
         auto b = bernstein_basis(n - 1, k, t);
         point += b * ctrl_point;
@@ -75,7 +69,6 @@ MyWindow::~MyWindow()
 
 void MyWindow::Setup()
 {
-    using namespace hasenpfote::math;
     //
     glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);
@@ -97,17 +90,19 @@ void MyWindow::Setup()
     glfwGetFramebufferSize(window, &width, &height);
     glViewport(0, 0, width, height);
 
-    auto& camera = System::GetMutableInstance().GetCamera();
+    //
+    {
+        auto& camera = System::GetMutableInstance().GetCamera();
 
-    camera.SetViewport(0, 0, width, height);
-    //camera.Set35mmEquivalentFocalLength(50.0f);
-    camera.SetClippingPlane(1.0f, 10000.0f);
+        auto& vp = camera.viewport();
+        vp.origin() = glm::vec2(0, 0);
+        vp.size() = glm::vec2(width, height);
+        vp.depth_range() = glm::vec2(1.0f, 10000.0f);
 
-    camera.SetPosition(Vector3(0.0f, 0.0f, 50.0f));
-    camera.SetTargetPosition(Vector3(0.0f, 0.0f, 0.0f));
+        camera.position() = glm::vec3(0.0f, 0.0f, 50.0f);
 
-    camera.Update(0.0f);
-
+        camera.Update(0.0);
+    }
     // load shader.
     {
         std::filesystem::path dirpath("assets/shaders");
@@ -130,22 +125,22 @@ void MyWindow::Setup()
     //
     bb.Initialize();
     //
-    ctrl_points.push_back({ -5.0f,  5.0f, 0.0f});
-    ctrl_points.push_back({-10.0f, 10.0f, 0.0f});
-    ctrl_points.push_back({-15.0f, 10.0f, 0.0f});
-    ctrl_points.push_back({-20.0f,  5.0f, 0.0f});
-    ctrl_points.push_back({-20.0f, -5.0f, 0.0f});
-    ctrl_points.push_back({-15.0f,-10.0f, 0.0f});
-    ctrl_points.push_back({ -5.0f, -5.0f, 0.0f});
-    ctrl_points.push_back({  5.0f,  5.0f, 0.0f});
-    ctrl_points.push_back({ 10.0f, 10.0f, 0.0f});
-    ctrl_points.push_back({ 15.0f, 10.0f, 0.0f});
-    ctrl_points.push_back({ 20.0f,  5.0f, 0.0f});
-    ctrl_points.push_back({ 20.0f, -5.0f, 0.0f});
-    ctrl_points.push_back({ 15.0f,-10.0f, 0.0f});
-    ctrl_points.push_back({ 10.0f,-10.0f, 0.0f});
-    ctrl_points.push_back({  5.0f, -5.0f, 0.0f});
-    ctrl_points.push_back({ -5.0f,  5.0f, 0.0f});
+    ctrl_points.emplace_back(-5.0f,  5.0f, 0.0f);
+    ctrl_points.emplace_back(-10.0f, 10.0f, 0.0f);
+    ctrl_points.emplace_back(-15.0f, 10.0f, 0.0f);
+    ctrl_points.emplace_back(-20.0f,  5.0f, 0.0f);
+    ctrl_points.emplace_back(-20.0f, -5.0f, 0.0f);
+    ctrl_points.emplace_back(-15.0f,-10.0f, 0.0f);
+    ctrl_points.emplace_back( -5.0f, -5.0f, 0.0f);
+    ctrl_points.emplace_back(  5.0f,  5.0f, 0.0f);
+    ctrl_points.emplace_back( 10.0f, 10.0f, 0.0f);
+    ctrl_points.emplace_back( 15.0f, 10.0f, 0.0f);
+    ctrl_points.emplace_back( 20.0f,  5.0f, 0.0f);
+    ctrl_points.emplace_back( 20.0f, -5.0f, 0.0f);
+    ctrl_points.emplace_back( 15.0f,-10.0f, 0.0f);
+    ctrl_points.emplace_back( 10.0f,-10.0f, 0.0f);
+    ctrl_points.emplace_back(  5.0f, -5.0f, 0.0f);
+    ctrl_points.emplace_back( -5.0f,  5.0f, 0.0f);
     t = 0.0f;
 }
 
@@ -157,8 +152,7 @@ void MyWindow::OnKey(GLFWwindow* window, int key, int scancode, int action, int 
 {
     Window::OnKey(window, key, scancode, action, mods);
 
-    auto& camera = System::GetMutableInstance().GetCamera();
-    camera.OnKey(key, scancode, action, mods);
+    System::GetMutableInstance().GetCamera().OnKey(key, scancode, action, mods);
 
     if(key == GLFW_KEY_M && action == GLFW_PRESS){
         GLboolean ms;
@@ -197,7 +191,9 @@ void MyWindow::OnResizeWindow(GLFWwindow* window, int width, int height)
 {
     if(HasIconified())
         return;
-    System::GetMutableInstance().GetCamera().SetViewportSize(width, height);
+
+    auto& camera = System::GetMutableInstance().GetCamera();
+    camera.viewport().size() = glm::vec2(width, height);
 }
 
 void MyWindow::OnUpdate(double dt)
@@ -220,15 +216,14 @@ void MyWindow::OnUpdate(double dt)
 
 void MyWindow::OnRender()
 {
-    using namespace hasenpfote::math;
-
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     auto& camera = System::GetConstInstance().GetCamera();
-    auto& vp = camera.GetViewport();
 
-    const auto width = vp.GetWidth();
-    const auto height = vp.GetHeight();
+    auto& vp = camera.viewport();
+    auto& resolution = camera.viewport().size();
+    const auto width = static_cast<int>(resolution.x);
+    const auto height = static_cast<int>(resolution.y);
     glViewport(0, 0, width, height);
 
     glEnable(GL_BLEND);
@@ -248,118 +243,112 @@ void MyWindow::OnRender()
     glDepthMask(GL_TRUE);
     glDisable(GL_BLEND);
 
-    // 情報の表示
-    auto metrics = text->GetFont().GetFontMetrics();
-    auto line_height = static_cast<float>(metrics.GetLineHeight());
-    const float scale = 1.0f;
-    const float fh = line_height * scale;
-
-    static const Vector4 color(1.0f, 1.0f, 1.0f, 1.0f);
-    text->SetColor(static_cast<const GLfloat*>(color));
-
-    text->BeginRendering();
-
+    // Display debug information.
+    std::vector<std::string> text_lines;
     std::ostringstream oss;
-    oss << "FPS:UPS=";
+    //std::streamsize ss = std::cout.precision();
+
     oss << std::fixed << std::setprecision(2);
+
+    oss << "FPS:UPS=";
     oss << GetFPS() << ":" << GetUPS();
-    text->DrawString(oss.str(), 0.0f, fh, scale);
+    text_lines.push_back(oss.str());
     oss.str("");
     oss.clear(std::stringstream::goodbit);
 
     oss << "Screen size:";
-    oss << camera.GetViewport().GetWidth() << "x" << camera.GetViewport().GetHeight();
-    text->DrawString(oss.str(), 0.0f, fh * 2.0f, scale);
-    oss.str("");
-    oss.clear(std::stringstream::goodbit);
-
-    oss << "Aov D=" << ConvertRadiansToDegrees(camera.GetAngleOfView(CustomCamera::AngleOfView::Diagonal));
-    oss << " H=" << ConvertRadiansToDegrees(camera.GetAngleOfView(CustomCamera::AngleOfView::Horizontal));
-    oss << " V=" << ConvertRadiansToDegrees(camera.GetAngleOfView(CustomCamera::AngleOfView::Vertical));
-    text->DrawString(oss.str(), 0.0f, fh * 3.0f, scale);
-    oss.str("");
-    oss.clear(std::stringstream::goodbit);
-
-    oss << "Focal length=" << camera.GetFocalLength() << " (35mm=" << camera.Get35mmEquivalentFocalLength() << ")";
-    text->DrawString(oss.str(), 0.0f, fh * 4.0f, scale);
-    oss.str("");
-    oss.clear(std::stringstream::goodbit);
-
-    oss << "Zoom=x" << camera.GetZoomMagnification();
-    text->DrawString(oss.str(), 0.0f, fh * 5.0f, scale);
+    oss << width << "x" << height;
+    text_lines.push_back(oss.str());
     oss.str("");
     oss.clear(std::stringstream::goodbit);
 
     GLboolean ms;
     glGetBooleanv(GL_MULTISAMPLE, &ms);
     oss << "MultiSample:" << ((ms == GL_TRUE) ? "On" : "Off") << "(Toggle MultiSample: m)";
-    text->DrawString(oss.str(), 0.0f, fh * 6.0f, scale);
+    text_lines.push_back(oss.str());
     oss.str("");
     oss.clear(std::stringstream::goodbit);
+
+    DrawTextLines(text_lines);
+}
+
+void MyWindow::DrawTextLines(const std::vector<std::string>& text_lines)
+{
+    if(text_lines.empty())
+        return;
+
+    auto metrics = text->GetFont().GetFontMetrics();
+    auto line_height = static_cast<float>(metrics.GetLineHeight());
+    const float scale = 0.5f;
+    const float fh = line_height * scale;
+
+    static const glm::vec4 color(1.0f, 1.0f, 1.0f, 1.0f);
+    text->SetColor(glm::value_ptr(color));
+
+    text->BeginRendering();
+    int line_no = 1;
+    for(const auto& text_line : text_lines)
+    {
+        text->DrawString(text_line, 0.0f, fh * static_cast<float>(line_no), scale);
+        line_no++;
+    }
 
     text->EndRendering();
 }
 
 void MyWindow::DrawCube()
 {
-    using namespace hasenpfote::math;
-
-    bb.UpdateMatrices(CMatrix4::RotationY(ConvertDegreesToRadians(theta)));
+    bb.UpdateMatrices(glm::rotate(glm::radians(theta), glm::vec3(0.0f, 1.0f, 0.0f)));
 
     constexpr float size = 0.1f;
 
-    bb.Draw(Vector3(-10.0f, -10.0f, -10.0f), Vector3(10.0f, -10.0f, -10.0f), size);
-    bb.Draw(Vector3(-10.0f, -10.0f, 10.0f), Vector3(10.0f, -10.0f, 10.0f), size);
-    bb.Draw(Vector3(-10.0f, -10.0f, -10.0f), Vector3(-10.0f, -10.0f, 10.0f), size);
-    bb.Draw(Vector3(10.0f, -10.0f, -10.0f), Vector3(10.0f, -10.0f, 10.0f), size);
+    bb.Draw(glm::vec3(-10.0f, -10.0f, -10.0f), glm::vec3(10.0f, -10.0f, -10.0f), size);
+    bb.Draw(glm::vec3(-10.0f, -10.0f, 10.0f), glm::vec3(10.0f, -10.0f, 10.0f), size);
+    bb.Draw(glm::vec3(-10.0f, -10.0f, -10.0f), glm::vec3(-10.0f, -10.0f, 10.0f), size);
+    bb.Draw(glm::vec3(10.0f, -10.0f, -10.0f), glm::vec3(10.0f, -10.0f, 10.0f), size);
 
-    bb.Draw(Vector3(-10.0f, -10.0f, -10.0f), Vector3(-10.0f, 10.0f, -10.0f), size);
-    bb.Draw(Vector3(-10.0f, -10.0f, 10.0f), Vector3(-10.0f, 10.0f, 10.0f), size);
-    bb.Draw(Vector3(10.0f, -10.0f, -10.0f), Vector3(10.0f, 10.0f, -10.0f), size);
-    bb.Draw(Vector3(10.0f, -10.0f, 10.0f), Vector3(10.0f, 10.0f, 10.0f), size);
+    bb.Draw(glm::vec3(-10.0f, -10.0f, -10.0f), glm::vec3(-10.0f, 10.0f, -10.0f), size);
+    bb.Draw(glm::vec3(-10.0f, -10.0f, 10.0f), glm::vec3(-10.0f, 10.0f, 10.0f), size);
+    bb.Draw(glm::vec3(10.0f, -10.0f, -10.0f), glm::vec3(10.0f, 10.0f, -10.0f), size);
+    bb.Draw(glm::vec3(10.0f, -10.0f, 10.0f), glm::vec3(10.0f, 10.0f, 10.0f), size);
 
-    bb.Draw(Vector3(-10.0f, 10.0f, -10.0f), Vector3(10.0f, 10.0f, -10.0f), size);
-    bb.Draw(Vector3(-10.0f, 10.0f, 10.0f), Vector3(10.0f, 10.0f, 10.0f), size);
-    bb.Draw(Vector3(-10.0f, 10.0f, -10.0f), Vector3(-10.0f, 10.0f, 10.0f), size);
-    bb.Draw(Vector3(10.0f, 10.0f, -10.0f), Vector3(10.0f, 10.0f, 10.0f), size);
+    bb.Draw(glm::vec3(-10.0f, 10.0f, -10.0f), glm::vec3(10.0f, 10.0f, -10.0f), size);
+    bb.Draw(glm::vec3(-10.0f, 10.0f, 10.0f), glm::vec3(10.0f, 10.0f, 10.0f), size);
+    bb.Draw(glm::vec3(-10.0f, 10.0f, -10.0f), glm::vec3(-10.0f, 10.0f, 10.0f), size);
+    bb.Draw(glm::vec3(10.0f, 10.0f, -10.0f), glm::vec3(10.0f, 10.0f, 10.0f), size);
 }
 
 void MyWindow::DrawLines()
 {
-    using namespace hasenpfote::math;
-
-    bb.UpdateMatrices(CMatrix4::IDENTITY);
-    bb.Draw(Vector3(-20.0f, 0.0f, -20.0f), Vector3(-20.0f, 0.0f, 20.0f), Vector4(1.0f, 0.0f, 0.0f, 0.5f), Vector4(1.0f, 0.0f, 0.0f, 1.0f), 1.0f);
-    bb.Draw(Vector3(0.0f, 0.0f, -20.0f), Vector3(0.0f, 0.0f, 20.0f), Vector4(0.0f, 1.0f, 0.0f, 0.5f), Vector4(0.0f, 1.0f, 0.0f, 1.0f), 1.0f);
-    bb.Draw(Vector3(20.0f, 0.0f, -20.0f), Vector3(20.0f, 0.0f, 20.0f), Vector4(0.0f, 0.0f, 1.0f, 0.5f), Vector4(0.0f, 0.0f, 1.0f, 1.0f), 1.0f);
+    bb.UpdateMatrices(glm::mat4(1.0f));
+    bb.Draw(glm::vec3(-20.0f, 0.0f, -20.0f), glm::vec3(-20.0f, 0.0f, 20.0f), glm::vec4(1.0f, 0.0f, 0.0f, 0.5f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), 1.0f);
+    bb.Draw(glm::vec3(0.0f, 0.0f, -20.0f), glm::vec3(0.0f, 0.0f, 20.0f), glm::vec4(0.0f, 1.0f, 0.0f, 0.5f), glm::vec4(0.0f, 1.0f, 0.0f, 1.0f), 1.0f);
+    bb.Draw(glm::vec3(20.0f, 0.0f, -20.0f), glm::vec3(20.0f, 0.0f, 20.0f), glm::vec4(0.0f, 0.0f, 1.0f, 0.5f), glm::vec4(0.0f, 0.0f, 1.0f, 1.0f), 1.0f);
 }
 
 void MyWindow::DrawPoints()
 {
-    using namespace hasenpfote::math;
-
-    bb.UpdateMatrices(CMatrix4::IDENTITY);
-    bb.Draw(Vector3(-20.0f, 5.0f,  0.0f), Vector3(-20.0f, 5.0f, 0.0f), Vector4(1.0f, 0.0f, 0.0f, 0.5f), 1.0f);
-    bb.Draw(Vector3(  0.0f, 5.0f,  0.0f), Vector3(  0.0f, 5.0f, 0.0f), Vector4(0.0f, 1.0f, 0.0f, 0.5f), 1.0f);
-    bb.Draw(Vector3( 20.0f, 5.0f,  0.0f), Vector3( 20.0f, 5.0f, 0.0f), Vector4(0.0f, 0.0f, 1.0f, 0.5f), 1.0f);
+    bb.UpdateMatrices(glm::mat4(1.0f));
+    bb.Draw(glm::vec3(-20.0f, 5.0f,  0.0f), glm::vec3(-20.0f, 5.0f, 0.0f), glm::vec4(1.0f, 0.0f, 0.0f, 0.5f), 1.0f);
+    bb.Draw(glm::vec3(  0.0f, 5.0f,  0.0f), glm::vec3(  0.0f, 5.0f, 0.0f), glm::vec4(0.0f, 1.0f, 0.0f, 0.5f), 1.0f);
+    bb.Draw(glm::vec3( 20.0f, 5.0f,  0.0f), glm::vec3( 20.0f, 5.0f, 0.0f), glm::vec4(0.0f, 0.0f, 1.0f, 0.5f), 1.0f);
 }
 
 void MyWindow::DrawCurve()
 {
-    using namespace hasenpfote::math;
-
     auto size = points.size();
     if(size < 2)
         return;
 
-    bb.UpdateMatrices(CMatrix4::IDENTITY);
+    bb.UpdateMatrices(glm::mat4(1.0f));
 
     float delta = 1.0f / static_cast<float>(size - 1);
     float alpha = 1.0f;
-    for(auto i = 0; i < size-1; i++){
+    for(auto i = 0; i < size-1; i++)
+    {
         auto p0 = points[i];
         auto p1 = points[i+1];
-        bb.Draw(p0, p1, Vector4(1.0f, 1.0f, 0.0f, alpha), Vector4(1.0f, 1.0f, 0.0f, alpha - delta), 0.25f);
+        bb.Draw(p0, p1, glm::vec4(1.0f, 1.0f, 0.0f, alpha), glm::vec4(1.0f, 1.0f, 0.0f, alpha - delta), 0.25f);
         alpha -= delta;
     }
 }

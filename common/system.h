@@ -2,7 +2,7 @@
 #include <memory>
 #include "singleton.h"
 #include "resource.h"
-#include "render/custom_camera.h"
+#include "render/simple_camera.h"
 
 namespace common
 {
@@ -17,15 +17,15 @@ public:
     ~System();
 
 public:
-    common::DefaultResourceManager& GetResourceManager() { return *rm_; }
+    common::DefaultResourceManager& GetResourceManager(){ return *rm_; }
     const common::DefaultResourceManager& GetResourceManager() const { return *rm_; }
 
-    common::render::CustomCamera& GetCamera(){ return *camera_; }
-    const common::render::CustomCamera& GetCamera() const { return *camera_; }
+    common::render::SimpleCamera& GetCamera(){ return *camera_; }
+    const common::render::SimpleCamera& GetCamera() const { return *camera_; }
 
 private:
     std::unique_ptr<common::DefaultResourceManager> rm_;
-    std::unique_ptr<common::render::CustomCamera> camera_;
+    std::unique_ptr<common::render::SimpleCamera> camera_;
 };
 
 }   // namespace common

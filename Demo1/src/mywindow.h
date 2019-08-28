@@ -1,11 +1,8 @@
 ﻿#pragma once
-#include <iostream>
 #include <memory>
 #include <filesystem>
 #include <vector>
 #include <array>
-#include <tuple>
-#include <hasenpfote/math/quaternion.h>
 #include "../../common/window.h"
 #include "../../common/system.h"
 #include "../../common/render/texture.h"
@@ -24,7 +21,7 @@ class MyWindow final : public common::Window
     using Font = common::render::text::Font;
     using SDFText = common::render::text::SDFText;
     using SDFTextRenderer = common::render::text::SDFTextRenderer;
-    using CustomCamera = common::render::CustomCamera;
+    using Camera = common::render::SimpleCamera;
 
 public:
     MyWindow();
@@ -46,7 +43,7 @@ private:
     void OnGUI() override;
 
     void RecreateResources(int width, int height);
-    void DrawTextLines(std::vector<std::string> text_lines);
+    void DrawTextLines(const std::vector<std::string>& text_lines);
 
     void DrawFullScreenQuad(GLuint texture);
 

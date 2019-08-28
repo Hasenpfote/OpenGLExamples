@@ -1,6 +1,8 @@
 ﻿#include <cassert>
 #include <iostream>
 #include <tuple>
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <fbxsdk.h>
 #include "fbx_loader.h"
 
@@ -113,7 +115,7 @@ std::unique_ptr<Mesh> Model::ParseMesh(const FbxMesh* mesh)
     auto positions = GetControlPointsByPolygonVertex(mesh);
     auto normals = GetNormalsByPolygonVertex(mesh);
     auto texcoords0 = GetUVsByPolygonVertex(mesh, 0);
-    // 
+    //
     std::vector<std::array<Weight, 4>> joint_weights;
     const auto num_skin = mesh->GetDeformerCount(FbxDeformer::eSkin);
     if(num_skin > 0){
@@ -315,14 +317,14 @@ std::unordered_map<std::string, std::vector<FbxDouble2>> Model::GetUVsByPolygonV
     return std::move(map);
 }
 
-static hasenpfote::math::CMatrix4 convMatrix(FbxAMatrix& m)
+static glm::mat4 convMatrix(FbxAMatrix& m)
 {
     auto p = static_cast<double*>(m);
     std::array<float, 16> arr;
     for(auto i = 0; i < 16; i++){
         arr[i] = static_cast<float>(p[i]);
     }
-    return hasenpfote::math::CMatrix4(arr);
+    return glm::make_mat4(arr.data());
 }
 
 static FbxAMatrix GetGeometry(FbxNode* pNode)
@@ -420,7 +422,7 @@ std::unique_ptr<Material> Model::ParseMaterial(const FbxSurfaceMaterial* materia
         impl = GetImplementation(material, FBXSDK_IMPLEMENTATION_CGFX);
     }
 
-    if(impl){ 
+    if(impl){
         result->shader = std::move(std::unique_ptr<Material::Shader>(new Material::Shader()));
         auto root_table = impl->GetRootTable();
 

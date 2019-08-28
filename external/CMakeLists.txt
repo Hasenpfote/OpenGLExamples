@@ -8,6 +8,10 @@ add_subdirectory(glfw)
 add_subdirectory(glew/build/cmake)
 set(GLEW_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/glew/include" CACHE INTERNAL "")
 
+### glm
+set(GLM_TEST_ENABLE OFF CACHE BOOL "" FORCE)
+add_subdirectory(glm)
+
 ### stb
 set(STB_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/stb" CACHE INTERNAL "")
 

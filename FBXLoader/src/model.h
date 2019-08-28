@@ -1,6 +1,9 @@
 ﻿#pragma once
 #include <string>
+#include <vector>
+#include <array>
 #include <GL/glew.h>
+#include <glm/glm.hpp>
 #include "../../common/system.h"
 #include "../../common/render/texture.h"
 #include "../../common/render/shader/shader.h"
@@ -79,8 +82,8 @@ public:
     ~Model();
 
     void Setup(fbxloader::Model& model, GLuint common_matrices);
-    void DrawOpaqueMeshes(const hasenpfote::math::CMatrix4& model);
-    void DrawTransparentMeshes(const hasenpfote::math::CMatrix4& model);
+    void DrawOpaqueMeshes(const glm::mat4& model);
+    void DrawTransparentMeshes(const glm::mat4& model);
     void DrawSkeleton();
     void Update(double dt);
 
@@ -90,7 +93,7 @@ private:
     std::vector<std::unique_ptr<Mesh>> transparent_meshes;
     std::unique_ptr<Skeleton> skeleton;
 
-    std::array<hasenpfote::math::CMatrix4, 128> palette;
+    std::array<glm::mat4, 128> palette;
 
     GLuint pipeline;
     GLuint common_matrices;

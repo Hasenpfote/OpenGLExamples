@@ -1,7 +1,6 @@
 ﻿#pragma once
 #include <GLFW/glfw3.h>
-#include <hasenpfote/math/cmatrix4.h>
-#include <hasenpfote/math/vector3.h>
+#include <glm/glm.hpp>
 #include "../../common/system.h"
 #include "../../common/render/texture.h"
 #include "../../common/render/shader/shader.h"
@@ -52,7 +51,7 @@ private:
 
     DrawMode draw_mode;
 
-    hasenpfote::math::Vector3 light_direction;
+    glm::vec3 light_direction;
 
     std::unique_ptr<ProgramPipeline> pipeline1;
     std::unique_ptr<ProgramPipeline> pipeline2;

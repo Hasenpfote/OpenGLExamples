@@ -1,5 +1,7 @@
 ﻿#include <cassert>
 #include <GL/glew.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #define STB_IMAGE_STATIC
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
@@ -138,13 +140,11 @@ void Quad::Initialize()
 
 void Quad::Draw()
 {
-    using namespace hasenpfote::math;
-
     const auto& camera = System::GetConstInstance().GetCamera();
-    CMatrix4 mvp = camera.GetProjectionMatrix() * camera.GetViewMatrix();
+    auto mvp = camera.proj() * camera.view();
 
     auto& uniform = pipeline->GetPipelineUniform();
-    uniform.SetMatrix4fv("mvp", 1, GL_FALSE, static_cast<GLfloat*>(mvp));
+    uniform.SetMatrix4fv("mvp", 1, GL_FALSE, glm::value_ptr(mvp));
     uniform.Set1i("texture", 0);
 
     pipeline->Bind();

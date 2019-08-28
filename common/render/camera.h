@@ -1,31 +1,42 @@
 ﻿#pragma once
-#include <hasenpfote/math/vector3.h>
-#include <hasenpfote/math/quaternion.h>
-#include <hasenpfote/math/cmatrix4.h>
+#include <glm/glm.hpp>
 
 namespace common::render
 {
 
-class Viewport final
+class Viewport
 {
 public:
     Viewport() = default;
-    ~Viewport() = default;
+    virtual ~Viewport() = default;
+    Viewport(const Viewport&) = default;
+    Viewport& operator = (const Viewport&) = default;
+    Viewport(Viewport&&) = default;
+    Viewport& operator = (Viewport&&) = default;
 
-    void Set(int x, int y, int width, int height);
-    void SetPosition(int x, int y);
-    void SetSize(int width, int height);
-    int GetPositionX() const { return x; }
-    int GetPositionY() const { return y; }
-    int GetWidth() const { return width; }
-    int GetHeight() const { return height; }
-    float GetAspectRatio() const;
+    Viewport(float x, float y, float width, float height, float min_depath, float max_depath)
+        : origin_(x, y), size_(width, height), depth_range_(min_depath, max_depath)
+    {}
+
+    Viewport(const glm::vec2& origin, const glm::vec2& size, const glm::vec2& depth_range)
+        : origin_(origin), size_(size), depth_range_(depth_range)
+    {}
+
+    const glm::vec2& origin() const noexcept { return origin_; }
+    glm::vec2& origin() noexcept { return origin_; }
+
+    const glm::vec2& size() const noexcept { return size_; }
+    glm::vec2& size() noexcept { return size_; }
+
+    const glm::vec2& depth_range() const noexcept { return depth_range_; }
+    glm::vec2& depth_range() noexcept { return depth_range_; }
+
+    float aspect_ratio() const noexcept { return size_.x / size_.y; }
 
 private:
-    int x;
-    int y;
-    int width;
-    int height;
+    glm::vec2 origin_;
+    glm::vec2 size_;
+    glm::vec2 depth_range_;
 };
 
 class Camera
@@ -33,41 +44,45 @@ class Camera
 public:
     Camera() = default;
     virtual ~Camera() = default;
+    Camera(const Camera&) = default;
+    Camera& operator = (const Camera&) = default;
+    Camera(Camera&&) = default;
+    Camera& operator = (Camera&&) = default;
 
-    void SetViewMatrix(const hasenpfote::math::CMatrix4 view) { this->view = view; }
-    hasenpfote::math::CMatrix4 GetViewMatrix() const { return view; }
+    const glm::mat4& view() const noexcept { return view_; }
+    glm::mat4& view() noexcept { return view_; }
 
-    void SetProjectionMatrix(const hasenpfote::math::CMatrix4 proj) { this->proj = proj; }
-    hasenpfote::math::CMatrix4 GetProjectionMatrix() const { return proj; }
+    const glm::mat4& proj() const noexcept { return proj_; }
+    glm::mat4& proj() noexcept { return proj_; }
 
-    Viewport& GetViewport() { return vp; }
-    const Viewport& GetViewport() const { return vp; }
-
-    /*!
-     * ワールド座標からスクリーン座標へ変換.
-     * @param[in] world coord.
-     * @return screen coord.
-     */
-    hasenpfote::math::Vector3 ToScreenCoord(const hasenpfote::math::Vector3& pos) const;
+    const Viewport& viewport() const noexcept { return vp_; }
+    Viewport& viewport() noexcept { return vp_; }
 
     /*!
-     * スクリーン座標からワールド座標へ変換.
-     * @param[in] screen coord.
-     * @return world coord.
+     * Convert world to screen coords.
+     * @param[in] world coords.
+     * @return screen coords.
      */
-    hasenpfote::math::Vector3 ToWorldCoord(const hasenpfote::math::Vector3& pos) const;
+    glm::vec3 world_to_screen(const glm::vec3& pos) const;
 
     /*!
-     * スクリーン座標からワールド座標上の光線を得る.
-     * @param[int] screen coord.
-     * @return world coord.
+     * Convert screen to world coords.
+     * @param[in] screen coords.
+     * @return world coords.
      */
-    hasenpfote::math::Vector3 GetRay(const hasenpfote::math::Vector3& pos) const;
+    glm::vec3 screen_to_world(const glm::vec3& pos) const;
+
+    /*!
+     * Convert from screen position to ray vector.
+     * @param[in] screen coords.
+     * @return world coords.
+     */
+    glm::vec3 to_ray(const glm::vec3& pos) const;
 
 private:
-    hasenpfote::math::CMatrix4 view;
-    hasenpfote::math::CMatrix4 proj;
-    Viewport vp;
+    glm::mat4 view_;
+    glm::mat4 proj_;
+    Viewport vp_;
 };
 
 }   // namespace common::render

@@ -34,7 +34,11 @@ set(ALL_FILES ${HEADER_FILES} ${SOURCE_FILES})
 set(COMMON_DIR "../common")
 file(GLOB_RECURSE COMMON_HEADER_FILES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" ${COMMON_DIR}/*.h)
 file(GLOB_RECURSE COMMON_SOURCE_FILES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" ${COMMON_DIR}/*.cpp)
-set(ALL_COMMON_FILES ${COMMON_HEADER_FILES} ${COMMON_SOURCE_FILES})
+
+### Remove deprecated files.
+set(filter "[.]*/deprecated/[.]*")
+remove_by_filter("${COMMON_HEADER_FILES}" ${filter} COMMON_HEADER_FILES)
+remove_by_filter("${COMMON_SOURCE_FILES}" ${filter} COMMON_SOURCE_FILES)
 
 ### Remove files.
 set(COMMON_IMGUI_DIR "../common/imgui")
@@ -52,6 +56,7 @@ set(SOURCE_FILES_TO_REMOVE
 remove_sublist("${COMMON_SOURCE_FILES}" "${SOURCE_FILES_TO_REMOVE}" COMMON_SOURCE_FILES)
 ######
 
+set(ALL_COMMON_FILES ${COMMON_HEADER_FILES} ${COMMON_SOURCE_FILES})
 set(ALL_FILES ${ALL_FILES} ${ALL_COMMON_FILES})
 
 ### Define a grouping for source files in IDE project generation.
@@ -87,6 +92,7 @@ target_link_libraries(
     ${OPENGL_gl_LIBRARY}
     glfw
     glew_s
+    glm
     hasenpfote
     debug ${FBXSDK_LIBRARY_DEBUG}
     optimized ${FBXSDK_LIBRARY}

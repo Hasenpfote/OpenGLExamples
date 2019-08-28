@@ -1,13 +1,9 @@
 ﻿#include <iomanip>
 #include <sstream>
 #include <GL/glew.h>
-#include <hasenpfote/assert.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <hasenpfote/fp_conversion.h>
-#include <hasenpfote//math/utils.h>
-#include <hasenpfote/math/vector3.h>
-#include <hasenpfote/math/vector4.h>
-#include <hasenpfote/math/cmatrix4.h>
-#include <hasenpfote/math/axis_angle.h>
 #if defined(USE_IMGUI)
 #include "../../external/imgui/imgui.h"
 #endif
@@ -26,7 +22,6 @@ MyWindow::~MyWindow()
 
 void MyWindow::Setup()
 {
-    using namespace hasenpfote::math;
     //
     glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);
@@ -48,17 +43,17 @@ void MyWindow::Setup()
     glfwGetFramebufferSize(window, &width, &height);
     glViewport(0, 0, width, height);
 
-    auto& camera = System::GetMutableInstance().GetCamera();
+    //
+    {
+        auto& camera = System::GetMutableInstance().GetCamera();
 
-    camera.SetViewport(0, 0, width, height);
-    //camera.Set35mmEquivalentFocalLength(50.0f);
-    camera.SetClippingPlane(1.0f, 10000.0f);
+        auto& vp = camera.viewport();
+        vp.origin() = glm::vec2(0, 0);
+        vp.size() = glm::vec2(width, height);
+        vp.depth_range() = glm::vec2(1.0f, 10000.0f);
 
-    camera.SetPosition(Vector3(500.0f, 1000.0f, 1500.0f));
-    camera.SetTargetPosition(Vector3(500.0f, 0.0f, 500.0f));
-
-    camera.Update(0.0f);
-
+        camera.Update(0.0);
+    }
     // load shader.
     {
         std::filesystem::path dirpath("assets/shaders");
@@ -195,8 +190,7 @@ void MyWindow::OnKey(GLFWwindow* window, int key, int scancode, int action, int 
 {
     Window::OnKey(window, key, scancode, action, mods);
 
-    auto& camera = System::GetMutableInstance().GetCamera();
-    camera.OnKey(key, scancode, action, mods);
+    System::GetMutableInstance().GetCamera().OnKey(key, scancode, action, mods);
 }
 
 void MyWindow::OnMouseMove(GLFWwindow* window, double xpos, double ypos)
@@ -226,13 +220,14 @@ void MyWindow::OnResizeWindow(GLFWwindow* window, int width, int height)
 {
     if(HasIconified())
         return;
-    System::GetMutableInstance().GetCamera().SetViewportSize(width, height);
+
+    auto& camera = System::GetMutableInstance().GetCamera();
+    camera.viewport().size() = glm::vec2(width, height);
 }
 
 void MyWindow::OnUpdate(double dt)
 {
-    auto& camera = System::GetMutableInstance().GetCamera();
-    camera.Update(dt);
+    System::GetMutableInstance().GetCamera().Update(dt);
 
     // Determine an exposure value automatically.
     if(is_auto_exposure_enabled)
@@ -245,15 +240,14 @@ void MyWindow::OnUpdate(double dt)
 
 void MyWindow::OnRender()
 {
-    using namespace hasenpfote::math;
-
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     auto& camera = System::GetConstInstance().GetCamera();
-    auto& vp = camera.GetViewport();
 
-    const auto width = vp.GetWidth();
-    const auto height = vp.GetHeight();
+    auto& vp = camera.viewport();
+    auto& resolution = camera.viewport().size();
+    const auto width = static_cast<int>(resolution.x);
+    const auto height = static_cast<int>(resolution.y);
     glViewport(0, 0, width, height);
     //
 
@@ -425,20 +419,18 @@ void MyWindow::RecreateResources(int width, int height)
     }
 }
 
-void MyWindow::DrawTextLines(std::vector<std::string> text_lines)
+void MyWindow::DrawTextLines(const std::vector<std::string>& text_lines)
 {
     if(text_lines.empty())
         return;
-
-    using namespace hasenpfote::math;
 
     auto metrics = text->GetFont().GetFontMetrics();
     auto line_height = static_cast<float>(metrics.GetLineHeight());
     const float scale = 0.5f;
     const float fh = line_height * scale;
 
-    static const Vector4 color(1.0f, 1.0f, 1.0f, 1.0f);
-    text->SetColor(static_cast<const GLfloat*>(color));
+    static const glm::vec4 color(1.0f, 1.0f, 1.0f, 1.0f);
+    text->SetColor(glm::value_ptr(color));
 
     text->BeginRendering();
     int line_no = 1;
@@ -477,7 +469,7 @@ float MyWindow::ComputeAverageLuminance(FrameBuffer* input)
     float result = 0.0f;
 
     auto texture = luminance_rt->GetColorTexture();
-    if (!glIsTexture(texture))
+    if(!glIsTexture(texture))
         return result;
 
     GLint prev_texture;
@@ -703,7 +695,7 @@ void MyWindow::PassStreak(FrameBuffer* input, FrameBuffer* output)
         float angle = 45.0f;
         for(auto i = 0; i < num_of_streaks; i++)
         {
-            auto theta = hasenpfote::math::ConvertDegreesToRadians(angle);
+            auto theta = glm::radians(angle);
             auto dx = std::cos(theta);
             auto dy = std::sin(theta);
 
@@ -875,6 +867,7 @@ void MyWindow::OnGUI()
             ImGui::Text(oss2s(std::ostringstream() << "Screen size: " << width << "x" << height).c_str());
         }
         ImGui::Separator();
+#if 0
         ImGui::SetNextItemOpen(false, ImGuiCond_Once);
         if(ImGui::CollapsingHeader("Camera"))
         {
@@ -909,6 +902,7 @@ void MyWindow::OnGUI()
             ImGui::Text(oss2s(std::ostringstream() << "Zoom: x" << camera.GetZoomMagnification()).c_str());
         }
         ImGui::Separator();
+#endif
         ImGui::SetNextItemOpen(true, ImGuiCond_Once);
         if(ImGui::CollapsingHeader("App"))
         {

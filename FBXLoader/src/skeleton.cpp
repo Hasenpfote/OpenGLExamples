@@ -1,8 +1,6 @@
 #include <cassert>
 #include "skeleton.h"
 
-using namespace hasenpfote::math;
-
 SkeletonJoint* Skeleton::GetJoint(int index)
 {
     assert((index >= 0) && (index < joints.size()));
@@ -42,7 +40,8 @@ int Skeleton::GetJointIndex(std::string name) const
 void Skeleton::LocalToGlobal()
 {
     joints[0].SetGlobalPose(joints[0].GetLocalPose());
-    for(auto i = 1; i < joints.size(); i++){
+    for(auto i = 1; i < joints.size(); i++)
+    {
         auto& joint = joints[i];
         const auto& parent_joint = joints[joint.GetParentIndex()];
         joint.SetGlobalPose(parent_joint.GetGlobalPose() * joint.GetLocalPose());
@@ -52,22 +51,25 @@ void Skeleton::LocalToGlobal()
 void Skeleton::GlobalToLocal()
 {
     joints[0].SetLocalPose(joints[0].GetGlobalPose());
-    for(auto i = 1; i < joints.size(); i++){
+    for(auto i = 1; i < joints.size(); i++)
+    {
         auto& joint = joints[i];
         const auto& parent_joint = joints[joint.GetParentIndex()];
-        joint.SetLocalPose(hasenpfote::math::CMatrix4::InverseAffineTransformation(parent_joint.GetGlobalPose()) * joint.GetGlobalPose());
+        //joint.SetLocalPose(hasenpfote::math::CMatrix4::InverseAffineTransformation(parent_joint.GetGlobalPose()) * joint.GetGlobalPose());
+        joint.SetLocalPose(glm::inverse(parent_joint.GetGlobalPose()) * joint.GetGlobalPose());
     }
 }
 
-CMatrix4 Skeleton::GetGlobalMatrix(std::string name) const
+glm::mat4 Skeleton::GetGlobalMatrix(std::string name) const
 {
-    CMatrix4 result = CMatrix4::IDENTITY;
+    auto result = glm::mat4(1.0f);
     auto joint = GetJoint(name);
     if(!joint)
         return result;
     result = joint->GetLocalPose();
     auto pid = joint->GetParentIndex();
-    while(pid >= 0){
+    while(pid >= 0)
+    {
         const auto& parent_joint = joints[pid];
         result = parent_joint.GetLocalPose() * result;
         pid = parent_joint.GetParentIndex();
@@ -85,9 +87,11 @@ void Skeleton::SetJoint(const SkeletonJoint& joint)
 
 void Skeleton::BuildByInvBindPose()
 {
-    CMatrix4 bindpose;
-    for(auto& joint : joints){
-        bindpose = CMatrix4::InverseAffineTransformation(joint.GetInverseBindPose());
+    glm::mat4 bindpose;
+    for(auto& joint : joints)
+    {
+        //bindpose = CMatrix4::InverseAffineTransformation(joint.GetInverseBindPose());
+        bindpose = glm::inverse(joint.GetInverseBindPose());
         joint.SetGlobalPose(bindpose);
     }
     GlobalToLocal();

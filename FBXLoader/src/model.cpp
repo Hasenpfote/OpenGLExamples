@@ -1,11 +1,9 @@
 ﻿#include <cassert>
 #include <iostream>
 #include <regex>
-#include <hasenpfote/math/utils.h>
-#include <hasenpfote/math/cmatrix4.h>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/transform.hpp>
 #include "model.h"
-
-using namespace hasenpfote::math;
 
 Material::Material()
 {
@@ -179,7 +177,7 @@ void Model::Setup(fbxloader::Model& model, GLuint common_matrices)
     glUseProgramStages(pipeline, GL_FRAGMENT_SHADER_BIT, fs->GetProgram());
 }
 
-void Model::DrawOpaqueMeshes(const hasenpfote::math::CMatrix4& model)
+void Model::DrawOpaqueMeshes(const glm::mat4& model)
 {
     assert(vs);
     assert(fs);
@@ -198,7 +196,7 @@ void Model::DrawOpaqueMeshes(const hasenpfote::math::CMatrix4& model)
     //GLuint ub_index = glGetUniformBlockIndex(vs_program, "CommonMatrices");
     glBindBufferBase(GL_UNIFORM_BUFFER, vs->GetUniform().GetBlockIndex("CommonMatrices"), common_matrices);
 
-    glProgramUniformMatrix4fv(vs_program, vs->GetUniform().GetLocation("matWorld"), 1, GL_FALSE, static_cast<const GLfloat*>(model));
+    glProgramUniformMatrix4fv(vs_program, vs->GetUniform().GetLocation("matWorld"), 1, GL_FALSE, glm::value_ptr(model));
 
     auto loc1 = vs->GetUniform().GetLocation("jointPalette");
     auto loc2 = vs->GetUniform().GetLocation("isSkinnedMesh");
@@ -252,7 +250,7 @@ void Model::DrawOpaqueMeshes(const hasenpfote::math::CMatrix4& model)
             if(mesh->IsSkinnedMesh())
             {
                 auto palette_count = 0;
-                CMatrix4 mat_final;
+                glm::mat4 mat_final;
                 auto& joints_name = mesh->GetJointNames();
                 for(const auto& joint_name : joints_name)
                 {
@@ -291,7 +289,7 @@ void Model::DrawOpaqueMeshes(const hasenpfote::math::CMatrix4& model)
     glCullFace(cfm);
 }
 
-void Model::DrawTransparentMeshes(const hasenpfote::math::CMatrix4& model)
+void Model::DrawTransparentMeshes(const glm::mat4& model)
 {
     assert(vs);
     assert(fs);
@@ -311,7 +309,7 @@ void Model::DrawTransparentMeshes(const hasenpfote::math::CMatrix4& model)
     GLuint ub_index = glGetUniformBlockIndex(vs_program, "CommonMatrices");
     glBindBufferBase(GL_UNIFORM_BUFFER, ub_index, common_matrices);
 
-    glProgramUniformMatrix4fv(vs_program, vs->GetUniform().GetLocation("matWorld"), 1, GL_FALSE, static_cast<const GLfloat*>(model));
+    glProgramUniformMatrix4fv(vs_program, vs->GetUniform().GetLocation("matWorld"), 1, GL_FALSE, glm::value_ptr(model));
 
     auto loc1 = vs->GetUniform().GetLocation("jointPalette");
     auto loc2 = vs->GetUniform().GetLocation("isSkinnedMesh");
@@ -365,7 +363,7 @@ void Model::DrawTransparentMeshes(const hasenpfote::math::CMatrix4& model)
             if(mesh->IsSkinnedMesh())
             {
                 auto palette_count = 0;
-                CMatrix4 mat_final;
+                glm::mat4 mat_final;
                 auto& joints_name = mesh->GetJointNames();
                 for (const auto& joint_name : joints_name)
                 {
@@ -432,7 +430,7 @@ void Model::DrawSkeleton()
     auto& joints = skeleton->GetJoints();
     for(auto& joint : joints){
         glPushMatrix();
-        glMultMatrixf(static_cast<GLfloat*>(joint.GetGlobalPose()));
+        glMultMatrixf(glm::value_ptr(joint.GetGlobalPose()));
         render_basis(10.0f);
         glPopMatrix();
     }
@@ -442,21 +440,23 @@ void Model::Update(double dt)
 {
     skeleton->BuildByInvBindPose();
 
-    constexpr auto max_limit = ConvertDegreesToRadians(45.0f);
-    constexpr auto min_limit = ConvertDegreesToRadians(-45.0f);
+    constexpr auto max_limit = glm::radians(45.0f);
+    constexpr auto min_limit = glm::radians(-45.0f);
 
-    static float s = ConvertDegreesToRadians(10.0f);
+    static float s = glm::radians(10.0f);
     static float t = 0.0f;
-    if((t > max_limit) || (t < min_limit)){
+    if((t > max_limit) || (t < min_limit))
+    {
         s = -s;
     }
 
     t += s * dt;
 
-    CMatrix4 pose = CMatrix4::RotationY(t);
+    auto pose = glm::rotate(t, glm::vec3(0.0f, 1.0f, 0.0f));
     {
         auto target = skeleton->GetJoint("Character1_LeftArm");
-        if(target){
+        if(target)
+        {
             auto local = target->GetLocalPose();
             target->SetLocalPose(local * pose);
         }

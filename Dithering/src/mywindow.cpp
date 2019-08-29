@@ -127,7 +127,7 @@ void MyWindow::Setup()
         selected_dither_setting_index = 0;
     }
 
-    fs_pass_geom = std::make_unique<FullscreenPassGeometry>();
+    fs_quad = std::make_unique<FullScreenQuad>();
 
     glGenSamplers(1, &nearest_sampler);
     glSamplerParameteri(nearest_sampler, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -386,7 +386,7 @@ void MyWindow::DrawFullScreenQuad(GLuint texture)
         glBindTexture(GL_TEXTURE_2D, texture);
         glBindSampler(0, linear_sampler);
 
-        fs_pass_geom->Draw();
+        fs_quad->Draw();
 
         glBindSampler(0, 0);
         glBindTexture(GL_TEXTURE_2D, 0);
@@ -429,7 +429,7 @@ void MyWindow::PassDithering(FrameBuffer* input, FrameBuffer* output)
         glBindTexture(GL_TEXTURE_2D, input->GetColorTexture());
         glBindSampler(1, linear_sampler);
 
-        fs_pass_geom->Draw();
+        fs_quad->Draw();
 
         glBindSampler(1, 0);
         glBindTexture(GL_TEXTURE_2D, 0);
@@ -462,7 +462,7 @@ void MyWindow::PassApply(FrameBuffer* input, FrameBuffer* output)
         glBindTexture(GL_TEXTURE_2D, input->GetColorTexture());
         glBindSampler(0, linear_sampler);
 
-        fs_pass_geom->Draw();
+        fs_quad->Draw();
 
         glBindSampler(0, 0);
         glBindTexture(GL_TEXTURE_2D, 0);

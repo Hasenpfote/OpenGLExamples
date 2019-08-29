@@ -76,7 +76,7 @@ void MyWindow::Setup()
     //
     texture = rm.GetResource<Texture>("assets/textures/kloofendal_48d_partly_cloudy_1k.exr")->GetTexture();
 
-    fs_pass_geom = std::make_unique<FullscreenPassGeometry>();
+    fs_quad = std::make_unique<FullScreenQuad>();
 
     glGenSamplers(1, &sampler);
 
@@ -257,7 +257,7 @@ void MyWindow::DrawFullScreenQuad(GLuint texture)
         glBindTexture(GL_TEXTURE_2D, texture);
         glBindSampler(0, sampler);
 
-        fs_pass_geom->Draw();
+        fs_quad->Draw();
 
         glActiveTexture(GL_TEXTURE0);
     }
@@ -276,7 +276,7 @@ void MyWindow::PassTonemapping(GLuint texture)
         glBindTexture(GL_TEXTURE_2D, texture);
         glBindSampler(0, sampler);
 
-        fs_pass_geom->Draw();
+        fs_quad->Draw();
 
         glActiveTexture(GL_TEXTURE0);
     }

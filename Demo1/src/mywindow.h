@@ -7,9 +7,9 @@
 #include "../../common/system.h"
 #include "../../common/render/texture.h"
 #include "../../common/render/framebuffer.h"
+#include "../../common/render/fullscreen_quad.h"
 #include "../../common/render/shader/shader.h"
 #include "../../common/render/text/sdf_text.h"
-#include "fullscreen_pass_geometry.h"
 
 class MyWindow final : public common::Window
 {
@@ -22,6 +22,7 @@ class MyWindow final : public common::Window
     using SDFText = common::render::text::SDFText;
     using SDFTextRenderer = common::render::text::SDFTextRenderer;
     using Camera = common::render::SimpleCamera;
+    using FullScreenQuad = common::render::FullScreenQuad;
 
 public:
     MyWindow();
@@ -60,7 +61,7 @@ private:
 
 private:
     std::unique_ptr<SDFText> text;
-    std::unique_ptr<FullscreenPassGeometry> fs_pass_geom;
+    std::unique_ptr<FullScreenQuad> fs_quad;
     GLuint nearest_sampler;
     GLuint linear_sampler;
 

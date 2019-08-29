@@ -89,7 +89,7 @@ void MyWindow::Setup()
 
     texture = rm.GetResource<Texture>("assets/textures/testimg_1920x1080.png")->GetTexture();
 
-    fs_pass_geom = std::make_unique<FullscreenPassGeometry>();
+    fs_quad = std::make_unique<FullScreenQuad>();
 
     glGenSamplers(1, &sampler);
 
@@ -387,7 +387,7 @@ void MyWindow::DrawFullScreenQuad()
         glBindTexture(GL_TEXTURE_2D, texture);
         glBindSampler(0, sampler);
 
-        fs_pass_geom->Draw();
+        fs_quad->Draw();
 
         glActiveTexture(GL_TEXTURE0);
     }
@@ -411,7 +411,7 @@ void MyWindow::PassHighLuminanceRegionExtraction(FrameBuffer* input, FrameBuffer
             glBindTexture(GL_TEXTURE_2D, input->GetColorTexture());
             glBindSampler(0, sampler);
 
-            fs_pass_geom->Draw();
+            fs_quad->Draw();
 
             glActiveTexture(GL_TEXTURE0);
         }
@@ -437,7 +437,7 @@ void MyWindow::PassDownsampling2x2(FrameBuffer* input, FrameBuffer* output)
             glBindTexture(GL_TEXTURE_2D, input->GetColorTexture());
             glBindSampler(0, sampler);
 
-            fs_pass_geom->Draw();
+            fs_quad->Draw();
 
             glActiveTexture(GL_TEXTURE0);
         }
@@ -463,7 +463,7 @@ void MyWindow::PassDownsampling4x4(FrameBuffer* input, FrameBuffer* output)
             glBindTexture(GL_TEXTURE_2D, input->GetColorTexture());
             glBindSampler(0, sampler);
 
-            fs_pass_geom->Draw();
+            fs_quad->Draw();
 
             glActiveTexture(GL_TEXTURE0);
         }
@@ -489,7 +489,7 @@ void MyWindow::PassKawaseBlur(FrameBuffer* input, FrameBuffer* output, int itera
             glBindTexture(GL_TEXTURE_2D, input->GetColorTexture());
             glBindSampler(0, sampler);
 
-            fs_pass_geom->Draw();
+            fs_quad->Draw();
 
             glActiveTexture(GL_TEXTURE0);
         }
@@ -568,7 +568,7 @@ void MyWindow::PassApply(FrameBuffer* input, FrameBuffer* output)
         glBindTexture(GL_TEXTURE_2D, input->GetColorTexture());
         glBindSampler(0, sampler);
 
-        fs_pass_geom->Draw();
+        fs_quad->Draw();
 
         glActiveTexture(GL_TEXTURE0);
     }

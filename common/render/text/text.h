@@ -60,14 +60,17 @@ public:
 
     void BeginRendering();
     void EndRendering();
-    void DrawString(const std::string& string, float x, float y, float scale = 1.0f);
-    void DrawString(const std::u16string& string, float x, float y, float scale = 1.0f);
+
     void SetColor(const GLfloat* color);
 
     const Font& GetFont() const;
 
+    void DrawString(const std::string& string, float x = 0.0f, float y = 0.0f, float scale = 1.0f);
+
 protected:
     ITextRenderer* GetRenderer();
+    void draw_string(const std::string& string, float x, float y, float scale);
+    void draw_string(const std::u16string& string, float x, float y, float scale);
 
 private:
     std::shared_ptr<const Font> font;

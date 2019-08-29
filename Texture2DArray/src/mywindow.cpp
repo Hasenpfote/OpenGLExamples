@@ -160,79 +160,46 @@ void MyWindow::OnRender()
     glDisable(GL_FRAMEBUFFER_SRGB);
 
     // Display debug information.
-    std::vector<std::string> text_lines;
-    std::ostringstream oss;
-    //std::streamsize ss = std::cout.precision();
-
-    oss << std::fixed << std::setprecision(2);
-
-    oss << "FPS:UPS=";
-    oss << GetFPS() << ":" << GetUPS();
-    text_lines.push_back(oss.str());
-    oss.str("");
-    oss.clear(std::stringstream::goodbit);
-
-    oss << "Screen size:";
-    oss << width << "x" << height;
-    text_lines.push_back(oss.str());
-    oss.str("");
-    oss.clear(std::stringstream::goodbit);
-
-    GLboolean ms;
-    glGetBooleanv(GL_MULTISAMPLE, &ms);
-    oss << "MultiSample:" << ((ms == GL_TRUE) ? "On" : "Off") << "(Toggle MultiSample: m)";
-    text_lines.push_back(oss.str());
-    oss.str("");
-    oss.clear(std::stringstream::goodbit);
-
-    oss << "Smoothness=" << smoothness;
-    text_lines.push_back(oss.str());
-    oss.str("");
-    oss.clear(std::stringstream::goodbit);
-
-    oss << "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    text_lines.push_back(oss.str());
-    oss.str("");
-    oss.clear(std::stringstream::goodbit);
-
-    oss << "abcdefghijklmnopqrstuvwxyz.";
-    text_lines.push_back(oss.str());
-    oss.str("");
-    oss.clear(std::stringstream::goodbit);
-
-    oss << "1234567890";
-    text_lines.push_back(oss.str());
-    oss.str("");
-    oss.clear(std::stringstream::goodbit);
-
-    oss << "\"!`?'.,;:()[]{}<>|/@\\^$-%+=#_&~*";
-    text_lines.push_back(oss.str());
-    oss.str("");
-    oss.clear(std::stringstream::goodbit);
-
-    DrawTextLines(text_lines);
-}
-
-void MyWindow::DrawTextLines(const std::vector<std::string>& text_lines)
-{
-    if(text_lines.empty())
-        return;
-
-    auto metrics = text->GetFont().GetFontMetrics();
-    auto line_height = static_cast<float>(metrics.GetLineHeight());
-    const float scale = 2.0f;
-    const float fh = line_height * scale;
-
-    static const glm::vec4 color(1.0f, 1.0f, 1.0f, 1.0f);
-    text->SetColor(glm::value_ptr(color));
-
-    text->BeginRendering();
-    int line_no = 1;
-    for(const auto& text_line : text_lines)
     {
-        text->DrawString(text_line, 0.0f, fh * static_cast<float>(line_no), scale);
-        line_no++;
-    }
+        std::ostringstream oss;
+        //std::streamsize ss = std::cout.precision();
 
-    text->EndRendering();
+        oss << std::fixed << std::setprecision(2);
+
+        oss << "FPS:UPS=" << GetFPS() << ":" << GetUPS();
+        oss << "\n";
+
+        oss << "Screen size:";
+        oss << width << "x" << height;
+        oss << "\n";
+
+        GLboolean ms;
+        glGetBooleanv(GL_MULTISAMPLE, &ms);
+        oss << "MultiSample:" << ((ms == GL_TRUE) ? "On" : "Off") << "(Toggle MultiSample: m)";
+        oss << "\n";
+
+        oss << "Smoothness=" << smoothness;
+        oss << "\n";
+
+        oss << "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        oss << "\n";
+
+        oss << "abcdefghijklmnopqrstuvwxyz.";
+        oss << "\n";
+
+        oss << "1234567890";
+        oss << "\n";
+
+        oss << "\"!`?'.,;:()[]{}<>|/@\\^$-%+=#_&~*";
+        oss << "\n";
+
+        text->BeginRendering();
+        {
+            text->DrawString(std::move(oss.str()), 0.0f, 0.0f, 2.0f);
+        }
+        text->EndRendering();
+
+        //oss.str("");
+        //oss.clear(std::stringstream::goodbit);
+    }
 }

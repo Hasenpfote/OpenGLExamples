@@ -44,7 +44,6 @@ private:
     void OnRender() override;
 
     void RecreateResources(int width, int height);
-    void DrawTextLines(std::vector<std::string> text_lines);
 
     void PassNoise(FrameBuffer* output);
     void PassEncode(FrameBuffer* input, FrameBuffer* output);

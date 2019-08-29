@@ -40,6 +40,7 @@ private:
     void OnRender() override;
 
     void DrawTextLines(const std::vector<std::string>& text_lines);
+    void DrawString(const std::string& s);
 
 private:
     std::unique_ptr<SDFText> text;

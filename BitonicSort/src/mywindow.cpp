@@ -222,47 +222,43 @@ void MyWindow::OnRender()
     glDisable(GL_FRAMEBUFFER_SRGB);
 
     // Display debug information.
-    std::vector<std::string> text_lines;
-    std::ostringstream oss;
-    //std::streamsize ss = std::cout.precision();
+    {
+        std::ostringstream oss;
+        //std::streamsize ss = std::cout.precision();
 
-    oss << std::fixed << std::setprecision(2);
+        oss << std::fixed << std::setprecision(2);
 
-    oss << "FPS:UPS=";
-    oss << GetFPS() << ":" << GetUPS();
-    text_lines.push_back(oss.str());
-    oss.str("");
-    oss.clear(std::stringstream::goodbit);
+        oss << "FPS:UPS=" << GetFPS() << ":" << GetUPS();
+        oss << "\n";
 
-    oss << "Screen size:";
-    oss << width << "x" << height;
-    text_lines.push_back(oss.str());
-    oss.str("");
-    oss.clear(std::stringstream::goodbit);
+        oss << "Screen size: " << width << "x" << height;
+        oss << "\n";
 
-    GLboolean ms;
-    glGetBooleanv(GL_MULTISAMPLE, &ms);
-    oss << "MultiSample:" << ((ms == GL_TRUE) ? "On" : "Off") << "(Toggle MultiSample: m)";
-    text_lines.push_back(oss.str());
-    oss.str("");
-    oss.clear(std::stringstream::goodbit);
+        GLboolean ms;
+        glGetBooleanv(GL_MULTISAMPLE, &ms);
+        oss << "MultiSample:" << ((ms == GL_TRUE) ? "On" : "Off") << "(Toggle MultiSample: m)";
+        oss << "\n";
 
-    std::string state_str;
-    if(state == State::Idle)
-        state_str = "Idle (Change the state with the space key)";
-    else if(state == State::Ready)
-        state_str = "Ready";
-    else if (state == State::Working)
-        state_str = "Working";
-    else if (state == State::Stopped)
-        state_str = "Stopped (Change the state with the space key)";
+        oss << "State:";
+        if(state == State::Idle)
+            oss << "Idle (Change the state with the space key)";
+        else if(state == State::Ready)
+            oss << "Ready";
+        else if(state == State::Working)
+            oss << "Working";
+        else if(state == State::Stopped)
+            oss << "Stopped (Change the state with the space key)";
+        oss << "\n";
 
-    oss << "State:" << state_str;
-    text_lines.push_back(oss.str());
-    oss.str("");
-    oss.clear(std::stringstream::goodbit);
+        text->BeginRendering();
+        {
+            text->DrawString(std::move(oss.str()), 0.0f, 0.0f, 0.5f);
+        }
+        text->EndRendering();
 
-    DrawTextLines(text_lines);
+        //oss.str("");
+        //oss.clear(std::stringstream::goodbit);
+    }
 }
 
 void MyWindow::RecreateResources(int width, int height)
@@ -310,30 +306,6 @@ void MyWindow::RecreateResources(int width, int height)
         const auto name = std::string("output_rt_color");
         output_rt = recreate_fb(name, 1, GL_RGBA16F, width, height);
     }
-}
-
-void MyWindow::DrawTextLines(std::vector<std::string> text_lines)
-{
-    if(text_lines.empty())
-        return;
-
-    auto metrics = text->GetFont().GetFontMetrics();
-    auto line_height = static_cast<float>(metrics.GetLineHeight());
-    const float scale = 0.5f;
-    const float fh = line_height * scale;
-
-    static const glm::vec4 color(1.0f, 1.0f, 1.0f, 1.0f);
-    text->SetColor(glm::value_ptr(color));
-
-    text->BeginRendering();
-    int line_no = 1;
-    for(const auto& text_line : text_lines)
-    {
-        text->DrawString(text_line, 0.0f, fh * static_cast<float>(line_no), scale);
-        line_no++;
-    }
-
-    text->EndRendering();
 }
 
 void MyWindow::PassNoise(FrameBuffer* output)

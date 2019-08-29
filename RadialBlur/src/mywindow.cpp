@@ -309,58 +309,48 @@ void MyWindow::OnRender()
     glDisable(GL_FRAMEBUFFER_SRGB);
 
     // Display debug information.
-    std::vector<std::string> text_lines;
-    std::ostringstream oss;
-    //std::streamsize ss = std::cout.precision();
+    {
+        std::ostringstream oss;
+        //std::streamsize ss = std::cout.precision();
 
-    oss << std::fixed << std::setprecision(2);
+        oss << std::fixed << std::setprecision(2);
 
-    oss << "FPS:UPS=";
-    oss << GetFPS() << ":" << GetUPS();
-    text_lines.push_back(oss.str());
-    oss.str("");
-    oss.clear(std::stringstream::goodbit);
+        oss << "FPS:UPS=" << GetFPS() << ":" << GetUPS();
+        oss << "\n";
 
-    oss << "Screen size:";
-    oss << width << "x" << height;
-    text_lines.push_back(oss.str());
-    oss.str("");
-    oss.clear(std::stringstream::goodbit);
+        oss << "Screen size: " << width << "x" << height;
+        oss << "\n";
 
-    GLboolean ms;
-    glGetBooleanv(GL_MULTISAMPLE, &ms);
-    oss << "MultiSample:" << ((ms == GL_TRUE) ? "On" : "Off") << "(Toggle MultiSample: m)";
-    text_lines.push_back(oss.str());
-    oss.str("");
-    oss.clear(std::stringstream::goodbit);
+        GLboolean ms;
+        glGetBooleanv(GL_MULTISAMPLE, &ms);
+        oss << "MultiSample:" << ((ms == GL_TRUE) ? "On" : "Off") << "(Toggle MultiSample: m)";
+        oss << "\n";
 
-    const auto& texpath = std::get<1>(selectable_textures[selected_texture_index]);
-    oss << "Texture:" << texpath << " ([Shift +] F1)";
-    text_lines.push_back(oss.str());
-    oss.str("");
-    oss.clear(std::stringstream::goodbit);
+        const auto& texpath = std::get<1>(selectable_textures[selected_texture_index]);
+        oss << "Texture:" << texpath << " ([Shift +] F1)";
+        oss << "\n";
 
-    oss << "Radial Blur:" << (is_filter_enabled ? "On" : "Off") << "(Toggle Radial Blur: f)";
-    text_lines.push_back(oss.str());
-    oss.str("");
-    oss.clear(std::stringstream::goodbit);
+        oss << "Radial Blur:" << (is_filter_enabled ? "On" : "Off") << "(Toggle Radial Blur: f)";
+        oss << "\n";
 
-    oss << "Radial Blur Mode:" << ((radial_blur_mode == 0)? "Simple" : "Custom") << " ([Shift +] F2)";
-    text_lines.push_back(oss.str());
-    oss.str("");
-    oss.clear(std::stringstream::goodbit);
+        oss << "Radial Blur Mode:" << ((radial_blur_mode == 0) ? "Simple" : "Custom") << " ([Shift +] F2)";
+        oss << "\n";
 
-    oss << "Attenuation Coefficient:" << attn_coef << " ([Shift +] F3)";
-    text_lines.push_back(oss.str());
-    oss.str("");
-    oss.clear(std::stringstream::goodbit);
+        oss << "Attenuation Coefficient:" << attn_coef << " ([Shift +] F3)";
+        oss << "\n";
 
-    oss << "Debug:" << (is_debug_enabled ? "On" : "Off") << "(Toggle Debug: p)";
-    text_lines.push_back(oss.str());
-    oss.str("");
-    oss.clear(std::stringstream::goodbit);
+        oss << "Debug:" << (is_debug_enabled ? "On" : "Off") << "(Toggle Debug: p)";
+        oss << "\n";
 
-    DrawTextLines(text_lines);
+        text->BeginRendering();
+        {
+            text->DrawString(std::move(oss.str()), 0.0f, 0.0f, 0.5f);
+        }
+        text->EndRendering();
+
+        //oss.str("");
+        //oss.clear(std::stringstream::goodbit);
+    }
 }
 
 void MyWindow::RecreateResources(int width, int height)
@@ -402,30 +392,6 @@ void MyWindow::RecreateResources(int width, int height)
         radial_blur_rts[1] = recreate_fb("radial_blur_color_1", 1, GL_RGBA16F, ds_width, ds_height);
         radial_blur_rts[2] = recreate_fb("radial_blur_color_2", 1, GL_RGBA16F, ds_width, ds_height);
     }
-}
-
-void MyWindow::DrawTextLines(const std::vector<std::string>& text_lines)
-{
-    if(text_lines.empty())
-        return;
-
-    auto metrics = text->GetFont().GetFontMetrics();
-    auto line_height = static_cast<float>(metrics.GetLineHeight());
-    const float scale = 0.5f;
-    const float fh = line_height * scale;
-
-    static const glm::vec4 color(1.0f, 1.0f, 1.0f, 1.0f);
-    text->SetColor(glm::value_ptr(color));
-
-    text->BeginRendering();
-    int line_no = 1;
-    for(const auto& text_line : text_lines)
-    {
-        text->DrawString(text_line, 0.0f, fh * static_cast<float>(line_no), scale);
-        line_no++;
-    }
-
-    text->EndRendering();
 }
 
 void MyWindow::DrawFullScreenQuad(GLuint texture)

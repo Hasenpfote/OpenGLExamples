@@ -39,8 +39,6 @@ private:
     void OnUpdate(double dt) override;
     void OnRender() override;
 
-    void DrawTextLines(const std::vector<std::string>& text_lines);
-
     void DrawCube();
     void DrawLines();
     void DrawPoints();

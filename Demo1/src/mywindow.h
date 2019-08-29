@@ -43,7 +43,6 @@ private:
     void OnGUI() override;
 
     void RecreateResources(int width, int height);
-    void DrawTextLines(const std::vector<std::string>& text_lines);
 
     void DrawFullScreenQuad(GLuint texture);
 

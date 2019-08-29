@@ -38,8 +38,6 @@ private:
     void OnUpdate(double dt) override;
     void OnRender() override;
 
-    void DrawTextLines(const std::vector<std::string>& text_lines);
-
 private:
     std::unique_ptr<SDFText> text;
     Model model;

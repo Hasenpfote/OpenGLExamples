@@ -299,19 +299,24 @@ void MyWindow::OnRender()
     }
 
     // Display debug information.
-    std::vector<std::string> text_lines;
-    std::ostringstream oss;
-    //std::streamsize ss = std::cout.precision();
+    {
+        std::ostringstream oss;
+        //std::streamsize ss = std::cout.precision();
 
-    oss << std::fixed << std::setprecision(2);
+        oss << std::fixed << std::setprecision(2);
 
-    oss << "FPS:UPS=";
-    oss << GetFPS() << ":" << GetUPS();
-    text_lines.push_back(oss.str());
-    oss.str("");
-    oss.clear(std::stringstream::goodbit);
+        oss << "FPS:UPS=" << GetFPS() << ":" << GetUPS();
+        oss << "\n";
 
-    DrawTextLines(text_lines);
+        text->BeginRendering();
+        {
+            text->DrawString(std::move(oss.str()), 0.0f, 0.0f, 0.5f);
+        }
+        text->EndRendering();
+
+        //oss.str("");
+        //oss.clear(std::stringstream::goodbit);
+    }
 }
 
 void MyWindow::RecreateResources(int width, int height)
@@ -417,30 +422,6 @@ void MyWindow::RecreateResources(int width, int height)
 
         streak_rts = { std::move(streak_rt_0), std::move(streak_rt_1), std::move(streak_rt_2) };
     }
-}
-
-void MyWindow::DrawTextLines(const std::vector<std::string>& text_lines)
-{
-    if(text_lines.empty())
-        return;
-
-    auto metrics = text->GetFont().GetFontMetrics();
-    auto line_height = static_cast<float>(metrics.GetLineHeight());
-    const float scale = 0.5f;
-    const float fh = line_height * scale;
-
-    static const glm::vec4 color(1.0f, 1.0f, 1.0f, 1.0f);
-    text->SetColor(glm::value_ptr(color));
-
-    text->BeginRendering();
-    int line_no = 1;
-    for(const auto& text_line : text_lines)
-    {
-        text->DrawString(text_line, 0.0f, fh * static_cast<float>(line_no), scale);
-        line_no++;
-    }
-
-    text->EndRendering();
 }
 
 void MyWindow::DrawFullScreenQuad(GLuint texture)

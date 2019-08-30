@@ -71,13 +71,14 @@ public:
      * @return world coords.
      */
     glm::vec3 screen_to_world(const glm::vec3& pos) const;
+    glm::vec3 screen_to_world(const glm::vec2& pos) const;
 
     /*!
      * Convert from screen position to ray vector.
      * @param[in] screen coords.
      * @return world coords.
      */
-    glm::vec3 to_ray(const glm::vec3& pos) const;
+    glm::vec3 to_ray(const glm::vec2& pos) const;
 
 private:
     glm::mat4 view_;

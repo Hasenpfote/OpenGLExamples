@@ -144,8 +144,8 @@ void Quad::Draw()
     auto mvp = camera.proj() * camera.view();
 
     auto& uniform = pipeline->GetPipelineUniform();
-    uniform.SetMatrix4fv("mvp", 1, GL_FALSE, glm::value_ptr(mvp));
-    uniform.Set1i("texture", 0);
+    uniform.Set("mvp", &mvp, 1, false);
+    uniform.Set("texture", 0);
 
     pipeline->Bind();
     {

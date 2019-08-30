@@ -249,7 +249,7 @@ void MyWindow::RecreateResources(int width, int height)
 
 void MyWindow::DrawFullScreenQuad(GLuint texture)
 {
-    pipeline_fullscreen_quad->GetPipelineUniform().Set1i("u_tex0", 0);
+    pipeline_fullscreen_quad->GetPipelineUniform().Set("u_tex0", 0);
 
     pipeline_fullscreen_quad->Bind();
     {
@@ -267,8 +267,8 @@ void MyWindow::DrawFullScreenQuad(GLuint texture)
 void MyWindow::PassTonemapping(GLuint texture)
 {
     auto& uniform = pipeline_tonemapping->GetPipelineUniform();
-    uniform.Set1i("u_tex0", 0);
-    uniform.Set1f("u_exposure", exposure);
+    uniform.Set("u_tex0", 0);
+    uniform.Set("u_exposure", exposure);
 
     pipeline_tonemapping->Bind();
     {

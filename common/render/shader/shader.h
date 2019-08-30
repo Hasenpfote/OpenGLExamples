@@ -39,7 +39,6 @@ private:
     std::unique_ptr<Uniform> uniform_;
 };
 
-
 class ProgramPipeline final
 {
 public:

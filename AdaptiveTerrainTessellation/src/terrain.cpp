@@ -119,19 +119,19 @@ void Terrain::Draw()
 void Terrain::DrawSolid()
 {
     auto& uniform = pipeline1->GetPipelineUniform();
-    uniform.Set1i("diffuse_map", 0);
-    uniform.Set1i("height_map", 1);
-    uniform.Set1f("horizontal_scale", horizontal_scale);
-    uniform.Set1f("vertical_scale", vertical_scale);
-    uniform.Set1f("lod_factor", lod_factor);
+    uniform.Set("diffuse_map", 0);
+    uniform.Set("height_map", 1);
+    uniform.Set("horizontal_scale", horizontal_scale);
+    uniform.Set("vertical_scale", vertical_scale);
+    uniform.Set("lod_factor", lod_factor);
 
     auto& camera = System::GetMutableInstance().GetCamera();
     const auto& resolution = camera.viewport().size();
     auto mvp = camera.proj() * camera.view();
-    uniform.SetMatrix4fv("mvp", 1, GL_FALSE, glm::value_ptr(mvp));
-    uniform.Set2f("vp_size", resolution.x, resolution.y);
+    uniform.Set("mvp", &mvp, 1, false);
+    uniform.Set("vp_size", glm::vec2(resolution.x, resolution.y));
 
-    uniform.Set3fv("light_direction", 1, glm::value_ptr(light_direction));
+    uniform.Set("light_direction", light_direction);
 
     pipeline1->Bind();
     {
@@ -156,16 +156,16 @@ void Terrain::DrawSolid()
 void Terrain::DrawWireFrame()
 {
     auto& uniform = pipeline2->GetPipelineUniform();
-    uniform.Set1i("height_map", 0);
-    uniform.Set1f("horizontal_scale", horizontal_scale);
-    uniform.Set1f("vertical_scale", vertical_scale);
-    uniform.Set1f("lod_factor", lod_factor);
+    uniform.Set("height_map", 0);
+    uniform.Set("horizontal_scale", horizontal_scale);
+    uniform.Set("vertical_scale", vertical_scale);
+    uniform.Set("lod_factor", lod_factor);
 
     auto& camera = System::GetMutableInstance().GetCamera();
     const auto& resolution = camera.viewport().size();
     auto mvp = camera.proj() * camera.view();
-    uniform.SetMatrix4fv("mvp", 1, GL_FALSE, glm::value_ptr(mvp));
-    uniform.Set2f("vp_size", resolution.x, resolution.y);
+    uniform.Set("mvp", &mvp, 1, false);
+    uniform.Set("vp_size", glm::vec2(resolution.x, resolution.y));
 
     pipeline2->Bind();
     {

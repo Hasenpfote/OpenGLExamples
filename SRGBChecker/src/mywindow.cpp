@@ -335,7 +335,7 @@ void MyWindow::RecreateResources(int width, int height)
 
 void MyWindow::DrawFullScreenQuad(GLuint texture)
 {
-    pipeline_fullscreen_quad->GetPipelineUniform().Set1i("u_tex0", 0);
+    pipeline_fullscreen_quad->GetPipelineUniform().Set("u_tex0", 0);
 
     pipeline_fullscreen_quad->Bind();
     {
@@ -357,8 +357,8 @@ void MyWindow::PassLinearToLinear(FrameBuffer* input)
     glGetIntegerv(GL_VIEWPORT, viewport);
 
     auto& uniform = pipeline_linear_to_linear->GetPipelineUniform();
-    uniform.Set1i("u_tex0", 0);
-    uniform.Set2f("u_pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
+    uniform.Set("u_tex0", 0);
+    uniform.Set("u_pixel_size", glm::vec2(1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3])));
 
     pipeline_linear_to_linear->Bind();
     {
@@ -380,8 +380,8 @@ void MyWindow::PassLinearToSRGB(FrameBuffer* input)
     glGetIntegerv(GL_VIEWPORT, viewport);
 
     auto& uniform = pipeline_linear_to_srgb->GetPipelineUniform();
-    uniform.Set1i("u_tex0", 0);
-    uniform.Set2f("u_pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
+    uniform.Set("u_tex0", 0);
+    uniform.Set("u_pixel_size", glm::vec2(1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3])));
 
     pipeline_linear_to_srgb->Bind();
     {

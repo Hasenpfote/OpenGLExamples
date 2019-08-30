@@ -1,8 +1,11 @@
 ﻿#pragma once
+#include <type_traits>
 #include <string>
 #include <unordered_set>
 #include <unordered_map>
 #include <GL/glew.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 namespace common::render::shader
 {
@@ -11,226 +14,53 @@ template<typename T>
 class IUniform
 {
 public:
-    IUniform() = default;
-    virtual ~IUniform() = default;
+    void Set(const std::string& name, GLfloat v){ underlying().set_impl(name, v); }
+    void Set(const std::string& name, const glm::vec1& v){ underlying().set_impl(name, v); }
+    void Set(const std::string& name, const glm::vec2& v){ underlying().set_impl(name, v); }
+    void Set(const std::string& name, const glm::vec3& v){ underlying().set_impl(name, v); }
+    void Set(const std::string& name, const glm::vec4& v){ underlying().set_impl(name, v); }
 
-    IUniform(const IUniform&) = delete;
-    IUniform& operator = (const IUniform&) = delete;
-    IUniform(IUniform&&) = delete;
-    IUniform& operator = (IUniform&&) = delete;
+    void Set(const std::string& name, GLint v){ underlying().set_impl(name, v); }
+    void Set(const std::string& name, const glm::ivec1& v){ underlying().set_impl(name, v); }
+    void Set(const std::string& name, const glm::ivec2& v){ underlying().set_impl(name, v); }
+    void Set(const std::string& name, const glm::ivec3& v){ underlying().set_impl(name, v); }
+    void Set(const std::string& name, const glm::ivec4& v){ underlying().set_impl(name, v); }
 
-    void Set1f(const std::string& name, GLfloat v0)
-    {
-        underlying().Set1f_impl(name, v0);
-    }
+    void Set(const std::string& name, GLuint v){ underlying().set_impl(name, v); }
+    void Set(const std::string& name, const glm::uvec2& v){ underlying().set_impl(name, v); }
+    void Set(const std::string& name, const glm::uvec3& v){ underlying().set_impl(name, v); }
+    void Set(const std::string& name, const glm::uvec4& v){ underlying().set_impl(name, v); }
 
-    void Set2f(const std::string& name, GLfloat v0, GLfloat v1)
-    {
-        underlying().Set2f_impl(name, v0, v1);
-    }
+    void Set(const std::string& name, const glm::vec1 a[], std::size_t size){ underlying().set_impl(name, a, size); }
+    void Set(const std::string& name, const glm::vec2 a[], std::size_t size){ underlying().set_impl(name, a, size); }
+    void Set(const std::string& name, const glm::vec3 a[], std::size_t size){ underlying().set_impl(name, a, size); }
+    void Set(const std::string& name, const glm::vec4 a[], std::size_t size){ underlying().set_impl(name, a, size); }
 
-    void Set3f(const std::string& name, GLfloat v0, GLfloat v1, GLfloat v2)
-    {
-        underlying().Set3f_impl(name, v0, v1, v2);
-    }
+    void Set(const std::string& name, const glm::ivec1 a[], std::size_t size){ underlying().set_impl(name, a, size); }
+    void Set(const std::string& name, const glm::ivec2 a[], std::size_t size){ underlying().set_impl(name, a, size); }
+    void Set(const std::string& name, const glm::ivec3 a[], std::size_t size){ underlying().set_impl(name, a, size); }
+    void Set(const std::string& name, const glm::ivec4 a[], std::size_t size){ underlying().set_impl(name, a, size); }
 
-    void Set4f(const std::string& name, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3)
-    {
-        underlying().Set4f_impl(name, v0, v1, v2, v3);
-    }
+    void Set(const std::string& name, const glm::uvec1 a[], std::size_t size){ underlying().set_impl(name, a, size); }
+    void Set(const std::string& name, const glm::uvec2 a[], std::size_t size){ underlying().set_impl(name, a, size); }
+    void Set(const std::string& name, const glm::uvec3 a[], std::size_t size){ underlying().set_impl(name, a, size); }
+    void Set(const std::string& name, const glm::uvec4 a[], std::size_t size){ underlying().set_impl(name, a, size); }
 
-    void Set1i(const std::string& name, GLint v0)
-    {
-        underlying().Set1i_impl(name, v0);
-    }
+    void Set(const std::string& name, const glm::mat2 a[], std::size_t size, bool transpose = false){ underlying().set_impl(name, a, size, transpose); }
+    void Set(const std::string& name, const glm::mat3 a[], std::size_t size, bool transpose = false){ underlying().set_impl(name, a, size, transpose); }
+    void Set(const std::string& name, const glm::mat4 a[], std::size_t size, bool transpose = false){ underlying().set_impl(name, a, size, transpose); }
 
-    void Set2i(const std::string& name, GLint v0, GLint v1)
-    {
-        underlying().Set2i_impl(name, v0, v1);
-    }
-
-    void Set3i(const std::string& name, GLint v0, GLint v1, GLint v2)
-    {
-        underlying().Set3i_impl(name, v0, v1, v2);
-    }
-
-    void Set4i(const std::string& name, GLint v0, GLint v1, GLint v2, GLint v3)
-    {
-        underlying().Set4i_impl(name, v0, v1, v2, v3);
-    }
-
-    void Set1ui(const std::string& name, GLuint v0)
-    {
-        underlying().Set1ui_impl(name, v0);
-    }
-
-    void Set2ui(const std::string& name, GLuint v0, GLuint v1)
-    {
-        underlying().Set2ui_impl(name, v0, v1);
-    }
-
-    void Set3ui(const std::string& name, GLuint v0, GLuint v1, GLuint v2)
-    {
-        underlying().Set3ui_impl(name, v0, v1, v2);
-    }
-
-    void Set4ui(const std::string& name, GLuint v0, GLuint v1, GLuint v2, GLuint v3)
-    {
-        underlying().Set4ui_impl(name, v0, v1, v2, v3);
-    }
-
-    void Set1fv(const std::string& name, GLsizei count, const GLfloat* value)
-    {
-        underlying().Set1fv_impl(name, count, value);
-    }
-
-    void Set2fv(const std::string& name, GLsizei count, const GLfloat* value)
-    {
-        underlying().Set2fv_impl(name, count, value);
-    }
-
-    void Set3fv(const std::string& name, GLsizei count, const GLfloat* value)
-    {
-        underlying().Set3fv_impl(name, count, value);
-    }
-
-    void Set4fv(const std::string& name, GLsizei count, const GLfloat* value)
-    {
-        underlying().Set4fv_impl(name, count, value);
-    }
-
-    void Set1iv(const std::string& name, GLsizei count, const GLint* value)
-    {
-        underlying().Set1iv_impl(name, count, value);
-    }
-
-    void Set2iv(const std::string& name, GLsizei count, const GLint* value)
-    {
-        underlying().Set2iv_impl(name, count, value);
-    }
-
-    void Set3iv(const std::string& name, GLsizei count, const GLint* value)
-    {
-        underlying().Set3iv_impl(name, count, value);
-    }
-
-    void Set4iv(const std::string& name, GLsizei count, const GLint* value)
-    {
-        underlying().Set4iv_impl(name, count, value);
-    }
-
-    void Set1uiv(const std::string& name, GLsizei count, const GLuint* value)
-    {
-        underlying().Set1uiv_impl(name, count, value);
-    }
-
-    void Set2uiv(const std::string& name, GLsizei count, const GLuint* value)
-    {
-        underlying().Set2uiv_impl(name, count, value);
-    }
-
-    void Set3uiv(const std::string& name, GLsizei count, const GLuint* value)
-    {
-        underlying().Set3uiv_impl(name, count, value);
-    }
-
-    void Set4uiv(const std::string& name, GLsizei count, const GLuint* value)
-    {
-        underlying().Set4uiv_impl(name, count, value);
-    }
-
-    void SetMatrix2fv(const std::string& name, GLsizei count, GLboolean transpose, const GLfloat* value)
-    {
-        underlying().SetMatrix2fv_impl(name, count, transpose, value);
-    }
-
-    void SetMatrix3fv(const std::string& name, GLsizei count, GLboolean transpose, const GLfloat* value)
-    {
-        underlying().SetMatrix3fv_impl(name, count, transpose, value);
-    }
-
-    void SetMatrix4fv(const std::string& name, GLsizei count, GLboolean transpose, const GLfloat* value)
-    {
-        underlying().SetMatrix4fv_impl(name, count, transpose, value);
-    }
-
-    void SetMatrix2x3fv(const std::string& name, GLsizei count, GLboolean transpose, const GLfloat* value)
-    {
-        underlying().SetMatrix2x3fv_impl(name, count, transpose, value);
-    }
-
-    void SetMatrix3x2fv(const std::string& name, GLsizei count, GLboolean transpose, const GLfloat* value)
-    {
-        underlying().SetMatrix3x2fv_impl(name, count, transpose, value);
-    }
-
-    void SetMatrix2x4fv(const std::string& name, GLsizei count, GLboolean transpose, const GLfloat* value)
-    {
-        underlying().SetMatrix2x4fv_impl(name, count, transpose, value);
-    }
-
-    void SetMatrix4x2fv(const std::string& name, GLsizei count, GLboolean transpose, const GLfloat* value)
-    {
-        underlying().SetMatrix4x2fv_impl(name, count, transpose, value);
-    }
-
-    void SetMatrix3x4fv(const std::string& name, GLsizei count, GLboolean transpose, const GLfloat* value)
-    {
-        underlying().SetMatrix3x4fv_impl(name, count, transpose, value);
-    }
-
-    void SetMatrix4x3fv(const std::string& name, GLsizei count, GLboolean transpose, const GLfloat* value)
-    {
-        underlying().SetMatrix4x3fv_impl(name, count, transpose, value);
-    }
-
-protected:
-    void Set1f_impl(const std::string& name, GLfloat v0);
-    void Set2f_impl(const std::string& name, GLfloat v0, GLfloat v1);
-    void Set3f_impl(const std::string& name, GLfloat v0, GLfloat v1, GLfloat v2);
-    void Set4f_impl(const std::string& name, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3);
-
-    void Set1i_impl(const std::string& name, GLint v0);
-    void Set2i_impl(const std::string& name, GLint v0, GLint v1);
-    void Set3i_impl(const std::string& name, GLint v0, GLint v1, GLint v2);
-    void Set4i_impl(const std::string& name, GLint v0, GLint v1, GLint v2, GLint v3);
-
-    void Set1ui_impl(const std::string& name, GLuint v0);
-    void Set2ui_impl(const std::string& name, GLuint v0, GLuint v1);
-    void Set3ui_impl(const std::string& name, GLuint v0, GLuint v1, GLuint v2);
-    void Set4ui_impl(const std::string& name, GLuint v0, GLuint v1, GLuint v2, GLuint v3);
-
-    void Set1fv_impl(const std::string& name, GLsizei count, const GLfloat* value);
-    void Set2fv_impl(const std::string& name, GLsizei count, const GLfloat* value);
-    void Set3fv_impl(const std::string& name, GLsizei count, const GLfloat* value);
-    void Set4fv_impl(const std::string& name, GLsizei count, const GLfloat* value);
-
-    void Set1iv_impl(const std::string& name, GLsizei count, const GLint* value);
-    void Set2iv_impl(const std::string& name, GLsizei count, const GLint* value);
-    void Set3iv_impl(const std::string& name, GLsizei count, const GLint* value);
-    void Set4iv_impl(const std::string& name, GLsizei count, const GLint* value);
-
-    void Set1uiv_impl(const std::string& name, GLsizei count, const GLuint* value);
-    void Set2uiv_impl(const std::string& name, GLsizei count, const GLuint* value);
-    void Set3uiv_impl(const std::string& name, GLsizei count, const GLuint* value);
-    void Set4uiv_impl(const std::string& name, GLsizei count, const GLuint* value);
-
-    void SetMatrix2fv_impl(const std::string& name, GLsizei count, GLboolean transpose, const GLfloat* value);
-    void SetMatrix3fv_impl(const std::string& name, GLsizei count, GLboolean transpose, const GLfloat* value);
-    void SetMatrix4fv_impl(const std::string& name, GLsizei count, GLboolean transpose, const GLfloat* value);
-
-    void SetMatrix2x3fv_impl(const std::string& name, GLsizei count, GLboolean transpose, const GLfloat* value);
-    void SetMatrix3x2fv_impl(const std::string& name, GLsizei count, GLboolean transpose, const GLfloat* value);
-    void SetMatrix2x4fv_impl(const std::string& name, GLsizei count, GLboolean transpose, const GLfloat* value);
-    void SetMatrix4x2fv_impl(const std::string& name, GLsizei count, GLboolean transpose, const GLfloat* value);
-    void SetMatrix3x4fv_impl(const std::string& name, GLsizei count, GLboolean transpose, const GLfloat* value);
-    void SetMatrix4x3fv_impl(const std::string& name, GLsizei count, GLboolean transpose, const GLfloat* value);
+    void Set(const std::string& name, const glm::mat2x3 a[], std::size_t size, bool transpose = false){ underlying().set_impl(name, a, size, transpose); }
+    void Set(const std::string& name, const glm::mat3x2 a[], std::size_t size, bool transpose = false){ underlying().set_impl(name, a, size, transpose); }
+    void Set(const std::string& name, const glm::mat2x4 a[], std::size_t size, bool transpose = false){ underlying().set_impl(name, a, size, transpose); }
+    void Set(const std::string& name, const glm::mat4x2 a[], std::size_t size, bool transpose = false){ underlying().set_impl(name, a, size, transpose); }
+    void Set(const std::string& name, const glm::mat3x4 a[], std::size_t size, bool transpose = false){ underlying().set_impl(name, a, size, transpose); }
+    void Set(const std::string& name, const glm::mat4x3 a[], std::size_t size, bool transpose = false){ underlying().set_impl(name, a, size, transpose); }
 
 private:
     T& underlying() noexcept { return static_cast<T&>(*this); }
     const T& underlying() const noexcept { return static_cast<const T&>(*this); }
 };
-
 
 class Uniform final : public IUniform<Uniform>
 {
@@ -251,54 +81,25 @@ public:
     GLuint Uniform::GetBlockIndex(const std::string& name) const;
 
 private:
+    template<typename T>
+    std::enable_if_t<std::is_fundamental_v<T>>
+    set_impl(const std::string&, T);
 
-    void Set1f_impl(const std::string& name, GLfloat v0);
-    void Set2f_impl(const std::string& name, GLfloat v0, GLfloat v1);
-    void Set3f_impl(const std::string& name, GLfloat v0, GLfloat v1, GLfloat v2);
-    void Set4f_impl(const std::string& name, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3);
+    template<typename T>
+    std::enable_if_t<!std::is_fundamental_v<T>>
+    set_impl(const std::string&, const T&);
 
-    void Set1i_impl(const std::string& name, GLint v0);
-    void Set2i_impl(const std::string& name, GLint v0, GLint v1);
-    void Set3i_impl(const std::string& name, GLint v0, GLint v1, GLint v2);
-    void Set4i_impl(const std::string& name, GLint v0, GLint v1, GLint v2, GLint v3);
+    template<typename T>
+    void set_impl(const std::string&, const T[], std::size_t);
 
-    void Set1ui_impl(const std::string& name, GLuint v0);
-    void Set2ui_impl(const std::string& name, GLuint v0, GLuint v1);
-    void Set3ui_impl(const std::string& name, GLuint v0, GLuint v1, GLuint v2);
-    void Set4ui_impl(const std::string& name, GLuint v0, GLuint v1, GLuint v2, GLuint v3);
-
-    void Set1fv_impl(const std::string& name, GLsizei count, const GLfloat* value);
-    void Set2fv_impl(const std::string& name, GLsizei count, const GLfloat* value);
-    void Set3fv_impl(const std::string& name, GLsizei count, const GLfloat* value);
-    void Set4fv_impl(const std::string& name, GLsizei count, const GLfloat* value);
-
-    void Set1iv_impl(const std::string& name, GLsizei count, const GLint* value);
-    void Set2iv_impl(const std::string& name, GLsizei count, const GLint* value);
-    void Set3iv_impl(const std::string& name, GLsizei count, const GLint* value);
-    void Set4iv_impl(const std::string& name, GLsizei count, const GLint* value);
-
-    void Set1uiv_impl(const std::string& name, GLsizei count, const GLuint* value);
-    void Set2uiv_impl(const std::string& name, GLsizei count, const GLuint* value);
-    void Set3uiv_impl(const std::string& name, GLsizei count, const GLuint* value);
-    void Set4uiv_impl(const std::string& name, GLsizei count, const GLuint* value);
-
-    void SetMatrix2fv_impl(const std::string& name, GLsizei count, GLboolean transpose, const GLfloat* value);
-    void SetMatrix3fv_impl(const std::string& name, GLsizei count, GLboolean transpose, const GLfloat* value);
-    void SetMatrix4fv_impl(const std::string& name, GLsizei count, GLboolean transpose, const GLfloat* value);
-
-    void SetMatrix2x3fv_impl(const std::string& name, GLsizei count, GLboolean transpose, const GLfloat* value);
-    void SetMatrix3x2fv_impl(const std::string& name, GLsizei count, GLboolean transpose, const GLfloat* value);
-    void SetMatrix2x4fv_impl(const std::string& name, GLsizei count, GLboolean transpose, const GLfloat* value);
-    void SetMatrix4x2fv_impl(const std::string& name, GLsizei count, GLboolean transpose, const GLfloat* value);
-    void SetMatrix3x4fv_impl(const std::string& name, GLsizei count, GLboolean transpose, const GLfloat* value);
-    void SetMatrix4x3fv_impl(const std::string& name, GLsizei count, GLboolean transpose, const GLfloat* value);
+    template<typename T>
+    void set_impl(const std::string&, const T[], std::size_t, bool);
 
 private:
     GLuint program_;
     mutable std::unordered_map<std::string, GLint> location_cache_;
     mutable std::unordered_map<std::string, GLuint> block_index_cache_;
 };
-
 
 class PipelineUniform final : public IUniform<PipelineUniform>
 {
@@ -319,46 +120,39 @@ public:
 private:
     void Cache(const std::string& name);
 
-    void Set1f_impl(const std::string& name, GLfloat v0);
-    void Set2f_impl(const std::string& name, GLfloat v0, GLfloat v1);
-    void Set3f_impl(const std::string& name, GLfloat v0, GLfloat v1, GLfloat v2);
-    void Set4f_impl(const std::string& name, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3);
+    template<typename T>
+    std::enable_if_t<std::is_fundamental_v<T>>
+    set_impl(const std::string& name, T v)
+    {
+        Cache(name);
+        auto range = cache_.equal_range(name);
+        std::for_each(range.first, range.second, [&](decltype(cache_)::value_type& x){ x.second->Set(name, v); });
+    }
 
-    void Set1i_impl(const std::string& name, GLint v0);
-    void Set2i_impl(const std::string& name, GLint v0, GLint v1);
-    void Set3i_impl(const std::string& name, GLint v0, GLint v1, GLint v2);
-    void Set4i_impl(const std::string& name, GLint v0, GLint v1, GLint v2, GLint v3);
+    template<typename T>
+    std::enable_if_t<!std::is_fundamental_v<T>>
+    set_impl(const std::string& name, const T& v)
+    {
+        Cache(name);
+        auto range = cache_.equal_range(name);
+        std::for_each(range.first, range.second, [&](decltype(cache_)::value_type& x){ x.second->Set(name, v); });
+    }
 
-    void Set1ui_impl(const std::string& name, GLuint v0);
-    void Set2ui_impl(const std::string& name, GLuint v0, GLuint v1);
-    void Set3ui_impl(const std::string& name, GLuint v0, GLuint v1, GLuint v2);
-    void Set4ui_impl(const std::string& name, GLuint v0, GLuint v1, GLuint v2, GLuint v3);
+    template<typename T>
+    void set_impl(const std::string& name, const T a[], std::size_t size)
+    {
+        Cache(name);
+        auto range = cache_.equal_range(name);
+        std::for_each(range.first, range.second, [&](decltype(cache_)::value_type& x){ x.second->Set(name, a, size); });
+    }
 
-    void Set1fv_impl(const std::string& name, GLsizei count, const GLfloat* value);
-    void Set2fv_impl(const std::string& name, GLsizei count, const GLfloat* value);
-    void Set3fv_impl(const std::string& name, GLsizei count, const GLfloat* value);
-    void Set4fv_impl(const std::string& name, GLsizei count, const GLfloat* value);
-
-    void Set1iv_impl(const std::string& name, GLsizei count, const GLint* value);
-    void Set2iv_impl(const std::string& name, GLsizei count, const GLint* value);
-    void Set3iv_impl(const std::string& name, GLsizei count, const GLint* value);
-    void Set4iv_impl(const std::string& name, GLsizei count, const GLint* value);
-
-    void Set1uiv_impl(const std::string& name, GLsizei count, const GLuint* value);
-    void Set2uiv_impl(const std::string& name, GLsizei count, const GLuint* value);
-    void Set3uiv_impl(const std::string& name, GLsizei count, const GLuint* value);
-    void Set4uiv_impl(const std::string& name, GLsizei count, const GLuint* value);
-
-    void SetMatrix2fv_impl(const std::string& name, GLsizei count, GLboolean transpose, const GLfloat* value);
-    void SetMatrix3fv_impl(const std::string& name, GLsizei count, GLboolean transpose, const GLfloat* value);
-    void SetMatrix4fv_impl(const std::string& name, GLsizei count, GLboolean transpose, const GLfloat* value);
-
-    void SetMatrix2x3fv_impl(const std::string& name, GLsizei count, GLboolean transpose, const GLfloat* value);
-    void SetMatrix3x2fv_impl(const std::string& name, GLsizei count, GLboolean transpose, const GLfloat* value);
-    void SetMatrix2x4fv_impl(const std::string& name, GLsizei count, GLboolean transpose, const GLfloat* value);
-    void SetMatrix4x2fv_impl(const std::string& name, GLsizei count, GLboolean transpose, const GLfloat* value);
-    void SetMatrix3x4fv_impl(const std::string& name, GLsizei count, GLboolean transpose, const GLfloat* value);
-    void SetMatrix4x3fv_impl(const std::string& name, GLsizei count, GLboolean transpose, const GLfloat* value);
+    template<typename T>
+    void set_impl(const std::string& name, const T a[], std::size_t size, bool transpose)
+    {
+        Cache(name);
+        auto range = cache_.equal_range(name);
+        std::for_each(range.first, range.second, [&](decltype(cache_)::value_type& x){ x.second->Set(name, a, size, transpose); });
+    }
 
 private:
     UniformPtrSet ups_;

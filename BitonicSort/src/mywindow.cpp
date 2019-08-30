@@ -315,7 +315,7 @@ void MyWindow::PassNoise(FrameBuffer* output)
         GLint viewport[4];
         glGetIntegerv(GL_VIEWPORT, viewport);
 
-        pipeline_noise->GetPipelineUniform().Set2f("u_pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
+        pipeline_noise->GetPipelineUniform().Set("u_pixel_size", glm::vec2(1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3])));
 
         pipeline_noise->Bind();
         {
@@ -344,8 +344,8 @@ void MyWindow::PassEncode(FrameBuffer* input, FrameBuffer* output)
         glViewport(0, 0, i_width, i_height);
 
         auto& uniform = pipeline_apply->GetPipelineUniform();
-        uniform.Set1i("u_tex0", 0);
-        uniform.Set2f("u_pixel_size", 1.0f / static_cast<float>(i_width), 1.0f / static_cast<float>(i_height));
+        uniform.Set("u_tex0", 0);
+        uniform.Set("u_pixel_size", glm::vec2(1.0f / static_cast<float>(i_width), 1.0f / static_cast<float>(i_height)));
 
         pipeline_apply->Bind();
         {
@@ -378,9 +378,9 @@ void MyWindow::PassDecode(FrameBuffer* input, FrameBuffer* output)
         glGetIntegerv(GL_VIEWPORT, viewport);
 
         auto& uniform = pipeline_decode->GetPipelineUniform();
-        uniform.Set1i("u_tex0", 0);
-        uniform.Set2f("u_src_resolution", static_cast<float>(i_width), static_cast<float>(i_height));
-        uniform.Set2f("u_dst_resolution", static_cast<float>(viewport[2]), static_cast<float>(viewport[3]));
+        uniform.Set("u_tex0", 0);
+        uniform.Set("u_src_resolution", glm::vec2(static_cast<float>(i_width), static_cast<float>(i_height)));
+        uniform.Set("u_dst_resolution", glm::vec2(static_cast<float>(viewport[2]), static_cast<float>(viewport[3])));
 
         pipeline_decode->Bind();
         {
@@ -449,11 +449,11 @@ void MyWindow::PassSort(FrameBuffer* input, FrameBuffer* output, int seq_size, i
         glGetIntegerv(GL_VIEWPORT, viewport);
 
         auto& uniform = pipeline_sort->GetPipelineUniform();
-        uniform.Set1i("u_tex0", 0);
-        uniform.Set2f("u_resolution", static_cast<float>(viewport[2]), static_cast<float>(viewport[3]));
-        uniform.Set1f("u_seq_size", static_cast<float>(seq_size));
-        uniform.Set1f("u_offset", static_cast<float>(offset));
-        uniform.Set1f("u_range", static_cast<float>(range));
+        uniform.Set("u_tex0", 0);
+        uniform.Set("u_resolution", glm::vec2(static_cast<float>(viewport[2]), static_cast<float>(viewport[3])));
+        uniform.Set("u_seq_size", static_cast<float>(seq_size));
+        uniform.Set("u_offset", static_cast<float>(offset));
+        uniform.Set("u_range", static_cast<float>(range));
 
         pipeline_sort->Bind();
         {
@@ -480,8 +480,8 @@ void MyWindow::PassApply(FrameBuffer* input, FrameBuffer* output)
     glGetIntegerv(GL_VIEWPORT, viewport);
 
     auto& uniform = pipeline_apply->GetPipelineUniform();
-    uniform.Set1i("u_tex0", 0);
-    uniform.Set2f("u_pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
+    uniform.Set("u_tex0", 0);
+    uniform.Set("u_pixel_size", glm::vec2(1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3])));
 
     pipeline_apply->Bind();
     {

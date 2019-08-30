@@ -100,13 +100,13 @@ void BillboardBeam::Draw(const glm::vec3& ep1, const glm::vec3& ep2, const glm::
     ComputeBillboardBeamMatrix2(ep1, ep2, mv, ma, mb);
 
     auto& uniform = pipeline->GetPipelineUniform();
-    uniform.Set1f("size", size);
-    uniform.SetMatrix4fv("bb[0]", 1, GL_FALSE, glm::value_ptr(ma));
-    uniform.SetMatrix4fv("bb[1]", 1, GL_FALSE, glm::value_ptr(mb));
-    uniform.Set4fv("color[0]", 1, glm::value_ptr(color1));
-    uniform.Set4fv("color[1]", 1, glm::value_ptr(color2));
-    uniform.SetMatrix4fv("mvp", 1, GL_FALSE, glm::value_ptr(mvp));
-    uniform.Set1i("texture", 0);
+    uniform.Set("size", size);
+    uniform.Set("bb[0]", &ma, 1, false);
+    uniform.Set("bb[1]", &mb, 1, false);
+    uniform.Set("color[0]", color1);
+    uniform.Set("color[1]", color2);
+    uniform.Set("mvp", &mvp, 1, false);
+    uniform.Set("texture", 0);
 
     pipeline->Bind();
     {

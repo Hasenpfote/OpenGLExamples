@@ -351,7 +351,7 @@ void MyWindow::RecreateResources(int width, int height)
 
 void MyWindow::DrawFullScreenQuad()
 {
-    pipeline_fullscreen_quad->GetPipelineUniform().Set1i("texture0", 0);
+    pipeline_fullscreen_quad->GetPipelineUniform().Set("texture0", 0);
 
     pipeline_fullscreen_quad->Bind();
     {
@@ -374,8 +374,8 @@ void MyWindow::PassHighLuminanceRegionExtraction(FrameBuffer* input, FrameBuffer
         glGetIntegerv(GL_VIEWPORT, viewport);
 
         auto& uniform = pipeline_high_luminance_region_extraction->GetPipelineUniform();
-        uniform.Set1i("texture0", 0);
-        uniform.Set2f("pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
+        uniform.Set("texture0", 0);
+        uniform.Set("pixel_size", glm::vec2(1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3])));
 
         pipeline_high_luminance_region_extraction->Bind();
         {
@@ -400,8 +400,8 @@ void MyWindow::PassDownsampling2x2(FrameBuffer* input, FrameBuffer* output)
         glGetIntegerv(GL_VIEWPORT, viewport);
 
         auto& uniform = pipeline_downsampling_2x2->GetPipelineUniform();
-        uniform.Set1i("texture0", 0);
-        uniform.Set2f("pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
+        uniform.Set("texture0", 0);
+        uniform.Set("pixel_size", glm::vec2(1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3])));
 
         pipeline_downsampling_2x2->Bind();
         {
@@ -426,8 +426,8 @@ void MyWindow::PassDownsampling4x4(FrameBuffer* input, FrameBuffer* output)
         glGetIntegerv(GL_VIEWPORT, viewport);
 
         auto& uniform = pipeline_downsampling_4x4->GetPipelineUniform();
-        uniform.Set1i("texture0", 0);
-        uniform.Set2f("pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
+        uniform.Set("texture0", 0);
+        uniform.Set("pixel_size", glm::vec2(1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3])));
 
         pipeline_downsampling_4x4->Bind();
         {
@@ -502,10 +502,10 @@ void MyWindow::PassStreak(FrameBuffer* input, FrameBuffer* output, float dx, flo
         glGetIntegerv(GL_VIEWPORT, viewport);
 
         auto& uniform = pipeline_streak->GetPipelineUniform();
-        uniform.Set1i("u_tex0", 0);
-        uniform.Set2f("u_pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
-        uniform.Set2f("u_direction", dx, dy);
-        uniform.Set2f("u_params", attenuation, static_cast<float>(pass));
+        uniform.Set("u_tex0", 0);
+        uniform.Set("u_pixel_size", glm::vec2(1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3])));
+        uniform.Set("u_direction", glm::vec2(dx, dy));
+        uniform.Set("u_params", glm::vec2(attenuation, static_cast<float>(pass)));
 
         pipeline_streak->Bind();
         {
@@ -531,8 +531,8 @@ void MyWindow::PassApply(FrameBuffer* input, FrameBuffer* output)
     glGetIntegerv(GL_VIEWPORT, viewport);
 
     auto& uniform = pipeline_apply->GetPipelineUniform();
-    uniform.Set1i("texture0", 0);
-    uniform.Set2f("pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
+    uniform.Set("texture0", 0);
+    uniform.Set("pixel_size", glm::vec2(1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3])));
 
     pipeline_apply->Bind();
     {

@@ -396,7 +396,7 @@ void MyWindow::RecreateResources(int width, int height)
 
 void MyWindow::DrawFullScreenQuad(GLuint texture)
 {
-    pipeline_fullscreen_quad->GetPipelineUniform().Set1i("u_tex0", 0);
+    pipeline_fullscreen_quad->GetPipelineUniform().Set("u_tex0", 0);
 
     pipeline_fullscreen_quad->Bind();
     {
@@ -420,11 +420,11 @@ void MyWindow::PassHighLuminanceRegionExtraction(FrameBuffer* input, FrameBuffer
         glGetIntegerv(GL_VIEWPORT, viewport);
 
         auto& uniform = pipeline_high_luminance_region_extraction->GetPipelineUniform();
-        uniform.Set1i("u_tex0", 0);
-        uniform.Set2f("u_pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
-        uniform.Set1f("u_exposure", 1.0f);
-        uniform.Set1f("u_threshold", 0.35f);
-        uniform.Set1f("u_soft_threshold", 0.5f);
+        uniform.Set("u_tex0", 0);
+        uniform.Set("u_pixel_size", glm::vec2(1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3])));
+        uniform.Set("u_exposure", 1.0f);
+        uniform.Set("u_threshold", 0.35f);
+        uniform.Set("u_soft_threshold", 0.5f);
 
         pipeline_high_luminance_region_extraction->Bind();
         {
@@ -482,10 +482,10 @@ void MyWindow::PassSimpleRadialBlur(FrameBuffer* input, FrameBuffer* output, flo
         glGetIntegerv(GL_VIEWPORT, viewport);
 
         auto& uniform = pipeline_simple_radial_blur->GetPipelineUniform();
-        uniform.Set1i("u_tex0", 0);
-        uniform.Set2f("u_pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
-        uniform.Set2f("u_origin", x, y);
-        uniform.Set1f("u_attenuation", attenuation);
+        uniform.Set("u_tex0", 0);
+        uniform.Set("u_pixel_size", glm::vec2(1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3])));
+        uniform.Set("u_origin", glm::vec2(x, y));
+        uniform.Set("u_attenuation", attenuation);
 
         pipeline_simple_radial_blur->Bind();
         {
@@ -555,10 +555,10 @@ void MyWindow::PassCustomRadialBlur(FrameBuffer* input, FrameBuffer* output, flo
         glGetIntegerv(GL_VIEWPORT, viewport);
 
         auto& uniform = pipeline_custom_radial_blur->GetPipelineUniform();
-        uniform.Set1i("u_tex0", 0);
-        uniform.Set2f("u_pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
-        uniform.Set2f("u_origin", x, y);
-        uniform.Set3f("u_params", attenuation, static_cast<float>(pass), static_cast<float>(num_of_passes));
+        uniform.Set("u_tex0", 0);
+        uniform.Set("u_pixel_size", glm::vec2(1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3])));
+        uniform.Set("u_origin", glm::vec2(x, y));
+        uniform.Set("u_params", glm::vec3(attenuation, static_cast<float>(pass), static_cast<float>(num_of_passes)));
 
         pipeline_custom_radial_blur->Bind();
         {
@@ -585,8 +585,8 @@ void MyWindow::PassApply(FrameBuffer* input, FrameBuffer* output)
     glGetIntegerv(GL_VIEWPORT, viewport);
 
     auto& uniform = pipeline_apply->GetPipelineUniform();
-    uniform.Set1i("u_tex0", 0);
-    uniform.Set2f("u_pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
+    uniform.Set("u_tex0", 0);
+    uniform.Set("u_pixel_size", glm::vec2(1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3])));
 
     pipeline_apply->Bind();
     {

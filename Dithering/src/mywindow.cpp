@@ -378,7 +378,7 @@ void MyWindow::RecreateResources(int width, int height)
 
 void MyWindow::DrawFullScreenQuad(GLuint texture)
 {
-    pipeline_fullscreen_quad->GetPipelineUniform().Set1i("u_tex0", 0);
+    pipeline_fullscreen_quad->GetPipelineUniform().Set("u_tex0", 0);
 
     pipeline_fullscreen_quad->Bind();
     {
@@ -413,11 +413,11 @@ void MyWindow::PassDithering(FrameBuffer* input, FrameBuffer* output)
     const auto dither_texture = rm.GetResource<Texture>(name)->GetTexture();
 
     auto& uniform = pipeline_dithering->GetPipelineUniform();
-    uniform.Set1i("u_tex0", 0);
-    uniform.Set1i("u_tex1", 1);
-    uniform.Set2f("u_pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
-    uniform.Set1f("u_dimension", static_cast<float>(dim));
-    uniform.Set1i("u_mode", dithering_mode);
+    uniform.Set("u_tex0", 0);
+    uniform.Set("u_tex1", 1);
+    uniform.Set("u_pixel_size", glm::vec2(1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3])));
+    uniform.Set("u_dimension", static_cast<float>(dim));
+    uniform.Set("u_mode", dithering_mode);
 
     pipeline_dithering->Bind();
     {
@@ -453,8 +453,8 @@ void MyWindow::PassApply(FrameBuffer* input, FrameBuffer* output)
     glGetIntegerv(GL_VIEWPORT, viewport);
 
     auto& uniform = pipeline_apply->GetPipelineUniform();
-    uniform.Set1i("u_tex0", 0);
-    uniform.Set2f("u_pixel_size", 1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3]));
+    uniform.Set("u_tex0", 0);
+    uniform.Set("u_pixel_size", glm::vec2(1.0f / static_cast<float>(viewport[2]), 1.0f / static_cast<float>(viewport[3])));
 
     pipeline_apply->Bind();
     {

@@ -42,6 +42,8 @@ public:
     const float& fov() const noexcept { return fov_; }
     float& fov() noexcept { return fov_; }
 
+    void LookAt(const glm::vec3& v);
+
 private:
     void translate(const glm::vec3& v) { position_ += orientation_ * v; }
     void translate(float x, float y, float z){ translate(glm::vec3(x, y, z)); }

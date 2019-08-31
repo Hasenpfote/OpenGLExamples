@@ -50,6 +50,7 @@ void MyWindow::Setup()
         vp.depth_range() = glm::vec2(1.0f, 10000.0f);
 
         camera.position() = glm::vec3(600.0f, 300.0f, 1500.0f);
+        camera.LookAt(glm::vec3(600.0f, 0.0f, 500.0f));
 
         camera.Update(0.0);
     }

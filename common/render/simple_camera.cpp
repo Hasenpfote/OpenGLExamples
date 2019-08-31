@@ -3,6 +3,20 @@
 #include "../logger.h"
 #include "simple_camera.h"
 
+namespace
+{
+
+glm::quat shortest_arc(const glm::vec3& a, const glm::vec3& b)
+{
+    const auto d = glm::dot(a, b);
+    const auto s = glm::sqrt((1.0f + d) * 2.0f);
+    const auto c = glm::cross(a, b);
+
+    return glm::quat(s * 0.5f, c / s);
+}
+
+}   // namespace
+
 namespace common::render
 {
 
@@ -111,6 +125,21 @@ void SimpleCamera::Update(double dt)
 
     const auto& depth_range = viewport().depth_range();
     proj() = glm::perspective(fov_, viewport().aspect_ratio(), depth_range.x, depth_range.y);
+}
+
+void SimpleCamera::LookAt(const glm::vec3& v)
+{
+    auto direction = v - position_;
+    if(glm::length(direction) > 0.0f)
+    {
+        direction = glm::normalize(direction);
+        //
+        const auto forward = orientation_ * glm::vec3(0.0f, 0.0f, -1.0f);
+        if(glm::dot(direction, forward) < 1.0f)
+        {
+            orientation_ = shortest_arc(direction, forward);
+        }
+    }
 }
 
 }   // namespace common::render

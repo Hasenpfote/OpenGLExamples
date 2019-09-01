@@ -131,11 +131,10 @@ void SimpleCamera::LookAt(const glm::vec3& v)
     if(glm::length(direction) > 0.0f)
     {
         direction = glm::normalize(direction);
-        //
-        const auto forward = orientation_ * kForward;
+        const auto forward = kForward * orientation_;
         if(glm::dot(direction, forward) < 1.0f)
         {
-            orientation_ = shortest_arc(direction, forward);
+            orientation_ *= shortest_arc(direction, forward);
         }
     }
 }

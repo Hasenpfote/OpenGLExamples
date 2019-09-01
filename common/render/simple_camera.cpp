@@ -25,40 +25,40 @@ void SimpleCamera::OnKey(int key, int scancode, int action, int mods)
     switch(key)
     {
     case GLFW_KEY_W:
-        if(action == GLFW_PRESS || action == GLFW_REPEAT)
-            velocity_ += glm::vec3(0.0f, 0.0f, -1.0f);
+        if (action == GLFW_PRESS || action == GLFW_REPEAT)
+            velocity_ -= kEz;
         else if(action == GLFW_RELEASE)
-            velocity_ = glm::vec3(0.0f);
+            velocity_ = kZero;
         break;
     case GLFW_KEY_S:
-        if(action == GLFW_PRESS || action == GLFW_REPEAT)
-            velocity_ -= glm::vec3(0.0f, 0.0f, -1.0f);
+        if (action == GLFW_PRESS || action == GLFW_REPEAT)
+            velocity_ += kEz;
         else if (action == GLFW_RELEASE)
-            velocity_ = glm::vec3(0.0f);
+            velocity_ = kZero;
         break;
     case GLFW_KEY_D:
-        if(action == GLFW_PRESS || action == GLFW_REPEAT)
-            velocity_ += glm::vec3(1.0f, 0.0f, 0.0f);
+        if (action == GLFW_PRESS || action == GLFW_REPEAT)
+            velocity_ += kEx;
         else if(action == GLFW_RELEASE)
-            velocity_ = glm::vec3(0.0f);
+            velocity_ = kZero;
         break;
     case GLFW_KEY_A:
-        if(action == GLFW_PRESS || action == GLFW_REPEAT)
-            velocity_ -= glm::vec3(1.0f, 0.0f, 0.0f);
+        if (action == GLFW_PRESS || action == GLFW_REPEAT)
+            velocity_ -= kEx;
         else if(action == GLFW_RELEASE)
-            velocity_ = glm::vec3(0.0f);
+            velocity_ = kZero;
         break;
     case GLFW_KEY_E:
-        if(action == GLFW_PRESS || action == GLFW_REPEAT)
-            velocity_ += glm::vec3(0.0f, 1.0f, 0.0f);
+        if (action == GLFW_PRESS || action == GLFW_REPEAT)
+            velocity_ += kEy;
         else if(action == GLFW_RELEASE)
-            velocity_ = glm::vec3(0.0f);
+            velocity_ = kZero;
         break;
     case GLFW_KEY_Q:
         if(action == GLFW_PRESS || action == GLFW_REPEAT)
-            velocity_ -= glm::vec3(0.0f, 1.0f, 0.0f);
+            velocity_ -= kEy;
         else if(action == GLFW_RELEASE)
-            velocity_ = glm::vec3(0.0f);
+            velocity_ = kZero;
         break;
     default:
         break;
@@ -67,23 +67,21 @@ void SimpleCamera::OnKey(int key, int scancode, int action, int mods)
 
 void SimpleCamera::OnMouseMove(double xpos, double ypos)
 {
-    static glm::vec2 prev(0.0f);
-
     if(tracking_state_ == TrackingState::Starting)
     {
-        prev = glm::vec2(static_cast<float>(xpos), static_cast<float>(ypos));
+        last_mouse_pos_ = glm::vec2(static_cast<float>(xpos), static_cast<float>(ypos));
         tracking_state_ = TrackingState::Tracking;
     }
     else if(tracking_state_ == TrackingState::Tracking)
     {
-        auto current = glm::vec2(static_cast<float>(xpos), static_cast<float>(ypos));
-        auto offset = current - prev;
+        auto mouse_pos = glm::vec2(static_cast<float>(xpos), static_cast<float>(ypos));
+        auto offset = mouse_pos - last_mouse_pos_;
 
         constexpr float sensitivity = 0.001f;
         angular_velocity_.x += offset.y * sensitivity;
         angular_velocity_.y += offset.x * sensitivity;
 
-        prev = current;
+        last_mouse_pos_ = mouse_pos;
     }
 }
 
@@ -97,7 +95,7 @@ void SimpleCamera::OnMouseButton(int button, int action, int mods)
         }
         else if(action == GLFW_RELEASE)
         {
-            angular_velocity_ = glm::vec3(0.0f);
+            angular_velocity_ = kZero;
             tracking_state_ = TrackingState::Idling;
         }
     }
@@ -134,7 +132,7 @@ void SimpleCamera::LookAt(const glm::vec3& v)
     {
         direction = glm::normalize(direction);
         //
-        const auto forward = orientation_ * glm::vec3(0.0f, 0.0f, -1.0f);
+        const auto forward = orientation_ * kForward;
         if(glm::dot(direction, forward) < 1.0f)
         {
             orientation_ = shortest_arc(direction, forward);

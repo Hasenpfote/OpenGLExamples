@@ -52,7 +52,7 @@ public:
     void LookAt(const glm::vec3& v);
 
 private:
-    void translate(const glm::vec3& v) { position_ += orientation_ * v; }
+    void translate(const glm::vec3& v){ position_ += orientation_ * v; }
     void translate(float x, float y, float z){ translate(glm::vec3(x, y, z)); }
 
     void rotate(float angle, const glm::vec3& axis){ orientation_ *= glm::angleAxis(angle, axis); }

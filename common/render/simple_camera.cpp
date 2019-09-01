@@ -1,21 +1,8 @@
 #include <iostream>
 #include <GLFW/glfw3.h>
+#include <glm/gtx/quaternion.hpp>
 #include "../logger.h"
 #include "simple_camera.h"
-
-namespace
-{
-
-glm::quat shortest_arc(const glm::vec3& a, const glm::vec3& b)
-{
-    const auto d = glm::dot(a, b);
-    const auto s = glm::sqrt((1.0f + d) * 2.0f);
-    const auto c = glm::cross(a, b);
-
-    return glm::quat(s * 0.5f, c / s);
-}
-
-}   // namespace
 
 namespace common::render
 {
@@ -118,7 +105,8 @@ void SimpleCamera::Update(double dt)
 
     translate(velocity_ * static_cast<float>(dt));
 
-    auto trans = glm::translate(glm::mat4(1.0f), position_) * glm::mat4_cast(orientation_);
+    auto trans = glm::mat4_cast(orientation_);
+    trans[3] = glm::vec4(position_, 1.0f);
     view() = glm::inverse(trans);
 
     const auto& depth_range = viewport().depth_range();
@@ -131,11 +119,9 @@ void SimpleCamera::LookAt(const glm::vec3& v)
     if(glm::length(direction) > 0.0f)
     {
         direction = glm::normalize(direction);
-        const auto forward = kForward * orientation_;
-        if(glm::dot(direction, forward) < 1.0f)
-        {
-            orientation_ *= shortest_arc(direction, forward);
-        }
+        const auto forward = orientation_ * kForward;
+        // Shortest arc.
+        orientation_ *= glm::rotation(forward, direction);
     }
 }
 

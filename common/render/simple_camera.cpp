@@ -36,16 +36,52 @@ void SimpleCamera::OnKey(int key, int scancode, int action, int mods)
             velocity_ = kZero;
         break;
     case GLFW_KEY_E:
-        if (action == GLFW_PRESS || action == GLFW_REPEAT)
-            velocity_ += kEy;
+        if(action == GLFW_PRESS || action == GLFW_REPEAT)
+        {
+            if(mods == GLFW_MOD_SHIFT)
+            {
+                angular_velocity_.z -= 10.0f * kMouseSensitivity;
+            }
+            else
+            {
+                velocity_ += kEy;
+            }
+        }
         else if(action == GLFW_RELEASE)
-            velocity_ = kZero;
+        {
+            if(mods == GLFW_MOD_SHIFT)
+            {
+                angular_velocity_.z = 0.0f;
+            }
+            else
+            {
+                velocity_ = kZero;
+            }
+        }
         break;
     case GLFW_KEY_Q:
         if(action == GLFW_PRESS || action == GLFW_REPEAT)
-            velocity_ -= kEy;
+        {
+            if(mods == GLFW_MOD_SHIFT)
+            {
+                angular_velocity_.z += 10.0f * kMouseSensitivity;
+            }
+            else
+            {
+                velocity_ -= kEy;
+            }
+        }
         else if(action == GLFW_RELEASE)
-            velocity_ = kZero;
+        {
+            if (mods == GLFW_MOD_SHIFT)
+            {
+                angular_velocity_.z = 0.0f;
+            }
+            else
+            {
+                velocity_ = kZero;
+            }
+        }
         break;
     default:
         break;
@@ -54,37 +90,68 @@ void SimpleCamera::OnKey(int key, int scancode, int action, int mods)
 
 void SimpleCamera::OnMouseMove(double xpos, double ypos)
 {
-    if(tracking_state_ == TrackingState::Starting)
+    // l_drag_state_
+    if(l_drag_info_.state_ == DragInfo::State::Enter)
     {
-        last_mouse_pos_ = glm::vec2(static_cast<float>(xpos), static_cast<float>(ypos));
-        tracking_state_ = TrackingState::Tracking;
+        l_drag_info_.last_pos_ = glm::vec2(static_cast<float>(xpos), static_cast<float>(ypos));
+        l_drag_info_.state_ = DragInfo::State::Move;
     }
-    else if(tracking_state_ == TrackingState::Tracking)
+    else if(l_drag_info_.state_ == DragInfo::State::Move)
     {
         auto mouse_pos = glm::vec2(static_cast<float>(xpos), static_cast<float>(ypos));
-        auto offset = mouse_pos - last_mouse_pos_;
+        auto offset = mouse_pos - l_drag_info_.last_pos_;
 
-        constexpr float sensitivity = 0.001f;
-        angular_velocity_.x += offset.y * sensitivity;
-        angular_velocity_.y += offset.x * sensitivity;
+        angular_velocity_.x += offset.y * kMouseSensitivity;
+        angular_velocity_.y += offset.x * kMouseSensitivity;
 
-        last_mouse_pos_ = mouse_pos;
+        l_drag_info_.last_pos_ = mouse_pos;
+    }
+    // r_drag_state_
+    if(r_drag_info_.state_ == DragInfo::State::Enter)
+    {
+        r_drag_info_.last_pos_ = glm::vec2(static_cast<float>(xpos), static_cast<float>(ypos));
+        r_drag_info_.state_ = DragInfo::State::Move;
+    }
+    else if(r_drag_info_.state_ == DragInfo::State::Move)
+    {
+        auto mouse_pos = glm::vec2(static_cast<float>(xpos), static_cast<float>(ypos));
+        auto offset = mouse_pos - r_drag_info_.last_pos_;
+
+        angular_velocity_.z += offset.x * kMouseSensitivity;
+
+        r_drag_info_.last_pos_ = mouse_pos;
     }
 }
 
 void SimpleCamera::OnMouseButton(int button, int action, int mods)
 {
-    if(button == GLFW_MOUSE_BUTTON_LEFT)
+    switch (button)
     {
+    case GLFW_MOUSE_BUTTON_LEFT:
         if(action == GLFW_PRESS)
         {
-            tracking_state_ = TrackingState::Starting;
+            l_drag_info_.state_ = DragInfo::State::Enter;
         }
         else if(action == GLFW_RELEASE)
         {
-            angular_velocity_ = kZero;
-            tracking_state_ = TrackingState::Idling;
+            angular_velocity_.x = 0.0f;
+            angular_velocity_.y = 0.0f;
+            l_drag_info_.state_ = DragInfo::State::Leave;
         }
+        break;
+    case GLFW_MOUSE_BUTTON_RIGHT:
+        if(action == GLFW_PRESS)
+        {
+            r_drag_info_.state_ = DragInfo::State::Enter;
+        }
+        else if(action == GLFW_RELEASE)
+        {
+            angular_velocity_.z = 0.0f;
+            r_drag_info_.state_ = DragInfo::State::Leave;
+        }
+        break;
+    default:
+        break;
     }
 }
 
@@ -99,9 +166,7 @@ void SimpleCamera::OnMouseWheel(double xoffset, double yoffset)
 
 void SimpleCamera::Update(double dt)
 {
-    auto avel = angular_velocity_ * static_cast<float>(dt);
-    pitch(avel.x);
-    yaw(avel.y);
+    rotate(angular_velocity_ * static_cast<float>(dt));
 
     translate(velocity_ * static_cast<float>(dt));
 

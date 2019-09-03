@@ -176,13 +176,6 @@ void MyWindow::OnRender()
 
         oss << "DrawMode:" << ((terrain.GetDrawMode() == Terrain::DrawMode::Solid) ? "Solid" : "Wire") << "(Toggle DrawMode: r)";
 
-        oss << "CamPos: " << camera.position().x << ", " << camera.position().y << ", " << camera.position().z;
-        oss << "\n";
-
-        auto angles = glm::degrees(glm::eulerAngles(camera.orientation()));
-        oss << "CamOri: " << angles.x << ", " << angles.y << ", " << angles.z;
-        oss << "\n";
-
         text->BeginRendering();
         {
             text->DrawString(std::move(oss.str()), 0.0f, 0.0f, 0.5f);

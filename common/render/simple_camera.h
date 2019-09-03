@@ -13,6 +13,7 @@ class SimpleCamera
     static constexpr auto kEz = glm::vec3(0.0f, 0.0f, 1.0f);
     static constexpr auto kZero = glm::vec3(0.0f);
     static constexpr auto kForward = glm::vec3(0.0f, 0.0f, -1.0f);
+    static constexpr auto kMouseSensitivity = 0.001f;
 
 public:
     SimpleCamera()
@@ -21,8 +22,8 @@ public:
         , orientation_(glm::quat(1.0f, 0.0f, 0.0f, 0.0f))
         , velocity_(glm::vec3(0.0f, 0.0f, 0.0f))
         , angular_velocity_(glm::vec3(0.0f, 0.0f, 0.0f))
-        , last_mouse_pos_(glm::vec2(0.0f, 0.0f))
-        , tracking_state_(TrackingState::Idling)
+        , l_drag_info_{ DragInfo::State::None, {0.0f, 0.0f} }
+        , r_drag_info_{ DragInfo::State::None, {0.0f, 0.0f} }
     {}
     virtual ~SimpleCamera() = default;
     SimpleCamera(const SimpleCamera&) = default;
@@ -58,6 +59,9 @@ private:
     void rotate(float angle, const glm::vec3& axis){ orientation_ *= glm::angleAxis(angle, axis); }
     void rotate(float angle, float x, float y, float z){ rotate(angle, glm::vec3(x, y, z)); }
 
+    void rotate(const glm::vec3& euler_angles){ orientation_ *= glm::quat(euler_angles); }
+    void rotate(float pitch, float yaw, float roll){ rotate(glm::vec3(pitch, yaw, roll)); }
+
     void roll(float angle){ rotate(angle, kEz); }
     void pitch(float angle){ rotate(angle, kEx); }
     void yaw(float angle){ rotate(angle, kEy); }
@@ -68,14 +72,21 @@ private:
     glm::quat orientation_;
     glm::vec3 velocity_;
     glm::vec3 angular_velocity_;
-    glm::vec2 last_mouse_pos_;
 
-    enum class TrackingState
+    struct DragInfo
     {
-        Idling,
-        Starting,
-        Tracking
-    } tracking_state_;
+        enum class State
+        {
+            None,
+            Enter,
+            Move,
+            Leave
+        };
+        State state_;
+        glm::vec2 last_pos_;
+    };
+    DragInfo l_drag_info_;
+    DragInfo r_drag_info_;
 };
 
 }   // namespace common::render

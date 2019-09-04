@@ -37,51 +37,15 @@ void SimpleCamera::OnKey(int key, int scancode, int action, int mods)
         break;
     case GLFW_KEY_E:
         if(action == GLFW_PRESS || action == GLFW_REPEAT)
-        {
-            if(mods == GLFW_MOD_SHIFT)
-            {
-                angular_velocity_.z -= 10.0f * kMouseSensitivity;
-            }
-            else
-            {
-                velocity_ += kEy;
-            }
-        }
+            velocity_ += kEy;
         else if(action == GLFW_RELEASE)
-        {
-            if(mods == GLFW_MOD_SHIFT)
-            {
-                angular_velocity_.z = 0.0f;
-            }
-            else
-            {
-                velocity_ = kZero;
-            }
-        }
+            velocity_ = kZero;
         break;
     case GLFW_KEY_Q:
         if(action == GLFW_PRESS || action == GLFW_REPEAT)
-        {
-            if(mods == GLFW_MOD_SHIFT)
-            {
-                angular_velocity_.z += 10.0f * kMouseSensitivity;
-            }
-            else
-            {
-                velocity_ -= kEy;
-            }
-        }
+            velocity_ -= kEy;
         else if(action == GLFW_RELEASE)
-        {
-            if (mods == GLFW_MOD_SHIFT)
-            {
-                angular_velocity_.z = 0.0f;
-            }
-            else
-            {
-                velocity_ = kZero;
-            }
-        }
+            velocity_ = kZero;
         break;
     default:
         break;
